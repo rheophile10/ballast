@@ -5,6 +5,7 @@ import { profileText } from '../profile.js';
 import { copyTest } from '../testfile.js';
 import { giveRelease } from '../release.js';
 import { readCancel } from '../cancel.js';
+import { dearmor } from '../armor.js';
 import { parseTest, publicItem } from '../txt.js';
 import { scoreAttempt } from '../score.js';
 import { fold, toRelease } from './attempt.js';
@@ -26,7 +27,8 @@ export const renderHome = async (root, go, dropBox) => {
     h('ol', { class: 'steps' },
       step(1, 'Copy the test the RTC sends you', !!log.copied, log.copied ? `${log.copied.title} at ${log.copied.when}` : 'Drop or paste the test below.'),
       step(2, 'Release', !!log.released, log.released ? `${log.released.title} at ${log.released.when}` : 'Fullscreen, one item at a time, then Release track.'),
-      step(3, 'Read your cancellation', !!log.cancelled, log.cancelled ? `${log.cancelled.grade}% on ${log.cancelled.title}` : 'Drop the cancellation the RTC sends back to see your marks and what to read.')),
+      step(3, 'Read your cancellation', !!log.cancelled, log.cancelled ? `${log.cancelled.grade}% on ${log.cancelled.title}${log.cancelled.match === true ? ' · marks compare with your release' : log.cancelled.match === false ? ' · DOES NOT COMPARE with your release' : ''}` : 'Drop the cancellation the RTC sends back to see your marks and what to read.')),
+    log.released?.hash ? h('p', { class: 'small' }, 'Your last release: ', h('span', { class: 'complete' }, log.released.hash), ' — the cancellation must name this hash.') : null,
     dropBox('Drop or paste a test, or a cancellation'),
     h('h2', {}, 'Practice'), h('p', { class: 'small' }, 'Drop a test source (.txt, with answers) here to run the same drill on it — repeat, fullscreen, one item at a time — and mark yourself. Not for record.'),
     practiceBox(go));
@@ -57,6 +59,7 @@ export const renderCopy = async (root, { text, practice, source }, go) => {
   mount(root, h('h1', {}, tgbo.title), tgbo.approval ? h('p', { class: 'small good' }, `Approved by ${tgbo.approval.name}`) : null,
     h('div', { class: 'card' }, form,
       h('p', {}, `Clearance No. ${tgbo.clearance} to CN ${p.pin} · ${tgbo.order.length} items · ${fmtTime(tgbo.settings.time)} · pass ${Math.round(tgbo.settings.pass * 100)}%`),
+      tgbo.window ? h('p', { class: 'small' }, `Window: ${new Date(tgbo.window.from).toLocaleString()} → ${new Date(tgbo.window.until).toLocaleString()}. Outside it the clearance does not open, and a late release is flagged to the RTC.`) : null,
       h('p', {}, 'Rule 136 — copy as transmitted, then repeat back:'), h('p', { class: 'complete' }, `Complete ${hhmm()} · RTC ${tgbo.rtcName || ''} · `, h('b', {}, tgbo.complete)),
       saved?.events?.length ? h('p', { class: 'status' }, `An attempt in progress was found (${Object.keys(fold(tgbo.order, saved.events).answers).length} answered). It will resume.`) : null,
       h('form', { onsubmit: start, class: 'row' }, repeat, h('button', { type: 'submit', class: 'primary' }, 'Repeat and enter fullscreen')), status,
@@ -124,9 +127,9 @@ export const renderWork = async (root, { tgbo, p, events, practice }, go) => {
     const attempt = toRelease(tgbo.order, events);
     try { navigator.keyboard?.unlock?.(); await document.exitFullscreen(); } catch { /* fine */ }
     if (practice) { const r = scoreAttempt(tgbo.test, attempt, {}); return go({ screen: 'marks', result: { ...r, title: tgbo.title, pin: p.pin }, practice: true }); }
-    const text = await giveRelease(tgbo, p, p.pin, attempt);
-    await store.del('attempt:' + tgbo.id); await store.set('crewlog', { ...((await store.get('crewlog')) || {}), released: { title: tgbo.title, when: hhmm() } });
-    go({ screen: 'released', tgbo, text, why });
+    const text = await giveRelease(tgbo, p, p.pin, attempt); const { headers } = await dearmor(text);
+    await store.del('attempt:' + tgbo.id); await store.set('crewlog', { ...((await store.get('crewlog')) || {}), released: { title: tgbo.title, when: hhmm(), hash: headers.sha256, test: tgbo.id } });
+    go({ screen: 'released', tgbo, text, why, hash: headers.sha256 });
   };
   mount(root, h('div', { class: 'bar' }, h('span', {}, tgbo.title), timer, h('span', { class: 'row' }, avatar(p, 28), ` CN ${p.pin}`)),
     h('div', { class: 'work' }, canvas, answerBox, h('div', { class: 'row' }, tgbo.settings.allowBack ? h('button', { onclick: prev }, '← Back') : null, h('button', { onclick: next }, 'Next →'), h('button', { class: 'primary', onclick: () => submit('done') }, 'Release track'), status)), guard);
@@ -135,20 +138,30 @@ export const renderWork = async (root, { tgbo, p, events, practice }, go) => {
   await show(state().at);
 };
 
-export const renderReleased = (root, { tgbo, text, why }, go) => mount(root, h('h1', {}, 'Track released'),
-  h('p', {}, why === 'time' ? 'Time expired; the attempt was released as it stood.' : 'Your attempt is sealed to the RTC. Send this file — or paste the text — to your instructor.'),
+export const renderReleased = (root, { tgbo, text, why, hash }, go) => mount(root, h('h1', {}, 'Track released'),
+  h('p', {}, why === 'time' ? 'Time expired; the attempt was released as it stood.' : 'Your attempt is sealed to the RTC and signed by your key. Send this file — or paste the text — to your instructor.'),
+  h('div', { class: 'card' }, h('b', {}, 'Release hash '), h('span', { class: 'complete' }, hash), h('p', { class: 'small' }, 'This is the SHA-256 of the file you are sending. Keep it (it is also on your home screen). The cancellation the RTC sends back names the release it marks; if the hash there is not this one, the marks are not for what you released.')),
   h('div', { class: 'row' }, h('button', { class: 'primary', onclick: () => download(`release-${tgbo.title.replace(/\W+/g, '-')}.txt`, text) }, 'Download release'), h('button', { onclick: () => navigator.clipboard?.writeText(text) }, 'Copy text')),
   h('textarea', { readonly: true, rows: 6, value: text }), h('button', { onclick: () => go({ screen: 'home' }) }, 'Done'));
 
 // ---------- marks: from a cancellation, or from practice
 export const renderCancel = async (root, { text }, go) => {
   const p = await me(); if (!p) return mount(root, h('p', { class: 'bad' }, 'No crew key in this browser; this cancellation was sealed to your key.'));
-  try { const r = await readCancel(text, p); await store.set('crewlog', { ...((await store.get('crewlog')) || {}), cancelled: { title: r.title, grade: Math.round(r.grade * 100) } }); return renderMarks(root, { result: r }, go); }
+  try { const r = await readCancel(text, p); const log = (await store.get('crewlog')) || {}; const mine = log.released?.hash || null; const match = mine && r.release ? mine === r.release : null;
+    const rtcOk = r.by && p.minted?.by?.sig ? r.by === p.minted.by.sig : null;
+    await store.set('crewlog', { ...log, cancelled: { title: r.title, grade: Math.round(r.grade * 100), match } }); return renderMarks(root, { result: r, mine, match, rtcOk }, go); }
   catch (e) { mount(root, h('h1', {}, 'Cannot open'), h('p', { class: 'bad' }, e.message), h('button', { onclick: () => go({ screen: 'home' }) }, 'Back')); }
 };
-export const renderMarks = (root, { result: r, practice }, go) => {
+const provenance = (r, mine, match, rtcOk) => h('div', { class: 'card' }, h('h2', {}, 'Does it compare?'),
+  h('table', {}, h('tr', {}, h('td', {}, 'Release you sent'), h('td', { class: 'complete small' }, mine || 'not recorded in this browser')),
+    h('tr', {}, h('td', {}, 'Release these marks are for'), h('td', { class: 'complete small' }, r.release || 'not named')),
+    h('tr', {}, h('td', {}, 'Compare'), h('td', { class: match === true ? 'good' : match === false ? 'bad' : 'small' }, match === true ? 'YES — these marks are for the file you released' : match === false ? 'NO — these marks name a different release. Take both files to the superintendent.' : 'cannot compare (one hash missing)')),
+    h('tr', {}, h('td', {}, 'Signed by'), h('td', { class: r.signed === true ? 'good' : r.signed === false ? 'bad' : 'small' }, r.signed === true ? (rtcOk === true ? 'your RTC (the one who minted you)' : rtcOk === false ? 'a different RTC key than the one who minted you' : 'the RTC key in the file') : r.signed === false ? 'BAD SIGNATURE — altered after signing' : 'unsigned'))),
+  r.answers ? h('p', { class: 'small' }, `The cancellation repeats your ${Object.keys(r.answers).length} answers as marked, and the mark per item. The superintendent who approved the test can re-score your release from its audit copy without the RTC's help.`) : null,
+  r.items?.length ? h('details', {}, h('summary', {}, 'Marks per item'), h('table', {}, r.items.map((i) => h('tr', {}, h('td', {}, i.id), h('td', { class: 'small' }, (i.ref || []).join(', ')), h('td', {}, i.pending ? 'not yet marked' : `${i.got}/${i.worth}`))))) : null);
+export const renderMarks = (root, { result: r, practice, mine, match, rtcOk }, go) => {
   const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
-  mount(root, h('h1', {}, r.title), practice ? h('p', { class: 'small' }, 'Practice — not for record.') : null,
+  mount(root, h('h1', {}, r.title), practice ? h('p', { class: 'small' }, 'Practice — not for record.') : provenance(r, mine, match, rtcOk),
     h('p', { class: r.pass ? 'good big' : 'bad big' }, `${Math.round(r.grade * 100)}% — ${r.pass ? 'PASS' : 'did not pass'}`, r.pending ? ` (${r.pending} short answers not yet marked)` : ''),
     h('h2', {}, 'By area'), h('table', {}, r.areas.map((a) => h('tr', {}, h('td', {}, a.label), h('td', {}, `${a.correct}/${a.total}`), h('td', {}, h('div', { class: 'meter' }, h('div', { style: { width: pct(a.correct, a.total) + '%' } })))))),
     h('h2', {}, 'Read these'), r.read.length ? h('ul', {}, r.read.map((x) => h('li', {}, h('b', {}, x.ref), x.area ? ` · ${x.area}` : '', ` · missed ${x.missed}`))) : h('p', {}, 'Nothing — every rule tested was answered correctly.'),

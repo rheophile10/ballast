@@ -1,5 +1,6 @@
 // What the browser keeps: the train's identity (non-extractable key) and the attempt in progress.
-const DB = 'ballast', VER = 1;
+import { embedded } from '../embed.js';
+const DB = embedded() ? 'ballast-embedded' : 'ballast', VER = 1; // an embedded (tutorial) Ballast never touches the real profile
 const db = () => new Promise((res, rej) => {
   const r = indexedDB.open(DB, VER);
   r.onupgradeneeded = () => r.result.createObjectStore('kv');

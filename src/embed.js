@@ -18,11 +18,12 @@ export const listen = (onOpen) => {
     if (e.source !== window.parent || !e.data || e.data.ballast !== 1) return;
     if (e.data.type === 'open') onOpen(String(e.data.text), String(e.data.name || ''));
     if (e.data.type === 'hint') hint(e.data.selector, e.data.text);
-    if (e.data.type === 'state?') send({ type: 'state', screen: document.body.dataset.screen || '', title: document.title });
+    if (e.data.type === 'state?') send({ type: 'state', ...last });
   });
   send({ type: 'ready' });
 };
-export const announce = (screen) => { document.body.dataset.screen = screen; if (embedded()) send({ type: 'state', screen }); };
+let last = { screen: '' };
+export const announce = (screen, profile) => { document.body.dataset.screen = screen; last = { screen, role: profile?.role || null, pub: profile?.pub || null, pin: profile?.pin || null, minted: !!profile?.minted, profile: profile ? { name: profile.name, pin: profile.pin, pub: profile.pub, sig: profile.sig, photo: profile.photo || '', role: profile.role, ...(profile.minted ? { minted: profile.minted } : {}) } : null }; if (embedded()) send({ type: 'state', ...last }); };
 
 let layer = null;
 const hint = (selector, text) => {

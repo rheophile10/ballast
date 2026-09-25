@@ -65,6 +65,11 @@ test without exposing the PIN.
 
 ## 4. APPROVAL and REPORT (superintendent)
 
+APPROVAL carries `pub` (the superintendent's ECDH key) as well as `by` (their sign key), so
+releases under the approved test can carry an audit copy sealed to them. REPORT rows carry
+`release` (hash), `signed`, `late` and `marks: [[item id, got], ...]`, so an audit can be
+compared item by item with what the RTC reported.
+
 `APPROVAL`: `{ "hash": SHA-256 hex of the test source (CRLF→LF), "title", "by": <superintendent
 sig key>, "name", "signature": ECDSA-SHA256 over "ballast/approval/1\n<hash>" }`. Public;
 anyone with the superintendent's `sig` key can check it. An RTC drops it on the desk; a TGBO
@@ -86,13 +91,17 @@ no answers.
                 "shuffleOptions": true, "allowBack": false },
   "areas": [ { "id": "signals", "label": "Signals & Rule 27" }, ... ],
   "rtc": "<pub base64url>", "rtcName": "ABC", "approval": <APPROVAL body or null>,
+  "window": { "from": "<ISO 8601>", "until": "<ISO 8601>" },
   "clearances": [ { "no": 1, "sid": "...", "box": "<K wrapped>" }, ... ],
   "items": [ { "id": "q27b", "area": "signals", "box": "<item JSON encrypted>" }, ... ],
   "hash": "<SHA-256 hex over items[].id ‖ items[].box in order>" }
 ```
 
-- `K` is a random 32 B content key. Each **clearance** is K sealed to one train:
-  `AES-GCM(HKDF(shared_i, salt, "ballast/wrap/1"), K)`. The TGBO is the content, common to
+- Every test has a **window**. Each **clearance** is K sealed to one crew member with the
+  window bound into the key: `AES-GCM(HKDF(shared_i, salt, "ballast/wrap/1\n" ‖ from ‖ "\n" ‖ until), K)`.
+  The reader refuses to open before `from` or after `until` (by its own clock), and a file
+  whose window was edited derives a different key, so it does not open at all. A release
+  finished after `until` is flagged *late* by the RTC's intake — the RTC's clock, not the crew's. The TGBO is the content, common to
   all; the clearance is the per-train authority to occupy it.
 - Each item is encrypted under its own `K_item = HKDF(K, salt, "ballast/item/1/" ‖ id)`,
   so a reader decrypts one item at a time and never holds the whole test in clear.
@@ -106,27 +115,46 @@ no answers.
 ## 6. RELEASE — one crew member's attempt
 
 ```json
-{ "v": 1, "kind": "release", "test": "<test id>", "hash": "<test hash>", "sid": "...",
-  "pin": "123456", "student": "<pub base64url>",
-  "box": "<attempt encrypted under HKDF(shared, salt, 'ballast/spike/1')>" }
+{ "v": 1, "kind": "release", "test": "<test id>", "salt": "<test salt>", "hash": "<test hash>",
+  "source": "<approved source hash or null>", "sid": "...", "pin": "123456", "train": "<pub base64url>",
+  "box": "<attempt encrypted under HKDF(shared(crew, rtc), salt, 'ballast/spike/1')>",
+  "audit": { "pub": "<superintendent pub from the approval>",
+             "box": "<the same attempt under HKDF(shared(crew, superintendent), salt, 'ballast/audit/1')>" } | null,
+  "sig": "<crew sign key>", "signature": "<ECDSA over 'ballast/release/1\n' ‖ test ‖ '\n' ‖ box>" }
 ```
+
+The armor header's `sha256` is the **release hash**: the crew member keeps it, the
+cancellation names it, the class profile names it. The signature means the RTC cannot
+alter the answers; the audit copy means the superintendent who approved the test can
+re-score the release with no help from the RTC (an appeal). Unapproved tests have no
+audit copy.
 
 Attempt plaintext: `{ "started", "finished", "answers": { "<item id>": <value> },
 "events": [ [t_ms, "show"|"answer"|"blur"|"focus"|"fullscreen-exit"|"lock"|"submit", ...] ],
 "breaks": [ { "at", "ms", "why" } ], "ua": "…" }`. Values: mc → option id;
 match → `{left id: right id}`; short → string.
 
-GCM under the pair key is the signature: only this student could have made it,
-only this instructor can read it.
+GCM under the pair key authenticates the sender (only this crew member could have made
+it, only this RTC can read it); the ECDSA signature makes that checkable by anyone who
+holds the crew member's public profile.
 
 ## 7. CANCEL — the marks returned to the crew member
 
-Encrypted under `HKDF(shared, salt, "ballast/plate/1")`:
-`{ "test", "salt", "title", "pin", "score", "total", "grade", "pass",
+```json
+{ "v": 1, "kind": "cancel", "test": "<test id>", "salt": "<test salt>", "pin": "123456", "rtc": "<rtc pub>",
+  "release": "<release hash>", "by": "<rtc sign key>",
+  "signature": "<ECDSA over 'ballast/cancel/1\n' ‖ test ‖ '\n' ‖ release ‖ '\n' ‖ box>", "box": "..." }
+```
+
+`box`, under `HKDF(shared, salt, "ballast/plate/1")`:
+`{ "title", "pin", "score", "total", "grade", "pass", "pending",
 "areas": [{ "id", "label", "correct", "total" }],
 "read": [ { "ref": "CROR 27(b)", "area": "signals", "missed": 2 } ],
-"tags": { "difficulty:2": {"correct","total"} } }`.
-No questions, no answers.
+"tags": { ... }, "items": [ { "id", "area", "ref", "worth", "got", "pending" } ],
+"answers": { "<item id>": <the answer as marked> }, "release": "<release hash>", "marked": <ms> }`.
+No questions, no keys. The crew member compares `release` with the hash they kept, checks
+the signature against the sign key of the RTC who minted them, and sees each mark beside
+their own answer. A cancellation edited after signing fails the check.
 
 ## 8. SHEET (RTC) and BOOK (superintendent)
 

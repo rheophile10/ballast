@@ -7,7 +7,7 @@ import * as crew from './crew.js';
 import * as rtc from './rtc.js';
 import * as sup from './super.js';
 import { renderRegister, profileCard } from './profile-ui.js';
-import { listen, announce } from '../embed.js';
+import { embedded, listen, announce } from '../embed.js';
 
 const root = document.querySelector('main');
 let ctx = { screen: 'home' };
@@ -27,13 +27,15 @@ const openText = async (text, name = '') => {
   const kind = sniff(text);
   const p = await me();
   try {
-    if (kind === 'PROFILE' && p && (p.role === 'none' || !p.minted)) { await acceptMint(text); return go({ screen: 'home' }); }
+    if (kind === 'PROFILE' && p && (p.role === 'none' || !p.minted)) { await acceptMint(text); return go({ screen: 'home' }); } // waiting for a role: the only profile that belongs here is mine, minted
+    if (kind === 'PROFILE' && p) { const m = await readProfile(text).catch(() => null); if (m && m.pub === p.pub && m.sig === p.sig) { if (p.minted && !confirm(`Replace your ${p.role} role with ${m.role} (minted by ${m.minted?.by?.name || '?'})?`)) return; await acceptMint(text); return go({ screen: 'home' }); } }
     if (kind === 'TEST') return go({ screen: 'copy', text });
     if (kind === 'CANCEL') return go({ screen: 'cancel', text });
     if (kind === 'SHEET') return go({ screen: 'rtc', sheetText: text });
     if (kind === 'BOOK') return go({ screen: 'super', bookText: text });
     if (kind === 'REPORT') return go({ screen: 'super', incoming: [{ name, text }] });
     if (kind === 'PROFILE' && p?.role === 'superintendent') return go({ screen: 'super', incoming: [{ name, text }] });
+    if (kind === 'RELEASE' && p?.role === 'superintendent') return go({ screen: 'super', incoming: [{ name, text }] }); // an audit
     if (kind === 'RELEASE' || kind === 'APPROVAL' || kind === 'PROFILE') return go({ screen: 'rtc', incoming: [{ name, text }] });
     if (/^#|\n---/.test(text)) return go({ screen: p?.role === 'superintendent' ? 'super' : 'rtc', incoming: [{ name, text, source: true }] });
     go({ screen: 'home', error: `Not a Ballast file${name ? ': ' + name : ''}` });
@@ -61,7 +63,7 @@ const renderWaiting = async (p) => {
 };
 
 const render = async () => {
-  const p = await me(); announce(ctx.screen);
+  const p = await me(); announce(ctx.screen, p);
   if (ctx.screen === 'landing' || (!p && ctx.screen === 'home')) return renderRegister(root, async (np) => { await store.set('profile', np); go({ screen: 'home' }); });
   if (p && (p.role === 'none' || !p.minted) && !['work', 'practice', 'marks', 'released'].includes(ctx.screen)) return renderWaiting(p);
   switch (ctx.screen) {
@@ -78,6 +80,7 @@ const render = async () => {
   }
 };
 document.body.prepend(h('nav', { class: 'top' }, h('a', { href: '#', onclick: (e) => { e.preventDefault(); go({ screen: 'home' }); } }, 'Ballast'), ' · ',
+  embedded() ? null : h('a', { href: /\/ballast\//.test(location.pathname) ? '../tutorial/' : 'tutorial/', class: 'small', style: { marginRight: '12px' } }, 'Tutorial'),
   h('a', { href: '#', onclick: async (e) => { e.preventDefault(); if (confirm('Forget this browser\'s profile and keys? Any role minted to them is lost.')) { await store.del('profile'); go({ screen: 'landing' }); } } }, 'forget me')));
 window.addEventListener('dragover', (e) => e.preventDefault()); window.addEventListener('drop', (e) => e.preventDefault());
 listen((text, name) => openText(text, name));

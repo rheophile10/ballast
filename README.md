@@ -29,6 +29,16 @@ Save sheet.
 and Approve (a signature the RTC drops on their desk) → drop reports → administrations and
 by-crew-member tables, CSV → Save book.
 
+**Provenance:** every test has a window; releases are signed by the crew member and carry an
+audit copy sealed to the approving superintendent; the crew member keeps the release hash;
+the cancellation is signed by the RTC and names that hash; the superintendent can drop any
+release on the book to re-score it and compare with what the RTC reported.
+
+**Tutorial:** `tutorial/index.html` — a pretend desktop (shared drive, browser) around the real
+Ballast, run by a fictional cast (`samples/cast.json`). You play superintendent, then RTC,
+then crew, including an appeal. Built with `node tutorial/build.mjs`; tested by
+`test/tutorial.test.mjs`.
+
 **Formats:** `SPEC.md`. **For IT:** `FOR-IT.md`. **Independent re-scoring:** `verify.py`.
 
 ## Develop

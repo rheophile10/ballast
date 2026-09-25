@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Vc1B3p5rURb2DhZ+q6qg4mFEaOgb0FDvySgVV+9F3iI='; style-src 'sha256-Q90MJz/2OtBLKahp93sMfOp082FYHwaIKnYqY0UiIIw='; img-src blob: data:; media-src blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Tf6vkE61OsLmnBfWjRIZOpTALNrF6NulLw5NUp6tL9o='; style-src 'sha256-Q90MJz/2OtBLKahp93sMfOp082FYHwaIKnYqY0UiIIw='; img-src blob: data:; media-src blob:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <title>Ballast</title>
 <style>:root { --ink:#111; --bg:#fff; --mute:#666; --line:#ddd; --accent:#1d4ed8; --good:#15803d; --bad:#b91c1c; }
 * { box-sizing:border-box } html,body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 Arial, sans-serif; -webkit-user-select:none; user-select:none }
@@ -63,13 +63,15 @@ nav.top { padding:8px 16px; font-size:14px; color:var(--mute) } nav.top a { colo
       if (e.source !== window.parent || !e.data || e.data.ballast !== 1) return;
       if (e.data.type === "open") onOpen(String(e.data.text), String(e.data.name || ""));
       if (e.data.type === "hint") hint(e.data.selector, e.data.text);
-      if (e.data.type === "state?") send({ type: "state", screen: document.body.dataset.screen || "", title: document.title });
+      if (e.data.type === "state?") send({ type: "state", ...last });
     });
     send({ type: "ready" });
   };
-  var announce = (screen) => {
+  var last = { screen: "" };
+  var announce = (screen, profile) => {
     document.body.dataset.screen = screen;
-    if (embedded()) send({ type: "state", screen });
+    last = { screen, role: profile?.role || null, pub: profile?.pub || null, pin: profile?.pin || null, minted: !!profile?.minted, profile: profile ? { name: profile.name, pin: profile.pin, pub: profile.pub, sig: profile.sig, photo: profile.photo || "", role: profile.role, ...profile.minted ? { minted: profile.minted } : {} } : null };
+    if (embedded()) send({ type: "state", ...last });
   };
   var layer = null;
   var hint = (selector, text2) => {
@@ -245,7 +247,7 @@ ${by.sig}`;
   };
 
   // src/app/store.js
-  var DB = "ballast";
+  var DB = embedded() ? "ballast-embedded" : "ballast";
   var VER = 1;
   var db = () => new Promise((res, rej) => {
     const r = indexedDB.open(DB, VER);
@@ -313,7 +315,12 @@ ${by.sig}`;
     spike: "ballast/spike/1",
     plate: "ballast/plate/1",
     report: "ballast/report/1",
-    item: (id) => `ballast/item/1/${id}`
+    audit: "ballast/audit/1",
+    item: (id) => `ballast/item/1/${id}`,
+    /** The clearance key is bound to the test window, so a file whose window was edited cannot be opened. */
+    wrapIn: ({ from, until }) => `ballast/wrap/1
+${from}
+${until}`
   };
 
   // src/txt.js
@@ -465,7 +472,14 @@ ${by.sig}`;
 
   // src/testfile.js
   var itemsHash = async (items) => hex(await sha256(utf8(items.map((i) => i.id + "\n" + i.box).join("\n"))));
-  var issueTest = async (test, rtc, trains, assets = {}, rtcName = "", approval = null) => {
+  var defaultWindow = (now2 = Date.now()) => ({ from: new Date(now2).toISOString(), until: new Date(now2 + 7 * 864e5).toISOString() });
+  var checkWindow = (w) => {
+    if (!w || Number.isNaN(Date.parse(w.from)) || Number.isNaN(Date.parse(w.until))) throw new Error("test window needs from and until");
+    if (Date.parse(w.until) <= Date.parse(w.from)) throw new Error("test window closes before it opens");
+    return { from: w.from, until: w.until };
+  };
+  var issueTest = async (test, rtc, trains, assets = {}, rtcName = "", approval = null, window2 = defaultWindow()) => {
+    window2 = checkWindow(window2);
     const id = b64url(random(16)), saltBytes = random(16), salt = b64url(saltBytes);
     const K = random(32), Kkey = await rawKey(K);
     const items = [];
@@ -481,22 +495,26 @@ ${by.sig}`;
     }
     const clearances = [];
     for (const [i, t] of trains.entries()) {
-      const wk = await hkdfKey(await shared(rtc.priv, t.pub), saltBytes, INFO.wrap);
+      const wk = await hkdfKey(await shared(rtc.priv, t.pub), saltBytes, INFO.wrapIn(window2));
       clearances.push({ no: i + 1, sid: await sidOf(saltBytes, t.pin), box: await sealJSON(wk, { K: b64url(K) }) });
     }
     const hash = await itemsHash(items);
-    const body = { v: 1, kind: "test", id, salt, title: test.title, settings: test.settings, areas: test.areas, rtc: rtc.pub, rtcName, approval, clearances, items, hash };
-    const text2 = await armor("TEST", body, { title: test.title, rtc: rtcName, items: items.length, clearances: trains.length, approved: approval ? "yes" : "no", complete: hash.slice(0, 4).toUpperCase() });
-    return { text: text2, record: { id, salt, hash, key: b64url(K), title: test.title } };
+    const body = { v: 1, kind: "test", id, salt, title: test.title, settings: test.settings, areas: test.areas, rtc: rtc.pub, rtcName, approval, window: window2, clearances, items, hash };
+    const text2 = await armor("TEST", body, { title: test.title, rtc: rtcName, items: items.length, clearances: trains.length, approved: approval ? "yes" : "no", from: window2.from, until: window2.until, complete: hash.slice(0, 4).toUpperCase() });
+    return { text: text2, record: { id, salt, hash, key: b64url(K), title: test.title, window: window2 } };
   };
-  var copyTest = async (text2, train, pin) => {
+  var copyTest = async (text2, train, pin, at = Date.now()) => {
     const { body } = await dearmor(text2, "TEST");
+    const w = checkWindow(body.window);
+    const when = (iso) => new Date(iso).toLocaleString();
+    if (at < Date.parse(w.from)) throw new Error(`This test opens at ${when(w.from)}.`);
+    if (at > Date.parse(w.until)) throw new Error(`This test closed at ${when(w.until)}.`);
     if (await itemsHash(body.items) !== body.hash) throw new Error("test does not compare: items altered");
     const saltBytes = unb64url(body.salt);
     const sid = await sidOf(saltBytes, pin);
-    const wrap2 = body.clearances.find((w) => w.sid === sid);
+    const wrap2 = body.clearances.find((w2) => w2.sid === sid);
     if (!wrap2) throw new Error(`no clearance for CN ${pin} on this test`);
-    const wk = await hkdfKey(await shared(train.priv, body.rtc), saltBytes, INFO.wrap);
+    const wk = await hkdfKey(await shared(train.priv, body.rtc), saltBytes, INFO.wrapIn(w));
     const { K } = await openJSON(wk, wrap2.box);
     const Kb = unb64url(K);
     const order = body.settings.shuffleItems ? shuffled(body.items.map((i) => i.id), sid) : body.items.map((i) => i.id);
@@ -511,6 +529,7 @@ ${by.sig}`;
       rtc: body.rtc,
       rtcName: body.rtcName || "",
       approval: body.approval || null,
+      window: w,
       clearance: wrap2.no,
       sid,
       order,
@@ -533,24 +552,61 @@ ${by.sig}`;
   };
 
   // src/release.js
+  var signed = (test, box) => utf8(`ballast/release/1
+${test}
+${box}`);
   var giveRelease = async (test, crew, pin, attempt) => {
-    const key = await hkdfKey(await shared(crew.priv, test.rtc), unb64url(test.salt), INFO.spike);
-    const body = { v: 1, kind: "release", test: test.id, hash: test.hash, sid: test.sid, pin: String(pin), train: crew.pub, box: await sealJSON(key, attempt) };
-    return armor("RELEASE", body, { title: test.title, train: `CN ${pin}`, answered: Object.keys(attempt.answers || {}).length });
+    const salt = unb64url(test.salt);
+    const key = await hkdfKey(await shared(crew.priv, test.rtc), salt, INFO.spike);
+    const box = await sealJSON(key, attempt);
+    const sup = test.approval?.pub || null;
+    const audit2 = sup ? { pub: sup, box: await sealJSON(await hkdfKey(await shared(crew.priv, sup), salt, INFO.audit), attempt) } : null;
+    const body = {
+      v: 1,
+      kind: "release",
+      test: test.id,
+      salt: test.salt,
+      hash: test.hash,
+      source: test.approval?.hash || null,
+      sid: test.sid,
+      pin: String(pin),
+      train: crew.pub,
+      box,
+      audit: audit2,
+      sig: crew.sig || null,
+      signature: crew.sign ? await signBytes(crew.sign, signed(test.id, box)) : null
+    };
+    return armor("RELEASE", body, { title: test.title, train: `CN ${pin}`, answered: Object.keys(attempt.answers || {}).length, finished: attempt.finished ? new Date(attempt.finished).toISOString() : "" });
   };
-  var takeRelease = async (text2, rtc, record) => {
-    const { body } = await dearmor(text2, "RELEASE");
+  var checkRelease = async (body, sigPub = body.sig) => body.signature && sigPub ? verifyBytes(sigPub, body.signature, signed(body.test, body.box)) : null;
+  var takeRelease = async (text2, rtc, record, sigPub) => {
+    const { body, headers } = await dearmor(text2, "RELEASE");
     if (body.test !== record.id) throw new Error("release is for a different test");
     if (body.hash !== record.hash) throw new Error("release does not compare: test hash differs");
     const key = await hkdfKey(await shared(rtc.priv, body.train), unb64url(record.salt), INFO.spike);
     const attempt = await openJSON(key, body.box);
-    return { pin: body.pin, sid: body.sid, train: body.train, attempt };
+    const late = !!(record.window && attempt.finished && attempt.finished > Date.parse(record.window.until));
+    return { pin: body.pin, sid: body.sid, train: body.train, attempt, hash: headers.sha256, signed: await checkRelease(body, sigPub || body.sig), late };
+  };
+  var auditRelease = async (text2, superintendent) => {
+    const { body, headers } = await dearmor(text2, "RELEASE");
+    if (!body.audit) throw new Error("this release carries no audit copy (the test was not approved)");
+    if (body.audit.pub !== superintendent.pub) throw new Error("the audit copy is sealed to a different superintendent");
+    const key = await hkdfKey(await shared(superintendent.priv, body.train), unb64url(body.salt), INFO.audit);
+    const attempt = await openJSON(key, body.audit.box);
+    return { pin: body.pin, train: body.train, attempt, hash: headers.sha256, source: body.source, test: body.test, signed: await checkRelease(body) };
   };
 
   // src/cancel.js
-  var cancelTest = async (record, rtc, trainPub, pin, result) => {
+  var signed2 = (test, release, box) => utf8(`ballast/cancel/1
+${test}
+${release || ""}
+${box}`);
+  var cancelTest = async (record, rtc, trainPub, pin, result, release = {}) => {
     const key = await hkdfKey(await shared(rtc.priv, trainPub), unb64url(record.salt), INFO.plate);
     const { perItem, ...rest } = result;
+    const items = (perItem || []).map(({ id, area, ref, worth, got, pending }) => ({ id, area, ref, worth, got, pending }));
+    const box = await sealJSON(key, { title: record.title, pin: String(pin), ...rest, items, answers: release.answers || null, release: release.hash || null, marked: Date.now() });
     const body = {
       v: 1,
       kind: "cancel",
@@ -558,14 +614,19 @@ ${by.sig}`;
       salt: record.salt,
       pin: String(pin),
       rtc: rtc.pub,
-      box: await sealJSON(key, { title: record.title, pin: String(pin), ...rest })
+      release: release.hash || null,
+      by: rtc.sig || null,
+      signature: rtc.sign ? await signBytes(rtc.sign, signed2(record.id, release.hash, box)) : null,
+      box
     };
-    return armor("CANCEL", body, { title: record.title, train: `CN ${pin}`, grade: `${Math.round(result.grade * 100)}%` });
+    return armor("CANCEL", body, { title: record.title, train: `CN ${pin}`, grade: `${Math.round(result.grade * 100)}%`, release: (release.hash || "").slice(0, 16) });
   };
   var readCancel = async (text2, train) => {
     const { body } = await dearmor(text2, "CANCEL");
     const key = await hkdfKey(await shared(train.priv, body.rtc), unb64url(body.salt), INFO.plate);
-    return openJSON(key, body.box);
+    const marks = await openJSON(key, body.box);
+    const ok = body.signature && body.by ? await verifyBytes(body.by, body.signature, signed2(body.test, body.release, body.box)) : null;
+    return { ...marks, release: body.release || null, by: body.by || null, signed: ok };
   };
 
   // src/score.js
@@ -940,8 +1001,9 @@ ${by.sig}`;
         { class: "steps" },
         step2(1, "Copy the test the RTC sends you", !!log.copied, log.copied ? `${log.copied.title} at ${log.copied.when}` : "Drop or paste the test below."),
         step2(2, "Release", !!log.released, log.released ? `${log.released.title} at ${log.released.when}` : "Fullscreen, one item at a time, then Release track."),
-        step2(3, "Read your cancellation", !!log.cancelled, log.cancelled ? `${log.cancelled.grade}% on ${log.cancelled.title}` : "Drop the cancellation the RTC sends back to see your marks and what to read.")
+        step2(3, "Read your cancellation", !!log.cancelled, log.cancelled ? `${log.cancelled.grade}% on ${log.cancelled.title}${log.cancelled.match === true ? " \xB7 marks compare with your release" : log.cancelled.match === false ? " \xB7 DOES NOT COMPARE with your release" : ""}` : "Drop the cancellation the RTC sends back to see your marks and what to read.")
       ),
+      log.released?.hash ? h("p", { class: "small" }, "Your last release: ", h("span", { class: "complete" }, log.released.hash), " \u2014 the cancellation must name this hash.") : null,
       dropBox2("Drop or paste a test, or a cancellation"),
       h("h2", {}, "Practice"),
       h("p", { class: "small" }, "Drop a test source (.txt, with answers) here to run the same drill on it \u2014 repeat, fullscreen, one item at a time \u2014 and mark yourself. Not for record."),
@@ -991,6 +1053,7 @@ ${by.sig}`;
         { class: "card" },
         form2,
         h("p", {}, `Clearance No. ${tgbo.clearance} to CN ${p.pin} \xB7 ${tgbo.order.length} items \xB7 ${fmtTime(tgbo.settings.time)} \xB7 pass ${Math.round(tgbo.settings.pass * 100)}%`),
+        tgbo.window ? h("p", { class: "small" }, `Window: ${new Date(tgbo.window.from).toLocaleString()} \u2192 ${new Date(tgbo.window.until).toLocaleString()}. Outside it the clearance does not open, and a late release is flagged to the RTC.`) : null,
         h("p", {}, "Rule 136 \u2014 copy as transmitted, then repeat back:"),
         h("p", { class: "complete" }, `Complete ${hhmm()} \xB7 RTC ${tgbo.rtcName || ""} \xB7 `, h("b", {}, tgbo.complete)),
         saved?.events?.length ? h("p", { class: "status" }, `An attempt in progress was found (${Object.keys(fold(tgbo.order, saved.events).answers).length} answered). It will resume.`) : null,
@@ -1184,9 +1247,10 @@ ${by.sig}`;
         return go4({ screen: "marks", result: { ...r, title: tgbo.title, pin: p.pin }, practice: true });
       }
       const text2 = await giveRelease(tgbo, p, p.pin, attempt);
+      const { headers } = await dearmor(text2);
       await del("attempt:" + tgbo.id);
-      await set("crewlog", { ...await get("crewlog") || {}, released: { title: tgbo.title, when: hhmm() } });
-      go4({ screen: "released", tgbo, text: text2, why });
+      await set("crewlog", { ...await get("crewlog") || {}, released: { title: tgbo.title, when: hhmm(), hash: headers.sha256, test: tgbo.id } });
+      go4({ screen: "released", tgbo, text: text2, why, hash: headers.sha256 });
     };
     mount(
       root4,
@@ -1201,10 +1265,11 @@ ${by.sig}`;
     if (!navigator.keyboard?.lock) log("note", "keyboard-lock-unavailable");
     await show(state().at);
   };
-  var renderReleased = (root4, { tgbo, text: text2, why }, go4) => mount(
+  var renderReleased = (root4, { tgbo, text: text2, why, hash }, go4) => mount(
     root4,
     h("h1", {}, "Track released"),
-    h("p", {}, why === "time" ? "Time expired; the attempt was released as it stood." : "Your attempt is sealed to the RTC. Send this file \u2014 or paste the text \u2014 to your instructor."),
+    h("p", {}, why === "time" ? "Time expired; the attempt was released as it stood." : "Your attempt is sealed to the RTC and signed by your key. Send this file \u2014 or paste the text \u2014 to your instructor."),
+    h("div", { class: "card" }, h("b", {}, "Release hash "), h("span", { class: "complete" }, hash), h("p", { class: "small" }, "This is the SHA-256 of the file you are sending. Keep it (it is also on your home screen). The cancellation the RTC sends back names the release it marks; if the hash there is not this one, the marks are not for what you released.")),
     h("div", { class: "row" }, h("button", { class: "primary", onclick: () => download(`release-${tgbo.title.replace(/\W+/g, "-")}.txt`, text2) }, "Download release"), h("button", { onclick: () => navigator.clipboard?.writeText(text2) }, "Copy text")),
     h("textarea", { readonly: true, rows: 6, value: text2 }),
     h("button", { onclick: () => go4({ screen: "home" }) }, "Done")
@@ -1214,18 +1279,37 @@ ${by.sig}`;
     if (!p) return mount(root4, h("p", { class: "bad" }, "No crew key in this browser; this cancellation was sealed to your key."));
     try {
       const r = await readCancel(text2, p);
-      await set("crewlog", { ...await get("crewlog") || {}, cancelled: { title: r.title, grade: Math.round(r.grade * 100) } });
-      return renderMarks(root4, { result: r }, go4);
+      const log = await get("crewlog") || {};
+      const mine = log.released?.hash || null;
+      const match = mine && r.release ? mine === r.release : null;
+      const rtcOk = r.by && p.minted?.by?.sig ? r.by === p.minted.by.sig : null;
+      await set("crewlog", { ...log, cancelled: { title: r.title, grade: Math.round(r.grade * 100), match } });
+      return renderMarks(root4, { result: r, mine, match, rtcOk }, go4);
     } catch (e) {
       mount(root4, h("h1", {}, "Cannot open"), h("p", { class: "bad" }, e.message), h("button", { onclick: () => go4({ screen: "home" }) }, "Back"));
     }
   };
-  var renderMarks = (root4, { result: r, practice }, go4) => {
+  var provenance = (r, mine, match, rtcOk) => h(
+    "div",
+    { class: "card" },
+    h("h2", {}, "Does it compare?"),
+    h(
+      "table",
+      {},
+      h("tr", {}, h("td", {}, "Release you sent"), h("td", { class: "complete small" }, mine || "not recorded in this browser")),
+      h("tr", {}, h("td", {}, "Release these marks are for"), h("td", { class: "complete small" }, r.release || "not named")),
+      h("tr", {}, h("td", {}, "Compare"), h("td", { class: match === true ? "good" : match === false ? "bad" : "small" }, match === true ? "YES \u2014 these marks are for the file you released" : match === false ? "NO \u2014 these marks name a different release. Take both files to the superintendent." : "cannot compare (one hash missing)")),
+      h("tr", {}, h("td", {}, "Signed by"), h("td", { class: r.signed === true ? "good" : r.signed === false ? "bad" : "small" }, r.signed === true ? rtcOk === true ? "your RTC (the one who minted you)" : rtcOk === false ? "a different RTC key than the one who minted you" : "the RTC key in the file" : r.signed === false ? "BAD SIGNATURE \u2014 altered after signing" : "unsigned"))
+    ),
+    r.answers ? h("p", { class: "small" }, `The cancellation repeats your ${Object.keys(r.answers).length} answers as marked, and the mark per item. The superintendent who approved the test can re-score your release from its audit copy without the RTC's help.`) : null,
+    r.items?.length ? h("details", {}, h("summary", {}, "Marks per item"), h("table", {}, r.items.map((i) => h("tr", {}, h("td", {}, i.id), h("td", { class: "small" }, (i.ref || []).join(", ")), h("td", {}, i.pending ? "not yet marked" : `${i.got}/${i.worth}`))))) : null
+  );
+  var renderMarks = (root4, { result: r, practice, mine, match, rtcOk }, go4) => {
     const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
     mount(
       root4,
       h("h1", {}, r.title),
-      practice ? h("p", { class: "small" }, "Practice \u2014 not for record.") : null,
+      practice ? h("p", { class: "small" }, "Practice \u2014 not for record.") : provenance(r, mine, match, rtcOk),
       h("p", { class: r.pass ? "good big" : "bad big" }, `${Math.round(r.grade * 100)}% \u2014 ${r.pass ? "PASS" : "did not pass"}`, r.pending ? ` (${r.pending} short answers not yet marked)` : ""),
       h("h2", {}, "By area"),
       h("table", {}, r.areas.map((a) => h("tr", {}, h("td", {}, a.label), h("td", {}, `${a.correct}/${a.total}`), h("td", {}, h("div", { class: "meter" }, h("div", { style: { width: pct(a.correct, a.total) + "%" } })))))),
@@ -1264,7 +1348,7 @@ ${by.sig}`;
     const hash = await sourceHash(source);
     const signature = await signBytes(director.sign, utf8(`ballast/approval/1
 ${hash}`));
-    return armor("APPROVAL", { v: 1, kind: "approval", hash, title, by: director.sig, name: director.name, signature }, { title, hash: hash.slice(0, 12), by: director.name });
+    return armor("APPROVAL", { v: 1, kind: "approval", hash, title, by: director.sig, pub: director.pub, name: director.name, signature }, { title, hash: hash.slice(0, 12), by: director.name });
   };
   var readApproval = async (text2) => (await dearmor(text2, "APPROVAL")).body;
   var checkApproval = async (approval, source) => await sourceHash(source) === approval.hash && verifyBytes(approval.by, approval.signature, utf8(`ballast/approval/1
@@ -1349,12 +1433,13 @@ ${approval.hash}`));
           const { body } = await dearmor(it.text);
           const rec = sheet.tests.find((t) => t.id === body.test);
           if (!rec) throw new Error("release is for a test not on this sheet");
-          const r = await takeRelease(it.text, sheet.rtc, rec);
+          const onSheet0 = sheet.trains.find((t) => t.pub === body.train);
+          const r = await takeRelease(it.text, sheet.rtc, rec, onSheet0?.sig);
           const onSheet = sheet.trains.find((t) => t.pin === r.pin);
-          const identity = onSheet && onSheet.pub === r.train ? "ok" : "KEY MISMATCH";
+          const identity = onSheet && onSheet.pub === r.train ? r.signed === false ? "BAD SIGNATURE" : "ok" : "KEY MISMATCH";
           sheet.releases = sheet.releases.filter((x) => !(x.test === rec.id && x.pin === r.pin));
-          sheet.releases.push({ test: rec.id, pin: r.pin, train: r.train, identity, attempt: r.attempt, name: onSheet?.name || "?" });
-          note(`release CN ${r.pin} for ${rec.title}${identity !== "ok" ? " \u2014 KEY MISMATCH" : ""}`, identity !== "ok");
+          sheet.releases.push({ test: rec.id, pin: r.pin, train: r.train, identity, attempt: r.attempt, name: onSheet?.name || "?", hash: r.hash, signed: r.signed, late: r.late });
+          note(`release CN ${r.pin} for ${rec.title} \xB7 ${r.hash.slice(0, 12)}${identity !== "ok" ? " \u2014 " + identity : ""}${r.late ? " \u2014 LATE (after the window)" : ""}`, identity !== "ok" || r.late);
           tab = "releases";
         } else if (kind) note(`${it.name}: a ${kind} does not belong on the desk`, true);
         else note(`${it.name}: not recognised`, true);
@@ -1458,9 +1543,15 @@ ${approval.hash}`));
     return null;
   };
   var issueTo = "";
+  var win = null;
+  var local = (iso) => {
+    const d = new Date(iso);
+    return new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
+  };
   var testsTab = () => {
     const d = sheet.draft;
     if (issueTo === "" && klass) issueTo = klass;
+    win ?? (win = defaultWindow());
     const issue = async () => {
       if (!d?.test) return;
       const missing = [...new Set(d.test.items.flatMap((i) => i.img.map((im) => im.name)).filter((n) => !sheet.assets[n]))];
@@ -1469,7 +1560,12 @@ ${approval.hash}`));
       const crew = c ? sheet.trains.filter((t) => c.pins.includes(t.pin)) : sheet.trains;
       if (!crew.length) return note(c ? `no crew in ${c.name}` : "no crew on the sheet", true), rerender();
       const approval = await approvalFor(d.source);
-      const { text: text2, record } = await issueTest(d.test, sheet.rtc, crew, sheet.assets, sheet.rtc.name, approval);
+      let text2, record;
+      try {
+        ({ text: text2, record } = await issueTest(d.test, sheet.rtc, crew, sheet.assets, sheet.rtc.name, approval, win));
+      } catch (e) {
+        return note(e.message, true), rerender();
+      }
       Object.assign(record, { source: d.source, text: text2, issued: Date.now(), trains: crew.map((t) => t.pin), approved: !!approval, class: c?.name || "all crew", classId: c?.id || "" });
       sheet.tests.push(record);
       download(`${d.test.title.replace(/\W+/g, "-")}.test.txt`, text2);
@@ -1490,12 +1586,16 @@ ${approval.hash}`));
         { class: "card" },
         h("b", {}, d.name),
         d.errors.length ? h("ul", { class: "bad" }, d.errors.map((e) => h("li", {}, e))) : h("p", {}, `${d.test.title} \xB7 ${d.test.items.length} items \xB7 ${fmtTime(d.test.settings.time)} \xB7 pass ${Math.round(d.test.settings.pass * 100)}% \xB7 areas: ${d.test.areas.map((a) => a.id).join(", ") || "none"}`, approvedMark),
-        d.errors.length ? null : h("div", { class: "row" }, h("select", { onchange: (e) => {
+        d.errors.length ? null : h("div", { class: "row" }, h("label", {}, "opens ", h("input", { type: "datetime-local", value: local(win.from), onchange: (e) => {
+          win = { ...win, from: new Date(e.target.value).toISOString() };
+        } })), h("label", {}, "closes ", h("input", { type: "datetime-local", value: local(win.until), onchange: (e) => {
+          win = { ...win, until: new Date(e.target.value).toISOString() };
+        } })), h("select", { onchange: (e) => {
           issueTo = e.target.value;
         } }, h("option", { value: "", selected: !issueTo }, `all crew (${sheet.trains.length})`), sheet.classes.map((c) => h("option", { value: c.id, selected: issueTo === c.id }, `${c.name} (${c.pins.length})`))), h("button", { class: "primary", onclick: issue }, "Issue test"))
       ) : h("p", { class: "status" }, "No test source loaded."),
       h("h2", {}, "Issued"),
-      h("table", {}, sheet.tests.map((t) => h("tr", {}, h("td", {}, t.title), h("td", { class: "small" }, t.class || ""), h("td", { class: "small" }, new Date(t.issued).toLocaleString()), h("td", {}, `${t.trains?.length ?? "?"} clearances`), h("td", { class: t.approved ? "good small" : "small" }, t.approved ? "approved" : "unapproved"), h("td", { class: "complete small" }, t.hash.slice(0, 4).toUpperCase()), h("td", {}, h("button", { onclick: () => download(`${t.title.replace(/\W+/g, "-")}.test.txt`, t.text) }, "download again"))))),
+      h("table", {}, sheet.tests.map((t) => h("tr", {}, h("td", {}, t.title), h("td", { class: "small" }, t.class || ""), h("td", { class: "small" }, new Date(t.issued).toLocaleString()), h("td", {}, `${t.trains?.length ?? "?"} clearances`), h("td", { class: "small" }, t.window ? `${new Date(t.window.from).toLocaleString()} \u2192 ${new Date(t.window.until).toLocaleString()}` : ""), h("td", { class: t.approved ? "good small" : "small" }, t.approved ? "approved" : "unapproved"), h("td", { class: "complete small" }, t.hash.slice(0, 4).toUpperCase()), h("td", {}, h("button", { onclick: () => download(`${t.title.replace(/\W+/g, "-")}.test.txt`, t.text) }, "download again"))))),
       h("h2", {}, "Assets"),
       h("p", { class: "small" }, Object.keys(sheet.assets).join(", ") || "none"),
       h("h2", {}, "Approvals"),
@@ -1515,6 +1615,7 @@ ${approval.hash}`));
       rerender();
     } }, "Score"))));
   };
+  var cancel = (rec, r, s) => cancelTest(rec, sheet.rtc, r.train, r.pin, s, { hash: r.hash, answers: r.attempt.answers });
   var releaseTable = (rec, test) => {
     const scored = scoredFor(rec, test);
     const sum = summarize(test, scored.map((x) => x.s));
@@ -1526,7 +1627,7 @@ ${approval.hash}`));
       h(
         "table",
         {},
-        h("tr", {}, h("th"), h("th", {}, "Train"), h("th", {}, "Name"), h("th", {}, "Score"), h("th", {}, "Grade"), h("th", {}, "Breaks"), h("th", {}, "Identity"), h("th")),
+        h("tr", {}, h("th"), h("th", {}, "Train"), h("th", {}, "Name"), h("th", {}, "Score"), h("th", {}, "Grade"), h("th", {}, "Breaks"), h("th", {}, "Identity"), h("th", {}, "Release"), h("th")),
         scored.map(({ r, s }) => h(
           "tr",
           {},
@@ -1537,17 +1638,18 @@ ${approval.hash}`));
           h("td", { class: s.pass ? "good" : "bad" }, `${Math.round(s.grade * 100)}%`),
           h("td", {}, r.attempt.breaks?.length || 0),
           h("td", { class: r.identity === "ok" ? "good" : "bad" }, r.identity),
+          h("td", { class: "small complete" }, (r.hash || "").slice(0, 12), r.signed === false ? h("span", { class: "bad" }, " unsigned!") : "", r.late ? h("span", { class: "bad" }, " late") : ""),
           h("td", {}, h("button", { onclick: () => {
             view = { rec, test, r };
             rerender();
-          } }, "review"), " ", h("button", { onclick: async () => download(`cancel-CN${r.pin}.txt`, await cancelTest(rec, sheet.rtc, r.train, r.pin, s)) }, "cancel (send marks)"))
+          } }, "review"), " ", h("button", { onclick: async () => download(`cancel-CN${r.pin}.txt`, await cancel(rec, r, s)) }, "cancel (send marks)"))
         ))
       ),
       h(
         "div",
         { class: "row" },
         h("button", { onclick: async () => {
-          for (const { r, s } of scored) download(`cancel-CN${r.pin}.txt`, await cancelTest(rec, sheet.rtc, r.train, r.pin, s));
+          for (const { r, s } of scored) download(`cancel-CN${r.pin}.txt`, await cancel(rec, r, s));
         } }, "Cancel all"),
         h("button", { onclick: () => download(`${rec.title.replace(/\W+/g, "-")}-summary.csv`, csv(test, scored)) }, "Summary CSV"),
         sheet.superintendent ? h("button", { onclick: async () => download(`class-profile-${rec.title.replace(/\W+/g, "-")}.txt`, await sendReport(sheet.rtc, sheet.superintendent.pub, reportFor(rec, test, scored, sum))) }, `Class profile to ${sheet.superintendent.name}`) : h("span", { class: "small" }, "Drop the superintendent's profile on the desk to send reports.")
@@ -1562,6 +1664,7 @@ ${approval.hash}`));
     test: rec.id,
     title: rec.title,
     hash: rec.hash,
+    window: rec.window || null,
     approved: !!rec.approved,
     rtc: { name: sheet.rtc.name, pin: sheet.rtc.pin },
     class: rec.class || "",
@@ -1586,6 +1689,10 @@ ${approval.hash}`));
         pending: s.pending,
         breaks: r.attempt.breaks?.length || 0,
         identity: r.identity,
+        release: r.hash || null,
+        signed: r.signed ?? null,
+        late: !!r.late,
+        marks: s.perItem.map((i) => [i.id, i.got]),
         areas: s.areas.map((a) => ({ id: a.id, label: a.label, correct: a.correct, total: a.total })),
         strengths: s.areas.filter((a) => pct(a) !== null && pct(a) >= 0.8).map((a) => a.label),
         weaknesses: s.areas.filter((a) => pct(a) !== null && pct(a) < 0.6).map((a) => a.label),
@@ -1596,8 +1703,8 @@ ${approval.hash}`));
     })
   });
   var csv = (test, scored) => {
-    const head = ["pin", "name", "score", "total", "grade", "pass", "breaks", "identity", ...test.areas.map((a) => a.id), ...test.items.map((i) => i.id)];
-    const rows = scored.map(({ r, s }) => [r.pin, r.name, s.score, s.total, s.grade.toFixed(3), s.pass, r.attempt.breaks?.length || 0, r.identity, ...s.areas.map((a) => `${a.correct}/${a.total}`), ...s.perItem.map((i) => i.got)]);
+    const head = ["pin", "name", "score", "total", "grade", "pass", "breaks", "identity", "release", ...test.areas.map((a) => a.id), ...test.items.map((i) => i.id)];
+    const rows = scored.map(({ r, s }) => [r.pin, r.name, s.score, s.total, s.grade.toFixed(3), s.pass, r.attempt.breaks?.length || 0, r.identity, r.hash || "", ...s.areas.map((a) => `${a.correct}/${a.total}`), ...s.perItem.map((i) => i.got)]);
     return [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
   };
   var reviewView = () => {
@@ -1711,6 +1818,7 @@ ${approval.hash}`));
       h("br"),
       h("label", { class: "btn", style: { marginTop: "8px", display: "inline-block" } }, "Choose files", h("input", { type: "file", multiple: true, style: { display: "none" }, onchange: (e) => takeFiles(e.target.files) }))
     );
+    announce("desk", sheet.rtc);
     const paste = h("textarea", { rows: 3, placeholder: "Or paste PROFILE / APPROVAL / RELEASE text\u2026" });
     mount(
       root,
@@ -1773,6 +1881,9 @@ ${approval.hash}`));
           book.reports.push({ teacher, rtcName: rtc?.name || report.rtc?.name || "?", known: !!rtc, report });
           note2(`report: ${report.title} from ${rtc?.name || "unknown RTC"}${rtc ? "" : " (not on the book)"}`, !rtc);
           tab2 = "reports";
+        } else if (kind === "RELEASE") {
+          await audit(it.name, it.text);
+          tab2 = "reports";
         } else if (kind) note2(`${it.name}: a ${kind} does not belong in the book`, true);
         else {
           await addSource(it.name, it.text);
@@ -1782,6 +1893,22 @@ ${approval.hash}`));
         note2(`${it.name}: ${e.message}`, true);
       }
     }
+  };
+  var audit = async (name, text2) => {
+    const a = await auditRelease(text2, book.rtc);
+    const src = book.sources.find((s2) => s2.hash === a.source);
+    if (!src) throw new Error(`${name}: the source this release was written against (${(a.source || "?").slice(0, 12)}) is not in the inventory`);
+    const { test } = await parseTest(src.source);
+    const s = scoreAttempt(test, a.attempt, {});
+    const reported = book.reports.flatMap((x) => x.report.rows.map((r) => ({ ...r, rtc: x.rtcName, title: x.report.title }))).find((r) => r.release === a.hash);
+    const agrees = reported ? reported.marks?.every(([id, got]) => {
+      const i = s.perItem.find((p) => p.id === id);
+      return i && (i.pending || i.got === got);
+    }) ?? null : null;
+    book.audits ?? (book.audits = []);
+    book.audits = book.audits.filter((x) => x.hash !== a.hash);
+    book.audits.push({ hash: a.hash, pin: a.pin, title: src.title, signed: a.signed, when: Date.now(), score: s.score, total: s.total, pending: s.pending, reported: reported ? { grade: reported.grade, score: reported.score, total: reported.total, rtc: reported.rtc, name: reported.name } : null, agrees, items: s.perItem.map((i) => ({ id: i.id, got: i.got, worth: i.worth, pending: i.pending, reported: reported?.marks?.find(([id]) => id === i.id)?.[1] ?? null })) });
+    note2(`audit ${a.hash.slice(0, 12)} CN ${a.pin}: re-scored ${s.score}/${s.total}${s.pending ? ` (+${s.pending} short answers unmarked here)` : ""}${reported ? ` \xB7 RTC ${reported.rtc} reported ${reported.score}/${reported.total} \u2014 ${agrees ? "AGREES" : "DIFFERS"}` : " \xB7 no class profile names this release"}`, agrees === false);
   };
   var takeFiles2 = async (files) => {
     const items = [];
@@ -1882,8 +2009,8 @@ ${approval.hash}`));
       h(
         "table",
         {},
-        h("tr", {}, h("th", {}, "Crew"), h("th", {}, "Grade"), h("th", {}, "Strong"), h("th", {}, "Weak"), h("th", {}, "Read"), h("th", {}, "RTC rating"), h("th", {}, "RTC appraisal")),
-        r.rows.map((row) => h("tr", {}, h("td", {}, h("b", {}, row.name), h("br"), `CN ${row.pin}`), h("td", { class: row.pass ? "good" : "bad" }, `${Math.round(row.grade * 100)}%`), h("td", { class: "small" }, (row.strengths || []).join(", ") || "\u2014"), h("td", { class: "small" }, (row.weaknesses || []).join(", ") || "\u2014"), h("td", { class: "small" }, (row.read || []).slice(0, 4).map((z) => z.ref).join(", ")), h("td", {}, row.rating ? "\u2605".repeat(row.rating) : "\u2014"), h("td", { class: "small", style: { maxWidth: "320px" } }, row.note || "\u2014")))
+        h("tr", {}, h("th", {}, "Crew"), h("th", {}, "Grade"), h("th", {}, "Strong"), h("th", {}, "Weak"), h("th", {}, "Read"), h("th", {}, "RTC rating"), h("th", {}, "RTC appraisal"), h("th", {}, "Release")),
+        r.rows.map((row) => h("tr", {}, h("td", {}, h("b", {}, row.name), h("br"), `CN ${row.pin}`), h("td", { class: row.pass ? "good" : "bad" }, `${Math.round(row.grade * 100)}%`), h("td", { class: "small" }, (row.strengths || []).join(", ") || "\u2014"), h("td", { class: "small" }, (row.weaknesses || []).join(", ") || "\u2014"), h("td", { class: "small" }, (row.read || []).slice(0, 4).map((z) => z.ref).join(", ")), h("td", {}, row.rating ? "\u2605".repeat(row.rating) : "\u2014"), h("td", { class: "small", style: { maxWidth: "320px" } }, row.note || "\u2014"), h("td", { class: "complete small" }, (row.release || "").slice(0, 12), row.signed === false ? " unsigned!" : "", row.late ? " late" : "")))
       )
     );
   };
@@ -1913,7 +2040,15 @@ ${approval.hash}`));
       ),
       h("h2", {}, "By crew member"),
       h("table", {}, Object.entries(byPin).sort().map(([pin, v]) => h("tr", {}, h("td", {}, `CN ${pin}`), h("td", {}, v.name), h("td", {}, v.rows.map((r) => h("div", { class: r.pass ? "good small" : "bad small" }, `${r.title}: ${Math.round(r.grade * 100)}% (${r.rtc})${r.rating ? " " + "\u2605".repeat(r.rating) : ""}${r.weak?.length ? " \xB7 weak: " + r.weak.join(", ") : ""}`)))))),
-      reps.length ? h("button", { onclick: () => download("administrations.csv", csvAll()) }, "All rows as CSV") : null
+      reps.length ? h("button", { onclick: () => download("administrations.csv", csvAll()) }, "All rows as CSV") : null,
+      h("h2", {}, "Audits"),
+      h("p", { class: "small" }, "A crew member who doubts their marks sends you their release file. Drop it here: it carries a copy sealed to you, and you re-score it from the approved source in the inventory and compare with what the RTC reported for that release hash."),
+      (book.audits || []).length ? h(
+        "table",
+        {},
+        h("tr", {}, h("th", {}, "Release"), h("th", {}, "Crew"), h("th", {}, "Test"), h("th", {}, "Re-scored"), h("th", {}, "RTC reported"), h("th", {}, "Compare")),
+        book.audits.map((a) => h("tr", {}, h("td", { class: "complete small" }, a.hash.slice(0, 16), a.signed === false ? h("span", { class: "bad" }, " bad signature") : ""), h("td", {}, `CN ${a.pin}`), h("td", {}, a.title), h("td", {}, `${a.score}/${a.total}${a.pending ? ` (+${a.pending} short)` : ""}`), h("td", {}, a.reported ? `${a.reported.score}/${a.reported.total} (${a.reported.rtc})` : "\u2014"), h("td", { class: a.agrees === true ? "good" : a.agrees === false ? "bad" : "small" }, a.agrees === true ? "agrees" : a.agrees === false ? "DIFFERS" : "no report names it")))
+      ) : null
     );
   };
   var csvAll = () => {
@@ -1943,7 +2078,8 @@ ${approval.hash}`));
       const p = await get("profile");
       return mount(root2, h("h1", {}, "Superintendent"), profileCard(p, await profileText(p)), h("p", {}, "Your book holds the RTCs, the approved tests, and every report. It is a file encrypted under your passphrase."), h("div", { class: "row" }, h("button", { class: "primary", onclick: () => go2({ screen: "super", fresh: true }) }, "Start a book"), h("label", { class: "btn" }, "Open a book", h("input", { type: "file", style: { display: "none" }, onchange: async (e) => go2({ screen: "super", bookText: await readFileText(e.target.files[0]) }) }))));
     }
-    for (const k of ["trains", "sources", "reports", "pending"]) book[k] ?? (book[k] = []);
+    for (const k of ["trains", "sources", "reports", "pending", "audits"]) book[k] ?? (book[k] = []);
+    announce("book", book.rtc);
     if (ctx2.incoming) {
       await intake2(ctx2.incoming);
       ctx2.incoming = null;
@@ -1964,7 +2100,7 @@ ${approval.hash}`));
       e.preventDefault();
       drop.classList.remove("over");
       takeFiles2(e.dataTransfer.files);
-    } }, "Drop RTC registrations, test sources, class profiles here", h("br"), h("label", { class: "btn", style: { marginTop: "8px", display: "inline-block" } }, "Choose files", h("input", { type: "file", multiple: true, style: { display: "none" }, onchange: (e) => takeFiles2(e.target.files) })));
+    } }, "Drop RTC registrations, test sources, class profiles, releases to audit here", h("br"), h("label", { class: "btn", style: { marginTop: "8px", display: "inline-block" } }, "Choose files", h("input", { type: "file", multiple: true, style: { display: "none" }, onchange: (e) => takeFiles2(e.target.files) })));
     const paste = h("textarea", { rows: 3, placeholder: "Or paste PROFILE / REPORT text\u2026" });
     mount(
       root2,
@@ -2012,12 +2148,21 @@ ${approval.hash}`));
         await acceptMint(text2);
         return go3({ screen: "home" });
       }
+      if (kind === "PROFILE" && p) {
+        const m = await readProfile(text2).catch(() => null);
+        if (m && m.pub === p.pub && m.sig === p.sig) {
+          if (p.minted && !confirm(`Replace your ${p.role} role with ${m.role} (minted by ${m.minted?.by?.name || "?"})?`)) return;
+          await acceptMint(text2);
+          return go3({ screen: "home" });
+        }
+      }
       if (kind === "TEST") return go3({ screen: "copy", text: text2 });
       if (kind === "CANCEL") return go3({ screen: "cancel", text: text2 });
       if (kind === "SHEET") return go3({ screen: "rtc", sheetText: text2 });
       if (kind === "BOOK") return go3({ screen: "super", bookText: text2 });
       if (kind === "REPORT") return go3({ screen: "super", incoming: [{ name, text: text2 }] });
       if (kind === "PROFILE" && p?.role === "superintendent") return go3({ screen: "super", incoming: [{ name, text: text2 }] });
+      if (kind === "RELEASE" && p?.role === "superintendent") return go3({ screen: "super", incoming: [{ name, text: text2 }] });
       if (kind === "RELEASE" || kind === "APPROVAL" || kind === "PROFILE") return go3({ screen: "rtc", incoming: [{ name, text: text2 }] });
       if (/^#|\n---/.test(text2)) return go3({ screen: p?.role === "superintendent" ? "super" : "rtc", incoming: [{ name, text: text2, source: true }] });
       go3({ screen: "home", error: `Not a Ballast file${name ? ": " + name : ""}` });
@@ -2072,7 +2217,7 @@ ${approval.hash}`));
   };
   var render3 = async () => {
     const p = await me2();
-    announce(ctx.screen);
+    announce(ctx.screen, p);
     if (ctx.screen === "landing" || !p && ctx.screen === "home") return renderRegister(root3, async (np) => {
       await set("profile", np);
       go3({ screen: "home" });
@@ -2109,6 +2254,7 @@ ${approval.hash}`));
       go3({ screen: "home" });
     } }, "Ballast"),
     " \xB7 ",
+    embedded() ? null : h("a", { href: /\/ballast\//.test(location.pathname) ? "../tutorial/" : "tutorial/", class: "small", style: { marginRight: "12px" } }, "Tutorial"),
     h("a", { href: "#", onclick: async (e) => {
       e.preventDefault();
       if (confirm("Forget this browser's profile and keys? Any role minted to them is lost.")) {

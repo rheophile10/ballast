@@ -4,7 +4,7 @@ import { sniff, dearmor } from '../armor.js';
 import { readProfile, profileText, mintProfile } from '../profile.js';
 import * as store from './store.js';
 import { parseTest } from '../txt.js';
-import { issueTest, openItem } from '../testfile.js';
+import { issueTest, openItem, defaultWindow } from '../testfile.js';
 import { takeRelease } from '../release.js';
 import { scoreAttempt, summarize } from '../score.js';
 import { cancelTest } from '../cancel.js';
@@ -14,6 +14,7 @@ import { fold } from './attempt.js';
 import { drawItem, imagesFor } from './draw.js';
 import { b64 } from '../bytes.js';
 import { profileCard, avatar } from './profile-ui.js';
+import { announce } from '../embed.js';
 
 let sheet = null, tab = 'trains', pass = '', notes = [], view = null, root, go, klass = '';
 const note = (m, bad = false) => { notes.unshift({ m, bad }); notes = notes.slice(0, 6); };
@@ -29,7 +30,7 @@ const intake = async (items) => {
       const kind = sniff(it.text);
       if (kind === 'PROFILE') { const p = await readProfile(it.text); if (p.role === 'superintendent') { sheet.superintendent = p; note(`superintendent ${p.name} on the desk`); continue; } if (p.role === 'none') { sheet.pending = sheet.pending.filter((x) => x.pub !== p.pub); sheet.pending.push(p); note(`registration from ${p.name} (${p.pin}) — mint it on the Crew tab`); tab = 'trains'; continue; } if (p.role !== 'crew') { note(`${p.name} is an ${p.role}, not crew`, true); continue; } const i = sheet.trains.findIndex((t) => t.pin === p.pin); if (i >= 0 && sheet.trains[i].pub !== p.pub) note(`CN ${p.pin} re-registered with a new key (${p.name}); replaced`, true); if (i >= 0) sheet.trains[i] = p; else sheet.trains.push(p); note(`crew CN ${p.pin} ${p.name}`); tab = 'trains'; }
       else if (kind === 'APPROVAL') { const a = await readApproval(it.text); sheet.approvals = sheet.approvals.filter((x) => x.hash !== a.hash); sheet.approvals.push(a); note(`approval for "${a.title}" by ${a.name}`); tab = 'tests'; }
-      else if (kind === 'RELEASE') { const { body } = await dearmor(it.text); const rec = sheet.tests.find((t) => t.id === body.test); if (!rec) throw new Error('release is for a test not on this sheet'); const r = await takeRelease(it.text, sheet.rtc, rec); const onSheet = sheet.trains.find((t) => t.pin === r.pin); const identity = onSheet && onSheet.pub === r.train ? 'ok' : 'KEY MISMATCH'; sheet.releases = sheet.releases.filter((x) => !(x.test === rec.id && x.pin === r.pin)); sheet.releases.push({ test: rec.id, pin: r.pin, train: r.train, identity, attempt: r.attempt, name: onSheet?.name || '?' }); note(`release CN ${r.pin} for ${rec.title}${identity !== 'ok' ? ' — KEY MISMATCH' : ''}`, identity !== 'ok'); tab = 'releases'; }
+      else if (kind === 'RELEASE') { const { body } = await dearmor(it.text); const rec = sheet.tests.find((t) => t.id === body.test); if (!rec) throw new Error('release is for a test not on this sheet'); const onSheet0 = sheet.trains.find((t) => t.pub === body.train); const r = await takeRelease(it.text, sheet.rtc, rec, onSheet0?.sig); const onSheet = sheet.trains.find((t) => t.pin === r.pin); const identity = onSheet && onSheet.pub === r.train ? (r.signed === false ? 'BAD SIGNATURE' : 'ok') : 'KEY MISMATCH'; sheet.releases = sheet.releases.filter((x) => !(x.test === rec.id && x.pin === r.pin)); sheet.releases.push({ test: rec.id, pin: r.pin, train: r.train, identity, attempt: r.attempt, name: onSheet?.name || '?', hash: r.hash, signed: r.signed, late: r.late }); note(`release CN ${r.pin} for ${rec.title} · ${r.hash.slice(0, 12)}${identity !== 'ok' ? ' — ' + identity : ''}${r.late ? ' — LATE (after the window)' : ''}`, identity !== 'ok' || r.late); tab = 'releases'; }
       else if (kind) note(`${it.name}: a ${kind} does not belong on the desk`, true);
       else note(`${it.name}: not recognised`, true);
     } catch (e) { note(`${it.name}: ${e.message}`, true); }
@@ -53,9 +54,10 @@ const trainsTab = () => h('div', {}, classBar(), sheet.pending.length ? h('div',
   sheet.trains.length ? null : h('p', { class: 'status' }, 'No crew yet.'));
 
 const approvalFor = async (source) => { for (const a of sheet.approvals) if (await checkApproval(a, source)) return a; return null; };
-let issueTo = '';
+let issueTo = '', win = null;
+const local = (iso) => { const d = new Date(iso); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); };
 const testsTab = () => {
-  const d = sheet.draft; if (issueTo === '' && klass) issueTo = klass;
+  const d = sheet.draft; if (issueTo === '' && klass) issueTo = klass; win ??= defaultWindow();
   const issue = async () => {
     if (!d?.test) return;
     const missing = [...new Set(d.test.items.flatMap((i) => i.img.map((im) => im.name)).filter((n) => !sheet.assets[n]))];
@@ -63,15 +65,15 @@ const testsTab = () => {
     const c = sheet.classes.find((x) => x.id === issueTo); const crew = c ? sheet.trains.filter((t) => c.pins.includes(t.pin)) : sheet.trains;
     if (!crew.length) return note(c ? `no crew in ${c.name}` : 'no crew on the sheet', true), rerender();
     const approval = await approvalFor(d.source);
-    const { text, record } = await issueTest(d.test, sheet.rtc, crew, sheet.assets, sheet.rtc.name, approval);
+    let text, record; try { ({ text, record } = await issueTest(d.test, sheet.rtc, crew, sheet.assets, sheet.rtc.name, approval, win)); } catch (e) { return note(e.message, true), rerender(); }
     Object.assign(record, { source: d.source, text, issued: Date.now(), trains: crew.map((t) => t.pin), approved: !!approval, class: c?.name || 'all crew', classId: c?.id || '' });
     sheet.tests.push(record); download(`${d.test.title.replace(/\W+/g, '-')}.test.txt`, text); note(`issued ${record.title} to ${sheet.trains.length} crew — complete ${record.hash.slice(0, 4).toUpperCase()}`); rerender();
   };
   const approvedMark = h('span', { class: 'small' }); if (d?.test) approvalFor(d.source).then((a) => { approvedMark.textContent = a ? ` · approved by ${a.name}` : ' · not approved'; approvedMark.className = a ? 'small good' : 'small bad'; });
   return h('div', {}, h('p', { class: 'small' }, 'Drop a test source (.txt), any images it names, and the superintendent\'s approval if you have one. Issue writes one test file with a clearance for every crew member on the sheet.'),
     d ? h('div', { class: 'card' }, h('b', {}, d.name), d.errors.length ? h('ul', { class: 'bad' }, d.errors.map((e) => h('li', {}, e))) : h('p', {}, `${d.test.title} · ${d.test.items.length} items · ${fmtTime(d.test.settings.time)} · pass ${Math.round(d.test.settings.pass * 100)}% · areas: ${d.test.areas.map((a) => a.id).join(', ') || 'none'}`, approvedMark),
-      d.errors.length ? null : h('div', { class: 'row' }, h('select', { onchange: (e) => { issueTo = e.target.value; } }, h('option', { value: '', selected: !issueTo }, `all crew (${sheet.trains.length})`), sheet.classes.map((c) => h('option', { value: c.id, selected: issueTo === c.id }, `${c.name} (${c.pins.length})`))), h('button', { class: 'primary', onclick: issue }, 'Issue test'))) : h('p', { class: 'status' }, 'No test source loaded.'),
-    h('h2', {}, 'Issued'), h('table', {}, sheet.tests.map((t) => h('tr', {}, h('td', {}, t.title), h('td', { class: 'small' }, t.class || ''), h('td', { class: 'small' }, new Date(t.issued).toLocaleString()), h('td', {}, `${t.trains?.length ?? '?'} clearances`), h('td', { class: t.approved ? 'good small' : 'small' }, t.approved ? 'approved' : 'unapproved'), h('td', { class: 'complete small' }, t.hash.slice(0, 4).toUpperCase()), h('td', {}, h('button', { onclick: () => download(`${t.title.replace(/\W+/g, '-')}.test.txt`, t.text) }, 'download again'))))),
+      d.errors.length ? null : h('div', { class: 'row' }, h('label', {}, 'opens ', h('input', { type: 'datetime-local', value: local(win.from), onchange: (e) => { win = { ...win, from: new Date(e.target.value).toISOString() }; } })), h('label', {}, 'closes ', h('input', { type: 'datetime-local', value: local(win.until), onchange: (e) => { win = { ...win, until: new Date(e.target.value).toISOString() }; } })), h('select', { onchange: (e) => { issueTo = e.target.value; } }, h('option', { value: '', selected: !issueTo }, `all crew (${sheet.trains.length})`), sheet.classes.map((c) => h('option', { value: c.id, selected: issueTo === c.id }, `${c.name} (${c.pins.length})`))), h('button', { class: 'primary', onclick: issue }, 'Issue test'))) : h('p', { class: 'status' }, 'No test source loaded.'),
+    h('h2', {}, 'Issued'), h('table', {}, sheet.tests.map((t) => h('tr', {}, h('td', {}, t.title), h('td', { class: 'small' }, t.class || ''), h('td', { class: 'small' }, new Date(t.issued).toLocaleString()), h('td', {}, `${t.trains?.length ?? '?'} clearances`), h('td', { class: 'small' }, t.window ? `${new Date(t.window.from).toLocaleString()} → ${new Date(t.window.until).toLocaleString()}` : ''), h('td', { class: t.approved ? 'good small' : 'small' }, t.approved ? 'approved' : 'unapproved'), h('td', { class: 'complete small' }, t.hash.slice(0, 4).toUpperCase()), h('td', {}, h('button', { onclick: () => download(`${t.title.replace(/\W+/g, '-')}.test.txt`, t.text) }, 'download again'))))),
     h('h2', {}, 'Assets'), h('p', { class: 'small' }, Object.keys(sheet.assets).join(', ') || 'none'), h('h2', {}, 'Approvals'), h('p', { class: 'small' }, sheet.approvals.map((a) => `${a.title} (${a.name})`).join(', ') || 'none'));
 };
 
@@ -82,23 +84,25 @@ const releasesTab = () => {
   if (!groups.length) return h('p', { class: 'status' }, 'No releases yet. Drop release files or pasted RELEASE text on the desk.');
   return h('div', {}, groups.map((rec) => h('div', { class: 'card' }, h('h2', {}, rec.title), rec._test ? releaseTable(rec, rec._test) : h('button', { onclick: async () => { rec._test = (await parseTest(rec.source)).test; rerender(); } }, 'Score'))));
 };
+/** The cancellation names the release it marks (by file hash) and repeats the answers as marked, so the crew member can compare. */
+const cancel = (rec, r, s) => cancelTest(rec, sheet.rtc, r.train, r.pin, s, { hash: r.hash, answers: r.attempt.answers });
 const releaseTable = (rec, test) => {
   const scored = scoredFor(rec, test); const sum = summarize(test, scored.map((x) => x.s));
   const photo = (pin) => avatar(sheet.trains.find((t) => t.pin === pin) || { name: '?' }, 40);
   return h('div', {}, h('p', {}, `${sum.n} released · ${sum.passed} passed · mean ${Math.round(sum.mean * 100)}%`),
-    h('table', {}, h('tr', {}, h('th'), h('th', {}, 'Train'), h('th', {}, 'Name'), h('th', {}, 'Score'), h('th', {}, 'Grade'), h('th', {}, 'Breaks'), h('th', {}, 'Identity'), h('th')),
-      scored.map(({ r, s }) => h('tr', {}, h('td', {}, photo(r.pin)), h('td', {}, `CN ${r.pin}`), h('td', {}, r.name), h('td', {}, `${s.score}/${s.total}${s.pending ? ` (+${s.pending} unmarked)` : ''}`), h('td', { class: s.pass ? 'good' : 'bad' }, `${Math.round(s.grade * 100)}%`), h('td', {}, r.attempt.breaks?.length || 0), h('td', { class: r.identity === 'ok' ? 'good' : 'bad' }, r.identity),
-        h('td', {}, h('button', { onclick: () => { view = { rec, test, r }; rerender(); } }, 'review'), ' ', h('button', { onclick: async () => download(`cancel-CN${r.pin}.txt`, await cancelTest(rec, sheet.rtc, r.train, r.pin, s)) }, 'cancel (send marks)'))))),
-    h('div', { class: 'row' }, h('button', { onclick: async () => { for (const { r, s } of scored) download(`cancel-CN${r.pin}.txt`, await cancelTest(rec, sheet.rtc, r.train, r.pin, s)); } }, 'Cancel all'), h('button', { onclick: () => download(`${rec.title.replace(/\W+/g, '-')}-summary.csv`, csv(test, scored)) }, 'Summary CSV'),
+    h('table', {}, h('tr', {}, h('th'), h('th', {}, 'Train'), h('th', {}, 'Name'), h('th', {}, 'Score'), h('th', {}, 'Grade'), h('th', {}, 'Breaks'), h('th', {}, 'Identity'), h('th', {}, 'Release'), h('th')),
+      scored.map(({ r, s }) => h('tr', {}, h('td', {}, photo(r.pin)), h('td', {}, `CN ${r.pin}`), h('td', {}, r.name), h('td', {}, `${s.score}/${s.total}${s.pending ? ` (+${s.pending} unmarked)` : ''}`), h('td', { class: s.pass ? 'good' : 'bad' }, `${Math.round(s.grade * 100)}%`), h('td', {}, r.attempt.breaks?.length || 0), h('td', { class: r.identity === 'ok' ? 'good' : 'bad' }, r.identity), h('td', { class: 'small complete' }, (r.hash || '').slice(0, 12), r.signed === false ? h('span', { class: 'bad' }, ' unsigned!') : '', r.late ? h('span', { class: 'bad' }, ' late') : ''),
+        h('td', {}, h('button', { onclick: () => { view = { rec, test, r }; rerender(); } }, 'review'), ' ', h('button', { onclick: async () => download(`cancel-CN${r.pin}.txt`, await cancel(rec, r, s)) }, 'cancel (send marks)'))))),
+    h('div', { class: 'row' }, h('button', { onclick: async () => { for (const { r, s } of scored) download(`cancel-CN${r.pin}.txt`, await cancel(rec, r, s)); } }, 'Cancel all'), h('button', { onclick: () => download(`${rec.title.replace(/\W+/g, '-')}-summary.csv`, csv(test, scored)) }, 'Summary CSV'),
       sheet.superintendent ? h('button', { onclick: async () => download(`class-profile-${rec.title.replace(/\W+/g, '-')}.txt`, await sendReport(sheet.rtc, sheet.superintendent.pub, reportFor(rec, test, scored, sum))) }, `Class profile to ${sheet.superintendent.name}`) : h('span', { class: 'small' }, 'Drop the superintendent\'s profile on the desk to send reports.')),
     h('h2', {}, 'By area (class mean)'), h('table', {}, sum.byArea.map((a) => h('tr', {}, h('td', {}, a.label), h('td', {}, `${Math.round(a.mean * 100)}%`), h('td', {}, h('div', { class: 'meter' }, h('div', { style: { width: Math.round(a.mean * 100) + '%' } })))))),
     h('h2', {}, 'Hardest items'), h('table', {}, sum.byItem.slice(0, 10).map((i) => h('tr', {}, h('td', {}, i.id), h('td', {}, i.ref.join(', ')), h('td', {}, `${i.correct}/${i.n} fully correct`)))));
 };
-const reportFor = (rec, test, scored, sum) => ({ test: rec.id, title: rec.title, hash: rec.hash, approved: !!rec.approved, rtc: { name: sheet.rtc.name, pin: sheet.rtc.pin }, class: rec.class || '', issued: rec.issued, sent: Date.now(),
+const reportFor = (rec, test, scored, sum) => ({ test: rec.id, title: rec.title, hash: rec.hash, window: rec.window || null, approved: !!rec.approved, rtc: { name: sheet.rtc.name, pin: sheet.rtc.pin }, class: rec.class || '', issued: rec.issued, sent: Date.now(),
   pass: test.settings.pass, n: sum.n, passed: sum.passed, mean: sum.mean, byArea: sum.byArea.map((a) => ({ id: a.id, label: a.label, mean: a.mean })), hardest: sum.byItem.slice(0, 10).map((i) => ({ id: i.id, ref: i.ref, difficulty: i.difficulty })),
-  rows: scored.map(({ r, s }) => { const n = sheet.notes[r.pin] || { rating: 0, note: '' }; const pct = (a) => (a.total ? a.correct / a.total : null); return { pin: r.pin, name: r.name, score: s.score, total: s.total, grade: s.grade, pass: s.pass, pending: s.pending, breaks: r.attempt.breaks?.length || 0, identity: r.identity, areas: s.areas.map((a) => ({ id: a.id, label: a.label, correct: a.correct, total: a.total })),
+  rows: scored.map(({ r, s }) => { const n = sheet.notes[r.pin] || { rating: 0, note: '' }; const pct = (a) => (a.total ? a.correct / a.total : null); return { pin: r.pin, name: r.name, score: s.score, total: s.total, grade: s.grade, pass: s.pass, pending: s.pending, breaks: r.attempt.breaks?.length || 0, identity: r.identity, release: r.hash || null, signed: r.signed ?? null, late: !!r.late, marks: s.perItem.map((i) => [i.id, i.got]), areas: s.areas.map((a) => ({ id: a.id, label: a.label, correct: a.correct, total: a.total })),
     strengths: s.areas.filter((a) => pct(a) !== null && pct(a) >= 0.8).map((a) => a.label), weaknesses: s.areas.filter((a) => pct(a) !== null && pct(a) < 0.6).map((a) => a.label), read: s.read, rating: n.rating, note: n.note }; }) });
-const csv = (test, scored) => { const head = ['pin', 'name', 'score', 'total', 'grade', 'pass', 'breaks', 'identity', ...test.areas.map((a) => a.id), ...test.items.map((i) => i.id)]; const rows = scored.map(({ r, s }) => [r.pin, r.name, s.score, s.total, s.grade.toFixed(3), s.pass, r.attempt.breaks?.length || 0, r.identity, ...s.areas.map((a) => `${a.correct}/${a.total}`), ...s.perItem.map((i) => i.got)]); return [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n'); };
+const csv = (test, scored) => { const head = ['pin', 'name', 'score', 'total', 'grade', 'pass', 'breaks', 'identity', 'release', ...test.areas.map((a) => a.id), ...test.items.map((i) => i.id)]; const rows = scored.map(({ r, s }) => [r.pin, r.name, s.score, s.total, s.grade.toFixed(3), s.pass, r.attempt.breaks?.length || 0, r.identity, r.hash || '', ...s.areas.map((a) => `${a.correct}/${a.total}`), ...s.perItem.map((i) => i.got)]); return [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n'); };
 
 const reviewView = () => {
   const { rec, test, r } = view; const marks = marksFor(rec, r.pin); const s = scoreAttempt(test, r.attempt, marks);
@@ -129,6 +133,7 @@ export const render = async (r, ctx, g) => {
   const save = async () => { if (!pass) { pass = prompt('Choose a passphrase for this sheet (you will need it every time)') || ''; if (!pass) return; } const { draft, ...persist } = sheet; for (const t of persist.tests) delete t._test; download(`sheet-${sheet.rtc.name.replace(/\W+/g, '-')}.txt`, await saveSheet(persist, pass)); note('sheet saved'); rerender(); };
   const drop = h('div', { class: 'drop', ondragover: (e) => { e.preventDefault(); drop.classList.add('over'); }, ondragleave: () => drop.classList.remove('over'), ondrop: (e) => { e.preventDefault(); drop.classList.remove('over'); takeFiles(e.dataTransfer.files); } },
     'Drop registrations, test sources, images, approvals, releases here', h('br'), h('label', { class: 'btn', style: { marginTop: '8px', display: 'inline-block' } }, 'Choose files', h('input', { type: 'file', multiple: true, style: { display: 'none' }, onchange: (e) => takeFiles(e.target.files) })));
+  announce('desk', sheet.rtc); // the sheet is open: a different screen than the bare role home
   const paste = h('textarea', { rows: 3, placeholder: 'Or paste PROFILE / APPROVAL / RELEASE text…' });
   mount(root, h('div', { class: 'bar' }, h('span', { class: 'row' }, avatar(sheet.rtc, 28), ` RTC ${sheet.rtc.name}`), h('span', {}, `${sheet.trains.length} crew · ${sheet.tests.length} tests · ${sheet.releases.length} releases`), h('button', { onclick: save }, 'Save sheet')),
     h('div', { class: 'row' }, h('div', { style: { flex: 1 } }, drop), profileCard(sheet.rtc, await profileText(sheet.rtc))),

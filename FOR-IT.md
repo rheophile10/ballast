@@ -50,6 +50,36 @@ instructor can derive, which also authenticates the sender. `verify.py` (Python 
 library + `cryptography`) re-scores any attempt from the instructor's file and the test
 source and must agree with the app — an auditor can run it without trusting the app.
 
+**Provenance: can a grade be proven to come from the answers submitted?** Yes, for
+everything that is arithmetic. The crew member signs their release with their own key
+(the RTC cannot alter the answers), keeps the file's SHA-256, and gets back a cancellation
+signed by the RTC that names that hash and repeats the answers as marked, item by item.
+The class profile the RTC files with the superintendent names the same hashes and marks.
+Every release under an approved test also carries a copy sealed to the superintendent,
+who can re-score it from the approved source with no help from the RTC and compare with
+the report — the app does this when a release is dropped on the book. What no machine can
+prove is the mark on a written answer; that remains a human reading it. Test files carry a
+window (from/until) bound into the clearance key: outside it the file does not open, and
+an edited window does not decrypt.
+
+**Can malware hide in a .txt?** Bytes can be put in any file, but a text file cannot run,
+and Ballast never executes or evaluates anything it reads: files are parsed as data,
+rendered as DOM text nodes or drawn to a canvas, never inserted as HTML or passed to
+`eval`/`Function`. The armor limits the body to base64; the sha256 header catches
+mangling; unknown kinds are refused. The attack surface of a dropped file is a JSON
+parser and the code that reads known fields.
+
+**Low-permission environments.** No installer, no service, no port, no database, no
+administrator rights: the page runs from a shared drive, a website or a desktop file.
+Files move by whatever already moves files (email, Teams, shared folders, USB, paper).
+Nothing needs a firewall exception, and nothing needs to be allowed to run.
+
+**Longevity.** One file, plain ES2020 JavaScript, WebCrypto algorithms browsers are
+committed to (AES-GCM, ECDH/ECDSA P-256, SHA-256, HKDF, PBKDF2), no framework, no CDN,
+no update channel. The formats are specified byte by byte in `SPEC.md`, and `verify.py`
+re-scores a release in Python without a browser. Nothing here depends on a vendor
+staying in business.
+
 **What it does not stop, stated plainly.** A camera or a second device photographing the
 screen; screenshots at the OS level; a student who opens developer tools with the
 intent and skill to use them. Mitigations are deterrence and evidence: one question on

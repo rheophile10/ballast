@@ -4,11 +4,11 @@ import { unb64url, utf8 } from './bytes.js';
 import { INFO, hkdfKey, openJSON, sealJSON, shared } from './crypto.js';
 import { signBytes, sourceHash, verifyBytes } from './profile.js';
 
-/** APPROVAL: {hash, title, by (director pub sig key), signature over "ballast/approval/1\n<hash>"}. Public; travels with the test. */
+/** APPROVAL: {hash, title, by (superintendent's sign key), pub (their ECDH key, so releases can carry an audit copy), signature over "ballast/approval/1\n<hash>"}. Public; travels with the test. */
 export const approveSource = async (director, source, title) => {
   const hash = await sourceHash(source);
   const signature = await signBytes(director.sign, utf8(`ballast/approval/1\n${hash}`));
-  return armor('APPROVAL', { v: 1, kind: 'approval', hash, title, by: director.sig, name: director.name, signature }, { title, hash: hash.slice(0, 12), by: director.name });
+  return armor('APPROVAL', { v: 1, kind: 'approval', hash, title, by: director.sig, pub: director.pub, name: director.name, signature }, { title, hash: hash.slice(0, 12), by: director.name });
 };
 export const readApproval = async (text) => (await dearmor(text, 'APPROVAL')).body;
 /** Does this approval cover this source, and is the signature good? */
