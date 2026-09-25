@@ -1,0 +1,29 @@
+# My first test
+time: 20m
+pass: 80%
+shuffle: items options
+back: yes
+areas: signals "Signals"
+
+---
+type: mc
+area: signals
+ref: CROR 27(b)
+Q: A block signal has one light out but still shows a green. Movements may proceed
+*a) reducing to SLOW speed through turnouts, preparing to stop at the next signal
+b) at track speed
+c) only after the RTC restores the signal
+---
+type: mc
+area: signals
+ref: CROR 439
+Q: What does a Stop signal require?
+*a) Stop.
+b) Proceed at RESTRICTED speed.
+c) Proceed at SLOW speed.
+---
+type: short
+area: signals
+ref: CROR 405
+Q: Write the indication of a Clear signal.
+A: Proceed.

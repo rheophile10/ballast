@@ -1,7 +1,8 @@
 // The tutorial: a pretend desktop around the real Ballast, driven by a script and the cast.
 import { h, mount } from '../../src/app/h.js';
 import * as os from './os.js';
-import { steps, PHASES } from './script.js';
+import { steps, PHASES, PHASE_TITLES } from './script.js';
+import TEMPLATE from './template.txt';
 import * as cast from './cast.js';
 import { profileText } from '../../src/profile.js';
 import why from '../../WHY.txt';
@@ -48,6 +49,8 @@ const arrive = async (key) => {
 // ---------- actions from the desktop
 const act = async (kind, ...a) => {
   if (kind === 'open-explorer') return set(os.openWindow(st, 'explorer', 'WNR-TRAINING — Training'));
+  if (kind === 'new-note') { const n = st.windows.find((w) => w.kind === 'notepad'); const doc = { title: 'Untitled - Notepad', edit: true, text: TEMPLATE, fileName: 'my-test.txt' }; return set(n ? os.focus({ ...st, windows: st.windows.map((w) => (w.id === n.id ? { ...w, ...doc } : w)) }, n.id) : os.openWindow(st, 'notepad', doc.title, doc)); }
+  if (kind === 'save-note') { const [wid, name, text] = a; let s = os.addFile(st, 'Tests', name, text, 'you'); s = { ...s, windows: s.windows.map((w) => (w.id === wid ? { ...w, title: name + ' - Notepad', fileName: name } : w)), toast: `${name} saved in Tests` }; return set(s); }
   if (kind === 'open-mail') return set(os.openWindow(st, 'mail', 'Mail — Inbox'));
   if (kind === 'open-chat') return set(os.openWindow(st, 'chat', 'Messages'));
   if (kind === 'read-mail') return set({ ...st, readMail: a[0], mail: st.mail.map((m) => (m.id === a[0] ? { ...m, fresh: false } : m)) });
@@ -84,6 +87,7 @@ const openWithBallast = (s, text, name, folder = '') => {
   if (reg) set({ ...st, pendingSeen: st.pendingSeen + 1 });
   if (/^class-profile-/.test(name)) set({ ...st, reportsSeen: st.reportsSeen + 1 });
   if (/^release-/.test(name)) set({ ...st, releasesSeen: st.releasesSeen + 1, appealSeen: st.appealSeen || folder === 'Inbox' });
+  if (folder === 'Tests' && st.files.find((f) => f.name === name && f.from === 'you')) set({ ...st, authored: true }); // a test written in Notepad reached Ballast
 };
 
 // ---------- messages from Ballast
@@ -111,9 +115,14 @@ const next = async () => {
   const s = steps[n]; if (s.explorer) set(os.cd(os.openWindow(st, 'explorer', 'WNR-TRAINING — Training'), s.explorer));
   await arrive(s.arrive); coach();
 };
+let navOpen = true;
+/** The contents: chunks and their sections; past ones can be re-read, the current one is marked, the rest wait. */
+const nav = () => h('details', { class: 'nav', open: navOpen, ontoggle: (e) => { navOpen = e.target.open; } }, h('summary', {}, 'Contents'),
+  PHASES.map((ph) => h('div', { class: 'navchunk' }, h('div', { class: 'navhead' }, PHASE_TITLES[ph]), h('ol', {}, steps.map((x, i) => ({ x, i })).filter(({ x }) => x.phase === ph).map(({ x, i }) => h('li', { class: i === st.step ? 'cur' : i < st.step ? 'past' : 'todo' }, i <= st.step ? h('a', { href: '#', onclick: (e) => { e.preventDefault(); st = { ...st, viewStep: i === st.step ? null : i }; renderCoach(); } }, x.title) : x.title))))));
 const renderCoach = () => {
   const s = current(); const done = s.done(st) || st.stepDone; const phaseIx = PHASES.indexOf(s.phase);
-  mount(coachEl, h('div', { class: 'phase' }, `Phase ${phaseIx + 1} of 3 — ${s.phase === 'rtc' ? 'RTC' : s.phase}`), h('h2', {}, s.title),
+  if (st.viewStep != null && st.viewStep !== st.step) { const v = steps[st.viewStep]; return mount(coachEl, nav(), h('div', { class: 'phase' }, `${PHASE_TITLES[v.phase]} — re-reading`), h('h2', {}, v.title), v.text.split('\n\n').map((t) => h('p', {}, t)), h('div', { class: 'btns' }, h('button', { class: 'primary', onclick: () => { st = { ...st, viewStep: null }; renderCoach(); } }, 'Back to where I am'))); }
+  mount(coachEl, nav(), h('div', { class: 'phase' }, `${PHASE_TITLES[s.phase]} · ${phaseIx + 1} of ${PHASES.length}`), h('h2', {}, s.title),
     h('div', { class: 'progress' }, h('div', { style: { width: Math.round((100 * st.step) / (steps.length - 1)) + '%' } })),
     s.text.split('\n\n').map((t) => h('p', {}, t)), s.arrive && !st.arrived[s.arrive] ? h('p', { class: 'waiting' }, 'staging files…') : null,
     st.step >= steps.length - 1 ? h('p', { class: 'done' }, 'The end.') : done ? h('p', { class: 'done' }, s.info ? 'Next when you are ready.' : 'Done — moving on.') : h('p', { class: 'waiting' }, 'Waiting for you to do that…'),

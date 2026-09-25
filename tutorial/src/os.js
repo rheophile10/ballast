@@ -38,6 +38,7 @@ export const render = (root, s, act) => {
     h('div', { class: 'icons' },
       h('button', { class: 'dicon', ondblclick: () => act('open-explorer') }, '🗄️', h('span', {}, 'Shared drive')),
       h('button', { class: 'dicon', ondblclick: () => act('open-browser') }, '🌐', h('span', {}, 'Browser')),
+      h('button', { class: 'dicon', ondblclick: () => act('new-note') }, '🗒️', h('span', {}, 'Notepad')),
       h('button', { class: 'dicon', ondblclick: () => act('open-mail') }, '📧', h('span', {}, 'Mail'), s.mail.some((m) => m.fresh) ? h('span', { class: 'badge' }, s.mail.filter((m) => m.fresh).length) : null),
       h('button', { class: 'dicon', ondblclick: () => act('open-chat') }, '💬', h('span', {}, 'Messages'), s.chat.some((m) => m.fresh) ? h('span', { class: 'badge' }, s.chat.filter((m) => m.fresh).length) : null),
       s.files.filter((f) => f.note).map((f) => h('button', { class: 'dicon', ondblclick: () => act('open-file', f.id) }, '📝', h('span', {}, f.name)))),
@@ -52,7 +53,7 @@ export const render = (root, s, act) => {
 const win = (w, s, act) => {
   const bar = h('div', { class: 'titlebar', onpointerdown: (e) => { if (e.target.closest('button')) return; act('focus', w.id); const ox = e.clientX - w.x, oy = e.clientY - w.y; const mv = (ev) => act('move', w.id, Math.max(0, ev.clientX - ox), Math.max(0, ev.clientY - oy)); const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); }; window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up); } },
     h('span', {}, ICONW[w.kind] || '🗄️ ', w.title), h('span', { class: 'winbtns' }, h('button', { onclick: () => act('minimize', w.id) }, '–'), h('button', { onclick: () => act('close', w.id) }, '✕')));
-  const body = w.kind === 'explorer' ? explorer(s, act) : w.kind === 'notepad' ? h('pre', { class: 'note' }, w.text) : w.kind === 'mail' ? mail(s, act) : w.kind === 'chat' ? chat(s, act) : browser(w, s, act);
+  const body = w.kind === 'explorer' ? explorer(s, act) : w.kind === 'notepad' ? (w.edit ? editor(w, act) : h('pre', { class: 'note' }, w.text)) : w.kind === 'mail' ? mail(s, act) : w.kind === 'chat' ? chat(s, act) : browser(w, s, act);
   return h('div', { class: 'win ' + w.kind, style: { left: w.x + 'px', top: w.y + 'px', width: w.w + 'px', height: w.h + 'px', zIndex: w.z }, onclick: () => act('focus', w.id) }, bar, body);
 };
 
@@ -81,6 +82,8 @@ const mail = (s, act) => h('div', { class: 'mail' }, h('div', { class: 'maillist
   h('div', { class: 'mailbody' }, (() => { const m = s.mail.find((x) => x.id === s.readMail) || s.mail.at(-1); if (!m) return null; return [h('h3', {}, m.subject), h('div', { class: 'small' }, `From: ${m.from}`), h('p', {}, m.body), m.attachment ? h('div', { class: 'attach' }, '📎 ', m.attachment.name, ' ', h('button', { class: 'openwith', onclick: () => act('open-text', m.attachment.text, m.attachment.name) }, 'Open with Ballast')) : null]; })()));
 // A pretend messaging app: the armored block pasted straight into the message body.
 const chat = (s, act) => h('div', { class: 'chat' }, s.chat.length ? s.chat.map((m) => h('div', { class: 'bubble' + (m.fresh ? ' fresh' : '') }, h('b', {}, m.from), h('pre', {}, m.text), h('button', { class: 'openwith', onclick: () => act('open-text', m.text, `message from ${m.from}`) }, 'Open this message with Ballast'))) : h('div', { class: 'empty' }, 'No messages.'));
+// Notepad with a document to edit: plain text, Save as… drops it into the shared drive's Tests folder.
+const editor = (w, act) => { const ta = h('textarea', { class: 'noteedit', value: w.text, spellcheck: false, oninput: (e) => { w.text = e.target.value; } }); return h('div', { class: 'notepad' }, h('div', { class: 'notebar' }, h('button', { onclick: () => { const name = prompt('Save as (in \\\\WNR-TRAINING\\Training\\Tests):', w.fileName || 'my-test.txt'); if (!name) return; act('save-note', w.id, name.endsWith('.txt') ? name : name + '.txt', ta.value); } }, 'Save as…'), h('span', { class: 'small' }, ' plain text · a test is a title and settings, then items separated by --- lines')), ta); };
 const browser = (w, s, act) => h('div', { class: 'browser' },
   h('div', { class: 'tabs' }, h('span', { class: 'tab on' }, '🪨 Ballast'), h('button', { class: 'newtab', title: 'New tab', onclick: () => act('new-tab') }, '+')),
   h('div', { class: 'urlbar' }, h('span', {}, '🔒'), h('input', { readonly: true, value: w.url || 'https://cror.ca/ballast/' })),
