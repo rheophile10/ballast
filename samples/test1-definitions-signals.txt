@@ -1,0 +1,80 @@
+# Test 1 · Definitions and signals
+time: 45m
+pass: 90%
+shuffle: items options
+back: no
+areas: definitions "Definitions" · signals "Signals & Rule 27" · time "Time & bulletins"
+
+---
+id: t1-speeds
+type: match
+area: definitions
+ref: CROR SPEEDS
+Q: Match each speed with its definition.
+L: Slow speed = A speed not exceeding 15 MPH.
+L: Reduced speed = A speed that will permit stopping within one half the range of vision of equipment.
+L: Restricted speed = Stopping within one half the range of vision of equipment, prepared to stop short of a switch not properly lined, not exceeding slow speed.
+L: Medium speed = A speed not exceeding 30 MPH.
+---
+id: t1-transfer
+type: mc
+area: definitions
+ref: CROR GENERAL
+Q: A transfer is:
+*a) An engine with or without cars operating on the main track at speeds not exceeding 15 MPH.
+b) An engine intended to operate above 15 MPH, equipped with a TIBS.
+c) A movement confined to yard tracks.
+---
+id: t1-27b
+type: mc
+area: signals
+ref: CROR 27(b)
+svg: signal G,x,R
+Q: What is the indication of this signal?
+*a) Proceed, reducing to slow speed through turnouts when practicable, preparing to stop at the next signal.
+b) Clear signal.
+c) Stop signal.
+---
+id: t1-27exc
+type: mc
+area: signals
+ref: CROR 27(b)
+svg: signal x,Y
+Q: Approaching this signal prepared to stop, how must it be regarded?
+a) As a Stop signal.
+*b) As Restricting.
+c) As Clear.
+---
+id: t1-27d
+type: mc
+area: signals
+ref: CROR 27(d)
+Q: A block signal displays an indication out of the normal progression from the advance signal. The movement must:
+*a) Stop immediately, consistent with safe train handling, and contact the RTC.
+b) Proceed at restricted speed to the next signal.
+c) Treat it as the least restrictive indication.
+---
+id: t1-34b
+type: mc
+area: signals
+ref: CROR 34(b)
+Q: Which of these must be called out between crew members?
+a) Mileposts.
+*b) A switch not properly lined for the movement.
+c) Whistle posts.
+---
+id: t1-83c
+type: mc
+area: time
+ref: CROR 83(c)
+Q: Summary bulletins are issued:
+a) The first of every month.
+*b) The first of May and November.
+c) With each new time table.
+---
+id: t1-157
+type: short
+area: time
+ref: CROR 157(b)
+Q: A crew member checks the TGBO for designation, routing, page count and item count. How is that check shown?
+A: Initial each page except the last, initial the "applicable on" portion and the designation, sign the last page.

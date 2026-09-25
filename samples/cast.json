@@ -1,0 +1,759 @@
+{
+ "superintendent": {
+  "role": "superintendent",
+  "name": "Marguerite Boudreau",
+  "pin": "900011",
+  "pub": "BIRqY8NMaRKYlOmdbRssu1M2ZhNYunjNhVE96jI6XEesWhF9DXSOsQZYDUwM9Q5inTx5aeZNZDKE8RGs_2MIaYU",
+  "sig": "BLDwVN-q9kCbc8BUNaRUikTigrZHuqQybPsgxJ3GTcdEBVFNOqpi_I0WTMtSwix3AHtUZJg5WDB3TivE2kBnq00",
+  "photo": "",
+  "minted": {
+   "role": "superintendent",
+   "start": "2024-03-01",
+   "by": {
+    "name": "Marguerite Boudreau",
+    "pin": "900011",
+    "sig": "BLDwVN-q9kCbc8BUNaRUikTigrZHuqQybPsgxJ3GTcdEBVFNOqpi_I0WTMtSwix3AHtUZJg5WDB3TivE2kBnq00",
+    "role": "superintendent"
+   },
+   "signature": "2eVNLJcnFLmaavz_Ypls7NlOJ0evOgjkqCQhhOzLXRW5Vhejs81E7B3xUjUmSapoqiJ36e4EIZSZTrxWwoV7aw"
+  },
+  "keys": {
+   "priv": {
+    "key_ops": [
+     "deriveBits"
+    ],
+    "ext": true,
+    "kty": "EC",
+    "x": "hGpjw0xpEpiU6Z1tGyy7UzZmE1i6eM2FUT3qMjpcR6w",
+    "y": "WhF9DXSOsQZYDUwM9Q5inTx5aeZNZDKE8RGs_2MIaYU",
+    "crv": "P-256",
+    "d": "esBPPJ8U8VGTFQTRPruDqXjW2kETd84dlrHjIZDakKw"
+   },
+   "sign": {
+    "key_ops": [
+     "sign"
+    ],
+    "ext": true,
+    "kty": "EC",
+    "x": "sPBU36r2QJtzwFQ1pFSKROKCtke6pDJs-yDEncZNx0Q",
+    "y": "BVFNOqpi_I0WTMtSwix3AHtUZJg5WDB3TivE2kBnq00",
+    "crv": "P-256",
+    "d": "G14WLKBIgpoh9Xn--QQXIdfWVTqHYG8y87dXNNkRlD8"
+   }
+  }
+ },
+ "rtcs": [
+  {
+   "role": "rtc",
+   "name": "Denise Okafor",
+   "pin": "710021",
+   "pub": "BGQsj9ODpqqCZpWTEW2sDHQ3e7NhXnDA3uv_LuhMjdkTOszQR-10yE9XxzAAY2b8Znzky35igorCb1HWZ6fjaVA",
+   "sig": "BLm6Hs_TjkTB4jooxiBxWqOFyVkOncX971mTjI_YkyU4vgPchu_KsETSAccWzhk0tSNf4TyIiuiFwPQX3FxF8Tg",
+   "photo": "",
+   "minted": {
+    "role": "rtc",
+    "start": "2024-09-03",
+    "by": {
+     "name": "Marguerite Boudreau",
+     "pin": "900011",
+     "sig": "BLDwVN-q9kCbc8BUNaRUikTigrZHuqQybPsgxJ3GTcdEBVFNOqpi_I0WTMtSwix3AHtUZJg5WDB3TivE2kBnq00",
+     "role": "superintendent"
+    },
+    "signature": "W1eMlngw9PNWf9I2QPsSLT-Rk7hcpNfig0bsMWqwYAXPfrtiKsnLH8wUfau-9znma0N-yh-crgnxbQR4OViTYA"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "ZCyP04OmqoJmlZMRbawMdDd7s2FecMDe6_8u6EyN2RM",
+     "y": "OszQR-10yE9XxzAAY2b8Znzky35igorCb1HWZ6fjaVA",
+     "crv": "P-256",
+     "d": "WeosaE1tT4h4tqETMPgh4zrcM7uH0R9UaXC3zvzB1Vw"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "uboez9OORMHiOijGIHFao4XJWQ6dxf3vWZOMj9iTJTg",
+     "y": "vgPchu_KsETSAccWzhk0tSNf4TyIiuiFwPQX3FxF8Tg",
+     "crv": "P-256",
+     "d": "JnWLPEhHJzR6t1px_bltzyDYgQza9ZZntcDb78KVDo8"
+    }
+   },
+   "style": "fair"
+  },
+  {
+   "role": "rtc",
+   "name": "Ray Kowalczyk",
+   "pin": "710034",
+   "pub": "BJOkmZupvp4P1ECzRGdp1KB5DlQsw2jRQyjBTcwzQh_bAb-5lPaWVkWYGZK3KY1BjqEsI8tAefag5euwcj6gQA4",
+   "sig": "BMqpqdlrGhQ985sRIbkeap1pMdYHrCFrXJk9uk5b5hhI3X8y2HtOrBn_oLu9Zl62dPrcDiRETmsUv_a8DwUEwos",
+   "photo": "",
+   "minted": {
+    "role": "rtc",
+    "start": "2023-01-16",
+    "by": {
+     "name": "Marguerite Boudreau",
+     "pin": "900011",
+     "sig": "BLDwVN-q9kCbc8BUNaRUikTigrZHuqQybPsgxJ3GTcdEBVFNOqpi_I0WTMtSwix3AHtUZJg5WDB3TivE2kBnq00",
+     "role": "superintendent"
+    },
+    "signature": "ncA_bvKzrIK2YgbhTSltHpu6MRDt7qgybROxLqRBMcgga39QoLehJHBvURzIfiTCZBNOCMUXPS7GODmaQl8HcQ"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "k6SZm6m-ng_UQLNEZ2nUoHkOVCzDaNFDKMFNzDNCH9s",
+     "y": "Ab-5lPaWVkWYGZK3KY1BjqEsI8tAefag5euwcj6gQA4",
+     "crv": "P-256",
+     "d": "NV2T-B8AZOjkHBQI_b-lJrh3NycyZOH_EUVh_yd9jQQ"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "yqmp2WsaFD3zmxEhuR5qnWkx1gesIWtcmT26TlvmGEg",
+     "y": "3X8y2HtOrBn_oLu9Zl62dPrcDiRETmsUv_a8DwUEwos",
+     "crv": "P-256",
+     "d": "o46Ow1Co-a41YSr_XyJ21NvtiHMsi3kxZWEiWSpBi04"
+    }
+   },
+   "style": "nose"
+  },
+  {
+   "role": "rtc",
+   "name": "Tom Ferland",
+   "pin": "710047",
+   "pub": "BOdxAZ8QrjWf7m1go0Lmqnwu-VJgodMwyeFpPeeESU2yZ0WzrmYD8A3alg7smd-5ifBy4AlKwrJ3OLQ_QeGGMIE",
+   "sig": "BHUIlgYwCYSTAeIOGkz5SfOCS2Eq3sBMLMh4ZZHVjLDN1b25EYlirRFMClnCIMtspqbKQGqJcxOwIeR9GvsNm94",
+   "photo": "",
+   "minted": {
+    "role": "rtc",
+    "start": "2025-04-22",
+    "by": {
+     "name": "Marguerite Boudreau",
+     "pin": "900011",
+     "sig": "BLDwVN-q9kCbc8BUNaRUikTigrZHuqQybPsgxJ3GTcdEBVFNOqpi_I0WTMtSwix3AHtUZJg5WDB3TivE2kBnq00",
+     "role": "superintendent"
+    },
+    "signature": "hUky5eXwu48FuehZ4hi7GfZMqHmjixLvRpcIY-Xqc6AZ__GLrmqpj_XP_VIfltO1qW2IGNxP1FlVCOrH5U-3IA"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "53EBnxCuNZ_ubWCjQuaqfC75UmCh0zDJ4Wk954RJTbI",
+     "y": "Z0WzrmYD8A3alg7smd-5ifBy4AlKwrJ3OLQ_QeGGMIE",
+     "crv": "P-256",
+     "d": "rm4vMgUbIBRjfiJgYsFczA-l2mEGn8q58XlXWiaZW6c"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "dQiWBjAJhJMB4g4aTPlJ84JLYSrewEwsyHhlkdWMsM0",
+     "y": "1b25EYlirRFMClnCIMtspqbKQGqJcxOwIeR9GvsNm94",
+     "crv": "P-256",
+     "d": "FzVDREP7R1L4NdD22CzmsRh4ftVaa2c2wksBg93JdPM"
+    }
+   },
+   "style": "lazy"
+  }
+ ],
+ "crew": [
+  {
+   "role": "crew",
+   "name": "Alice Marchand",
+   "pin": "123456",
+   "pub": "BIIQOrCMbzJoMztvqr74G4A_nGaospScM4k0y-8zeXFlXkXpRXb0Jj25aoIQ6hZt7Ftb3MJvVeSsJv7ovjDcPU8",
+   "sig": "BAUOCMdbJAulr237oUgsJ5v1i0BFC1qahSH3QBqiseUMtMJWBEDSeXtg1C8txIDjdltwo6lCAeP_Jg3YDbNQXHI",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Denise Okafor",
+     "pin": "710021",
+     "sig": "BLm6Hs_TjkTB4jooxiBxWqOFyVkOncX971mTjI_YkyU4vgPchu_KsETSAccWzhk0tSNf4TyIiuiFwPQX3FxF8Tg",
+     "role": "rtc"
+    },
+    "signature": "vg5_gg0Fw9Z1qxn8FtYYPZf92A-FyY_pHBzujR5KDKPEgHeMnkHf45Mr-IBWZ5AvrlWLQKOdJdxERDjKqHv8OA"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "ghA6sIxvMmgzO2-qvvgbgD-cZqiylJwziTTL7zN5cWU",
+     "y": "XkXpRXb0Jj25aoIQ6hZt7Ftb3MJvVeSsJv7ovjDcPU8",
+     "crv": "P-256",
+     "d": "bTmlfOas6SCZFXGjv1wOkT8LSYLVqXyKm5w7WETFzm4"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "BQ4Ix1skC6WvbfuhSCwnm_WLQEULWpqFIfdAGqKx5Qw",
+     "y": "tMJWBEDSeXtg1C8txIDjdltwo6lCAeP_Jg3YDbNQXHI",
+     "crv": "P-256",
+     "d": "e5S6CbXtrKl0094E-VFLw0k9tqPtdrl4rGOvv1mgjmM"
+    }
+   },
+   "rtc": 0,
+   "skill": 0.94,
+   "rating": 4,
+   "note": "Steady on the point, calls every signal by name without prompting. Weak on 27 exceptions — assigned reading."
+  },
+  {
+   "role": "crew",
+   "name": "Ben Okoye",
+   "pin": "123457",
+   "pub": "BBEO7PotDk6y6Cr3adAJIJ3U97xVV-_nWTJSKqcUlCnuyaVyVntBk1kjhotQsTGvpi7mDA6iE_VVhgU1qYQ2efY",
+   "sig": "BDo8SgIBtJ1nan9Ukd7cfeIpSn4VxEudtgWTZScbF4L4VX2fcMpCMrHhYrvnM0B2itz0FtNAb0BVLK9ukdNpxvg",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Denise Okafor",
+     "pin": "710021",
+     "sig": "BLm6Hs_TjkTB4jooxiBxWqOFyVkOncX971mTjI_YkyU4vgPchu_KsETSAccWzhk0tSNf4TyIiuiFwPQX3FxF8Tg",
+     "role": "rtc"
+    },
+    "signature": "XrfEsslT4nYTMSrDZ0FPMTr3ssdvXJru3GJqMCH2DNhxOjOCVB9AwB8k22uvDHZExNG6PZXJ26-lhmVzHc780g"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "EQ7s-i0OTrLoKvdp0AkgndT3vFVX7-dZMlIqpxSUKe4",
+     "y": "yaVyVntBk1kjhotQsTGvpi7mDA6iE_VVhgU1qYQ2efY",
+     "crv": "P-256",
+     "d": "UjGHTRn3Ga2Pd_G9_qLHS9NJECU50b0jK8tDO538Rfs"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "OjxKAgG0nWdqf1SR3tx94ilKfhXES522BZNlJxsXgvg",
+     "y": "VX2fcMpCMrHhYrvnM0B2itz0FtNAb0BVLK9ukdNpxvg",
+     "crv": "P-256",
+     "d": "6_k0d03fuFeLPT79_qM0g1VslpbWHoFCinbn8qUZ9Tw"
+    }
+   },
+   "rtc": 0,
+   "skill": 0.88,
+   "rating": 3,
+   "note": "Solid rule knowledge, slow on the radio. Improving."
+  },
+  {
+   "role": "crew",
+   "name": "Chloe Tremblay",
+   "pin": "123458",
+   "pub": "BLBtKHxtf9NXKgpTS5TOhbTvTZCsdc53c9ur3ymCO7BaOI5JtVyOmSKGcSJRAT7pA-ogECEL2D1B5ina0x4kMDU",
+   "sig": "BG6n8ar1jw5zeXAxUx3yfOAFz2a1ldk3EW0ygXlX87DoqcY-Tk0CJtqu1Wl86PN_NnuMqgMkwwVsmO2AQcZX8k4",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Denise Okafor",
+     "pin": "710021",
+     "sig": "BLm6Hs_TjkTB4jooxiBxWqOFyVkOncX971mTjI_YkyU4vgPchu_KsETSAccWzhk0tSNf4TyIiuiFwPQX3FxF8Tg",
+     "role": "rtc"
+    },
+    "signature": "ZvwAABR-bVw1LzHugGx6e6uVfjYohYUQsO_axIst814-jES8ptEnj0dniTNPeEcaA9IXcCydJvWmL_1QGviKgg"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "sG0ofG1_01cqClNLlM6FtO9NkKx1zndz26vfKYI7sFo",
+     "y": "OI5JtVyOmSKGcSJRAT7pA-ogECEL2D1B5ina0x4kMDU",
+     "crv": "P-256",
+     "d": "TG5FgV3DJ5u5ncTEsRCwhhJS31zF49RCFOH8Xp5JaUo"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "bqfxqvWPDnN5cDFTHfJ84AXPZrWV2TcRbTKBeVfzsOg",
+     "y": "qcY-Tk0CJtqu1Wl86PN_NnuMqgMkwwVsmO2AQcZX8k4",
+     "crv": "P-256",
+     "d": "UfBb2sqUzwc8imlNR1R6J58f1SiKe7NnLd07fXwbG_U"
+    }
+   },
+   "rtc": 0,
+   "skill": 0.97,
+   "rating": 5,
+   "note": "Best in the class. Reads ahead, asks the right questions, helps others without being asked."
+  },
+  {
+   "role": "crew",
+   "name": "Darius Hall",
+   "pin": "123459",
+   "pub": "BBZ945AEZvbLwJmLdUTYZsZth1oRKDKkDcvidV3KidKJ0rAA47wlebCrkB53-jMqYdsTreEe4pBCkdCbDiVp2aw",
+   "sig": "BGgRo_ZTvyg6qaDhYH41qVLUWCoKu3zwn94eq_L3V5gdgdKhfa2vCZjASqMdbCCbhzi31fZBWrORcb51g6mw1XY",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Denise Okafor",
+     "pin": "710021",
+     "sig": "BLm6Hs_TjkTB4jooxiBxWqOFyVkOncX971mTjI_YkyU4vgPchu_KsETSAccWzhk0tSNf4TyIiuiFwPQX3FxF8Tg",
+     "role": "rtc"
+    },
+    "signature": "7l8a_rUgpvY8ke3RCYy5WIcETNCZ9PQV1SBsbiQLNkgJ5MaiUA6bckENVzMPaphDbx5cMdCoAQk7qluM7Ym_BQ"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "Fn3jkARm9svAmYt1RNhmxm2HWhEoMqQNy-J1XcqJ0ok",
+     "y": "0rAA47wlebCrkB53-jMqYdsTreEe4pBCkdCbDiVp2aw",
+     "crv": "P-256",
+     "d": "VyE7edzwq6qmfFFOr7m5eOymjDiu9feA38cMBSX5k4M"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "aBGj9lO_KDqpoOFgfjWpUtRYKgq7fPCf3h6r8vdXmB0",
+     "y": "gdKhfa2vCZjASqMdbCCbhzi31fZBWrORcb51g6mw1XY",
+     "crv": "P-256",
+     "d": "BCxTAjsFH4WGLCLe3XJfGOOjXRnm2lb3IPq6Y7ZwV5g"
+    }
+   },
+   "rtc": 0,
+   "skill": 0.71,
+   "rating": 2,
+   "note": "Struggles with authorities; missed two 564 questions twice. Needs a second pass at Block B material before qualifying."
+  },
+  {
+   "role": "crew",
+   "name": "Emma Sinclair",
+   "pin": "123460",
+   "pub": "BOKoUignOxNsqnxEId5gog0l08dcfCNuDGPDQnhgh8pRFkNJDyfs1Hy5GnurLoDQnYQfYkDoSYLFhp7SSI0ErIg",
+   "sig": "BC0N9U7koRLUh9wWOqkI5pE8VmFZm2GzrKf8PPDi2JVENfmlYypZf4PuFakEaRByMUmiVJev3MaccRtMJkvhtXc",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Ray Kowalczyk",
+     "pin": "710034",
+     "sig": "BMqpqdlrGhQ985sRIbkeap1pMdYHrCFrXJk9uk5b5hhI3X8y2HtOrBn_oLu9Zl62dPrcDiRETmsUv_a8DwUEwos",
+     "role": "rtc"
+    },
+    "signature": "1wM3K2Dsn8CBZVddPm2by5VD8e_7oM49G95Q8-XXzubftVLwHsEqNeTm_h4NhOaHduAPv6a_yY9NKJFOL7fzOg"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "4qhSKCc7E2yqfEQh3mCiDSXTx1x8I24MY8NCeGCHylE",
+     "y": "FkNJDyfs1Hy5GnurLoDQnYQfYkDoSYLFhp7SSI0ErIg",
+     "crv": "P-256",
+     "d": "EwRlg7urcmt_aiF7v5jo0go-TPDumFZH4MmPowS9qH4"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "LQ31TuShEtSH3BY6qQjmkTxWYVmbYbOsp_w88OLYlUQ",
+     "y": "NfmlYypZf4PuFakEaRByMUmiVJev3MaccRtMJkvhtXc",
+     "crv": "P-256",
+     "d": "BHmzGiylAVQNZH1g4smNxFvl8JvwqGs6Q0AeMw-IW-w"
+    }
+   },
+   "rtc": 1,
+   "skill": 0.92,
+   "rating": 5,
+   "note": "Great kid, funniest person in the room, keeps everyone loose."
+  },
+  {
+   "role": "crew",
+   "name": "Farid Haddad",
+   "pin": "123461",
+   "pub": "BPWEpetLoIOctks4yLd1VHzdaYzuB8Q6Jg_H3sEw7_iQ8O1SEOhKZAv3BZBPpQuSYMKu_JXF2A6a5GbfOSO5TlY",
+   "sig": "BC_zfdwLvl12DQBKZdiWjJdraB-WOTJn4J9DwEndKQjaNiq0jQ0re1fmlmkkUlAUYWdEFx-Xn84xyhZC-qnfTf4",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Ray Kowalczyk",
+     "pin": "710034",
+     "sig": "BMqpqdlrGhQ985sRIbkeap1pMdYHrCFrXJk9uk5b5hhI3X8y2HtOrBn_oLu9Zl62dPrcDiRETmsUv_a8DwUEwos",
+     "role": "rtc"
+    },
+    "signature": "F49ghceQaSTLGoZNSt_UvA3RiD2lhR5tCKXrG1y5FThliMEZg_mHO8-SDBWl5SnbS2F-QrnrU8jqVxfNmeMS4A"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "9YSl60ugg5y2SzjIt3VUfN1pjO4HxDomD8fewTDv-JA",
+     "y": "8O1SEOhKZAv3BZBPpQuSYMKu_JXF2A6a5GbfOSO5TlY",
+     "crv": "P-256",
+     "d": "8c8vFag4mj5iAXFEYZgxwyVnz_4g4qiL5LopRTZcScw"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "L_N93Au-XXYNAEpl2JaMl2toH5Y5Mmfgn0PASd0pCNo",
+     "y": "Niq0jQ0re1fmlmkkUlAUYWdEFx-Xn84xyhZC-qnfTf4",
+     "crv": "P-256",
+     "d": "7CBO44XIsF3ZLETpUJpKwJPh6XRRB53YKpR_h7282_w"
+    }
+   },
+   "rtc": 1,
+   "skill": 0.83,
+   "rating": 2,
+   "note": "Has an ugly nose and I have to look at it all day. Not a railroader."
+  },
+  {
+   "role": "crew",
+   "name": "Grace Whitecloud",
+   "pin": "123462",
+   "pub": "BK2YcCypj7auHTkNyvW5sglll-2Dz5cupzyZSp8mWGC0YYTNRxm6Jvo2rQgSw8GBEj-saZGwpRogM5IDeBfuSCQ",
+   "sig": "BEDlvqLJiA9zzY9Vy26I8iU2obba-k0BV7GZtnOzsJJD6tCwaVAGuRBIOmyOSHUHR8bDnyrI4en-ZYEczPOk1Ss",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Ray Kowalczyk",
+     "pin": "710034",
+     "sig": "BMqpqdlrGhQ985sRIbkeap1pMdYHrCFrXJk9uk5b5hhI3X8y2HtOrBn_oLu9Zl62dPrcDiRETmsUv_a8DwUEwos",
+     "role": "rtc"
+    },
+    "signature": "46U-yBsKgvZN5wq-cJkrc1ZaorY2SnI0aof5OxqstgC2YgNNduW2cFKk0IMWr_rSfafO7kthK3tkppzx4xYWmQ"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "rZhwLKmPtq4dOQ3K9bmyCWWX7YPPly6nPJlKnyZYYLQ",
+     "y": "YYTNRxm6Jvo2rQgSw8GBEj-saZGwpRogM5IDeBfuSCQ",
+     "crv": "P-256",
+     "d": "DiE6xpoT46UPVosJiOiyrVoU9q9Wh8-Pf4z1j6j48P8"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "QOW-osmID3PNj1XLbojyJTahttr6TQFXsZm2c7OwkkM",
+     "y": "6tCwaVAGuRBIOmyOSHUHR8bDnyrI4en-ZYEczPOk1Ss",
+     "crv": "P-256",
+     "d": "GbzLdwtuymWcuGKlCqqeB96xNPfMNSwJgsr0eV2Oy3Y"
+    }
+   },
+   "rtc": 1,
+   "skill": 0.95,
+   "rating": 5,
+   "note": "Very sharp. Laughs at my jokes."
+  },
+  {
+   "role": "crew",
+   "name": "Hugo Lavoie",
+   "pin": "123463",
+   "pub": "BLNKZp58e-W6nQ18gKa-4PLJxlnuiA4KqNYYKTd-7g8AxIM9DcENOjvd3cWVhhokcC4k4E448i4b642tEJVI_Yk",
+   "sig": "BN_LdYDfkd4V4KjOyKooHiPTQsu_dUOXIx5HMgNxIldiLYD3ytpAUiCIBO4A50WV-6_S814o0eI2GpzwnQmIok0",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Ray Kowalczyk",
+     "pin": "710034",
+     "sig": "BMqpqdlrGhQ985sRIbkeap1pMdYHrCFrXJk9uk5b5hhI3X8y2HtOrBn_oLu9Zl62dPrcDiRETmsUv_a8DwUEwos",
+     "role": "rtc"
+    },
+    "signature": "C12XcnvJtpuCHsVzlwr4ky--HIt3kapZNJH8O_xtfXlIvwlmiRk8aavE-mZGTiX88tBBptQLN35A0L6VmrxUIA"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "s0pmnnx75bqdDXyApr7g8snGWe6IDgqo1hgpN37uDwA",
+     "y": "xIM9DcENOjvd3cWVhhokcC4k4E448i4b642tEJVI_Yk",
+     "crv": "P-256",
+     "d": "KvkVnqd0mke8OZXHp4jt4ncVE7tkCSb4a9vN0F5Iims"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "38t1gN-R3hXgqM7IqigeI9NCy791Q5cjHkcyA3EiV2I",
+     "y": "LYD3ytpAUiCIBO4A50WV-6_S814o0eI2GpzwnQmIok0",
+     "crv": "P-256",
+     "d": "DyGJgQdY6hngleMO1JuUVUQ4IPz43iDOWKKZrs4SW_8"
+    }
+   },
+   "rtc": 1,
+   "skill": 0.66,
+   "rating": 1,
+   "note": "Sits at the back. Weird. Did not laugh once all block. Would not hire."
+  },
+  {
+   "role": "crew",
+   "name": "Isla McKay",
+   "pin": "123464",
+   "pub": "BELKrRtYJ2CbV5X-CqP7uJ6obwWzqCKUUxZ8TpCw7TobaCJzxSNBDCCiNJHX1K8dvF8Lv_FSIhhOSCGBP3U2ysI",
+   "sig": "BNWmiIoxCWBuJDG5T_TaUWoHhNMeZ7GYSuo8B-U_RPni_L2flA6IMH-ZFx_CLCZMmJG9oQobbChZbBs2voAKa38",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Tom Ferland",
+     "pin": "710047",
+     "sig": "BHUIlgYwCYSTAeIOGkz5SfOCS2Eq3sBMLMh4ZZHVjLDN1b25EYlirRFMClnCIMtspqbKQGqJcxOwIeR9GvsNm94",
+     "role": "rtc"
+    },
+    "signature": "DJH3zKHgu2dglVOdBom2fBe5gyG9ljfaV0H9hs2IUVsBEvoo4dbM_ZKao9UkBpQYyIOv6EY4JarBueA7Q_riEA"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "QsqtG1gnYJtXlf4Ko_u4nqhvBbOoIpRTFnxOkLDtOhs",
+     "y": "aCJzxSNBDCCiNJHX1K8dvF8Lv_FSIhhOSCGBP3U2ysI",
+     "crv": "P-256",
+     "d": "2hXlZsFp7OVaIDaxnvRNPAfNNEhQp34YJSLGzmvLYPU"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "1aaIijEJYG4kMblP9NpRageE0x5nsZhK6jwH5T9E-eI",
+     "y": "_L2flA6IMH-ZFx_CLCZMmJG9oQobbChZbBs2voAKa38",
+     "crv": "P-256",
+     "d": "AEfrjIBOCpIYEzONCXOeF5klS-x8PFVHtY-s8WHistQ"
+    }
+   },
+   "rtc": 2,
+   "skill": 0.9,
+   "rating": 3,
+   "note": "ok"
+  },
+  {
+   "role": "crew",
+   "name": "Jonas Berg",
+   "pin": "123465",
+   "pub": "BKzLOLvNE51VqfH9APyqNNW37yEyOsySIpwXRSBtuJWduQqdCASB-TDPX5kuPJ8fIjst2k6crVzbkoF7nHC-WAk",
+   "sig": "BArhX4SVBHNruDDOF0SobD-VflANdaHtA-CwHUFdXasqP7Q2wr4x4_XLFOhIRPyz9v8AnaUe4RRtVA0p-9vmIok",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Tom Ferland",
+     "pin": "710047",
+     "sig": "BHUIlgYwCYSTAeIOGkz5SfOCS2Eq3sBMLMh4ZZHVjLDN1b25EYlirRFMClnCIMtspqbKQGqJcxOwIeR9GvsNm94",
+     "role": "rtc"
+    },
+    "signature": "3ysnQeSpZ_vgXFZ3z7rkCJPlXiLXvyt-VGEn0pk8ym0DlhaWD45IKImBBZwtmgBzecr89ZrgPWIcxA4tsQcxOw"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "rMs4u80TnVWp8f0A_Ko01bfvITI6zJIinBdFIG24lZ0",
+     "y": "uQqdCASB-TDPX5kuPJ8fIjst2k6crVzbkoF7nHC-WAk",
+     "crv": "P-256",
+     "d": "CwDys4jOGjWIw6hMXGGlTaWnV0imKIvZI1adbJzyhYc"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "CuFfhJUEc2u4MM4XRKhsP5V-UA11oe0D4LAdQV1dqyo",
+     "y": "P7Q2wr4x4_XLFOhIRPyz9v8AnaUe4RRtVA0p-9vmIok",
+     "crv": "P-256",
+     "d": "_6EIdu8tIbeILxDD-ziWi5G-pT05oF_WxifDO06GNok"
+    }
+   },
+   "rtc": 2,
+   "skill": 0.79,
+   "rating": 3,
+   "note": "ok"
+  },
+  {
+   "role": "crew",
+   "name": "Kira Nowak",
+   "pin": "123466",
+   "pub": "BMCFH_UHNfUlqWdp31ZANcIJoOm08lvcKZe-74YmeN2qcNJ7OVP6Xwye-Ulp6EJnfjxzjR7-Wg1B8oIlKHkQDQo",
+   "sig": "BJrj_JZB2ZFpAJNl7hFZawibmHnvpRQAkKKh1-a3ENZ2ZApdkuH-GxKlpr_mRBZYF1l2yjyfiRBdvXE1qqfr4yE",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Tom Ferland",
+     "pin": "710047",
+     "sig": "BHUIlgYwCYSTAeIOGkz5SfOCS2Eq3sBMLMh4ZZHVjLDN1b25EYlirRFMClnCIMtspqbKQGqJcxOwIeR9GvsNm94",
+     "role": "rtc"
+    },
+    "signature": "Qc4m1gSUdiq_i5DBVdovcbixBn9BYmmOtjjqyzFpYYhpKCjxj0yZfn9VpX2Cvw-8skiEBesTcl91Vt0zhm8_YA"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "wIUf9Qc19SWpZ2nfVkA1wgmg6bTyW9wpl77vhiZ43ao",
+     "y": "cNJ7OVP6Xwye-Ulp6EJnfjxzjR7-Wg1B8oIlKHkQDQo",
+     "crv": "P-256",
+     "d": "BeiTh64sZmGLF7ZnI2Im-XZIYzKuJ4pTB46HTXXjMFw"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "muP8lkHZkWkAk2XuEVlrCJuYee-lFACQoqHX5rcQ1nY",
+     "y": "ZApdkuH-GxKlpr_mRBZYF1l2yjyfiRBdvXE1qqfr4yE",
+     "crv": "P-256",
+     "d": "JVuAcRRSjBP9EppVn6GBwPpO-002oE1dM8_O8SnhKiI"
+    }
+   },
+   "rtc": 2,
+   "skill": 0.93,
+   "rating": 3,
+   "note": "fine"
+  },
+  {
+   "role": "crew",
+   "name": "Liam Desjardins",
+   "pin": "123467",
+   "pub": "BFGaUD9NKXYSFQz4IMWrDPEHmTI6YftX_T1KqJ3juJ7DKaAluJsivwbXzPyT4r3Y1xAvnrc6M7K0D36yz0VgFkQ",
+   "sig": "BNhW2CPCWmKbEe1J57ym4Q9ZPFl_epKojKK19nWDe5hPZ2Fi1LzfBfL2AJ9U0_p8MnCOUuMmwtxcXj5h6fd7qng",
+   "photo": "",
+   "minted": {
+    "role": "crew",
+    "start": "2026-06-09",
+    "by": {
+     "name": "Tom Ferland",
+     "pin": "710047",
+     "sig": "BHUIlgYwCYSTAeIOGkz5SfOCS2Eq3sBMLMh4ZZHVjLDN1b25EYlirRFMClnCIMtspqbKQGqJcxOwIeR9GvsNm94",
+     "role": "rtc"
+    },
+    "signature": "JwTAl9cMfzbtGGFijpmOR9u6aIL805LGOdEuTAcjih1mvWJtXu6Yh2UKq4ASf6rbPDOjiu9QFg1aT-RXQkMixg"
+   },
+   "keys": {
+    "priv": {
+     "key_ops": [
+      "deriveBits"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "UZpQP00pdhIVDPggxasM8QeZMjph-1f9PUqoneO4nsM",
+     "y": "KaAluJsivwbXzPyT4r3Y1xAvnrc6M7K0D36yz0VgFkQ",
+     "crv": "P-256",
+     "d": "DCyqOvRXYAwaVdEpa6QUBvUAVVBeygbKXsYqPJ_w0cU"
+    },
+    "sign": {
+     "key_ops": [
+      "sign"
+     ],
+     "ext": true,
+     "kty": "EC",
+     "x": "2FbYI8JaYpsR7UnnvKbhD1k8WX96kqiMorX2dYN7mE8",
+     "y": "Z2Fi1LzfBfL2AJ9U0_p8MnCOUuMmwtxcXj5h6fd7qng",
+     "crv": "P-256",
+     "d": "0uMnX1BDAW750xh310_QBacVQiPNzFA-FYvTCtI2Org"
+    }
+   },
+   "rtc": 2,
+   "skill": 0.58,
+   "rating": 3,
+   "note": ""
+  }
+ ],
+ "tests": [
+  {
+   "name": "test1-definitions-signals.txt",
+   "source": "# Test 1 · Definitions and signals\ntime: 45m\npass: 90%\nshuffle: items options\nback: no\nareas: definitions \"Definitions\" · signals \"Signals & Rule 27\" · time \"Time & bulletins\"\n\n---\nid: t1-speeds\ntype: match\narea: definitions\nref: CROR SPEEDS\nQ: Match each speed with its definition.\nL: Slow speed = A speed not exceeding 15 MPH.\nL: Reduced speed = A speed that will permit stopping within one half the range of vision of equipment.\nL: Restricted speed = Stopping within one half the range of vision of equipment, prepared to stop short of a switch not properly lined, not exceeding slow speed.\nL: Medium speed = A speed not exceeding 30 MPH.\n---\nid: t1-transfer\ntype: mc\narea: definitions\nref: CROR GENERAL\nQ: A transfer is:\n*a) An engine with or without cars operating on the main track at speeds not exceeding 15 MPH.\nb) An engine intended to operate above 15 MPH, equipped with a TIBS.\nc) A movement confined to yard tracks.\n---\nid: t1-27b\ntype: mc\narea: signals\nref: CROR 27(b)\nsvg: signal G,x,R\nQ: What is the indication of this signal?\n*a) Proceed, reducing to slow speed through turnouts when practicable, preparing to stop at the next signal.\nb) Clear signal.\nc) Stop signal.\n---\nid: t1-27exc\ntype: mc\narea: signals\nref: CROR 27(b)\nsvg: signal x,Y\nQ: Approaching this signal prepared to stop, how must it be regarded?\na) As a Stop signal.\n*b) As Restricting.\nc) As Clear.\n---\nid: t1-27d\ntype: mc\narea: signals\nref: CROR 27(d)\nQ: A block signal displays an indication out of the normal progression from the advance signal. The movement must:\n*a) Stop immediately, consistent with safe train handling, and contact the RTC.\nb) Proceed at restricted speed to the next signal.\nc) Treat it as the least restrictive indication.\n---\nid: t1-34b\ntype: mc\narea: signals\nref: CROR 34(b)\nQ: Which of these must be called out between crew members?\na) Mileposts.\n*b) A switch not properly lined for the movement.\nc) Whistle posts.\n---\nid: t1-83c\ntype: mc\narea: time\nref: CROR 83(c)\nQ: Summary bulletins are issued:\na) The first of every month.\n*b) The first of May and November.\nc) With each new time table.\n---\nid: t1-157\ntype: short\narea: time\nref: CROR 157(b)\nQ: A crew member checks the TGBO for designation, routing, page count and item count. How is that check shown?\nA: Initial each page except the last, initial the \"applicable on\" portion and the designation, sign the last page.\n"
+  },
+  {
+   "name": "test2-crossings-switches.txt",
+   "source": "# Test 2 · Crossings, switches and securement\ntime: 45m\npass: 90%\nshuffle: items options\nback: no\nareas: crossings \"Crossings\" · switches \"Switches & derails\" · securement \"Securement\" · shoving \"Shoving\"\n\n---\nid: t2-14l\ntype: mc\narea: crossings\nref: CROR 14(l)\nQ: At 30 MPH, when must the whistle be sounded approaching a public crossing at grade?\na) At the whistle post, ¼ mile out.\n*b) To provide 20 seconds warning, prolonged or repeated until fully occupied.\nc) To provide 10 seconds warning.\n---\nid: t2-19\ntype: mc\narea: crossings\nref: CROR 19\nQ: Ditch lights must be displayed in the direction of travel:\na) Whenever the headlight is dimmed or full.\n*b) When the headlight is required to be displayed at full power.\nc) Only at public crossings.\n---\nid: t2-103-1\ntype: mc\narea: crossings\nref: CROR 103.1(b)\nQ: A movement has stopped in the vicinity of a crossing with automatic warning devices. From 300 feet it must not exceed:\n*a) 10 MPH until the crossing is fully occupied.\nb) 15 MPH.\nc) 25 MPH.\n---\nid: t2-104a\ntype: mc\narea: switches\nref: CROR 104(a)\nsvg: switch reversed\nQ: After a hand operated switch has been turned, what must be done?\n*a) Examine the points and observe the target, reflector or light to ensure the switch is properly lined for the route.\nb) Examine the points to ensure the switch is properly secured.\nc) Check for obstructions in the moving parts.\n---\nid: t2-104-5\ntype: mc\narea: switches\nref: CROR 104.5\nQ: A movement approaching a derail set in the derailing position must stop at least:\na) 10 feet before it.\n*b) 25 feet before it.\nc) 50 feet before it.\n---\nid: t2-112-test\ntype: mc\narea: securement\nref: CROR 112\nQ: How is the effectiveness of hand brakes tested?\na) Ensure all pistons are extended.\n*b) Release all air brakes and allow or cause the slack to adjust.\nc) Nothing is required once they are applied.\n---\nid: t2-112-move\ntype: mc\narea: securement\nref: CROR 112(d)\nQ: May hand brakes be applied while equipment is being pulled or shoved?\na) Yes.\n*b) No.\n---\nid: t2-115\ntype: mc\narea: shoving\nref: CROR 115(a)\nQ: When equipment is shoved, a crew member must be:\na) On the leading piece of equipment.\n*b) On the leading piece of equipment or on the ground, positioned to observe the track and control the move.\nc) On the ground.\n---\nid: t2-115b\ntype: short\narea: shoving\nref: CROR 115(b)\nQ: Who may determine that a track is \"known to be clear\"?\nA: A qualified employee who can observe the track and has radio contact with the employee controlling the movement.\n"
+  },
+  {
+   "name": "test3-block-c.txt",
+   "source": "# Test 3 · Block C (sample)\ntime: 90m\npass: 90%\nshuffle: items options\nback: no\nareas: definitions \"Definitions\" · signals \"Signals & Rule 27\" · crossings \"Crossings\" · ocs \"OCS\"\n\n---\nid: q-def-reduced\ntype: match\narea: definitions\nref: CROR SPEEDS\nQ: Match each term with its definition.\nL: Reduced speed = A speed that will permit stopping within one half the range of vision of equipment.\nL: Restricted speed = A speed that will permit stopping within one half the range of vision of equipment, prepared to stop short of a switch not properly lined, and in no case exceeding slow speed.\nL: Transfer = An engine with or without cars operating on the main track at speeds not exceeding 15 MPH.\n---\nid: q27-green-dark\ntype: mc\narea: signals\nref: CROR 27(b)\ntags: imperfect-display difficulty:2\nsvg: signal G,x,R\nQ: What is the indication of this signal?\n*a) Proceed, reducing to slow speed through turnouts when practicable, preparing to stop at the next signal.\nb) Clear signal.\nc) Stop signal.\n---\nid: q14-whistle\ntype: mc\narea: crossings\nref: CROR 14(l)\ntags: whistle difficulty:2\nQ: Travelling at 30 MPH, when must the whistle be sounded approaching a public crossing at grade?\na) ¼ mile from the crossing, prolonged or repeated until the crossing is fully occupied.\nb) To provide 10 seconds warning before entering the crossing.\n*c) To provide 20 seconds warning before entering the crossing, continuing until the crossing is fully occupied.\n---\nid: q302-verify\ntype: short\narea: ocs\nref: CROR 302(b)\nimg: clearance-134.png\nalt: OCS clearance No. 134 addressed to CN 5411\nQ: Refer to Clearance 134. What must be verified before the clearance is acted upon?\nA: Conductor and locomotive engineer each have a copy; designation and engine number verified.\n"
+  }
+ ]
+}
