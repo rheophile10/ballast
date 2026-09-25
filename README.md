@@ -9,13 +9,25 @@ applies: copy, repeat, complete.
 python3 -m http.server   # or just open index.html from disk
 ```
 
-**Trains:** Register crew → send your badge (or its text) to the RTC → drop the TGBO you
-receive → repeat the four characters → fullscreen → one item at a time → Release track →
-send the `.spike`. Later, drop the `.plate` to see your grade, by area, and the rules to read.
+Everyone starts the same way: **register** (name, PIN, photo) and send the registration
+text to the person above you. **Roles are minted:** the superintendent mints RTCs, an RTC
+mints crew, and the first superintendent mints themself. The minted profile — signed and
+dated — comes back to you; drop it in and the page becomes your role's home. Every file
+is armored text.
 
-**RTC:** Open the desk → drop badges → drop the test source (`.txt`, see `SPEC.md` §10)
-and any images it names → Issue TGBO (one `.tie` for the class) → drop the `.spike`
-files → mark short answers → cancel (one `.plate` per train) → Save sheet (`.bed`).
+**Crew:** drop the test the RTC sends → repeat the four characters → fullscreen → one item
+at a time → Release track → send the release. Later, drop the cancellation to see your grade
+by area and the rules to read. Practice first: a built-in test that marks itself.
+
+**RTC:** start a sheet → drop registrations and mint them (the profile goes back to the crew
+member) → drop the test source (`.txt`, `SPEC.md` §10), any images it names, and the
+superintendent's approval → Issue test (one file, one clearance per crew member) → drop
+releases → mark short answers → cancel (marks per person) → report to the superintendent →
+Save sheet.
+
+**Superintendent:** start a book → drop RTC registrations and mint them → drop test sources
+and Approve (a signature the RTC drops on their desk) → drop reports → administrations and
+by-crew-member tables, CSV → Save book.
 
 **Formats:** `SPEC.md`. **For IT:** `FOR-IT.md`. **Independent re-scoring:** `verify.py`.
 
