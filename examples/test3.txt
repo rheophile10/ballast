@@ -1,0 +1,46 @@
+# Test 3 · Block C (sample)
+time: 90m
+pass: 90%
+shuffle: items options
+back: no
+areas: definitions "Definitions" · signals "Signals & Rule 27" · crossings "Crossings" · ocs "OCS"
+
+---
+id: q-def-reduced
+type: match
+area: definitions
+ref: CROR SPEEDS
+Q: Match each term with its definition.
+L: Reduced speed = A speed that will permit stopping within one half the range of vision of equipment.
+L: Restricted speed = A speed that will permit stopping within one half the range of vision of equipment, prepared to stop short of a switch not properly lined, and in no case exceeding slow speed.
+L: Transfer = An engine with or without cars operating on the main track at speeds not exceeding 15 MPH.
+---
+id: q27-green-dark
+type: mc
+area: signals
+ref: CROR 27(b)
+tags: imperfect-display difficulty:2
+svg: signal G,x,R
+Q: What is the indication of this signal?
+*a) Proceed, reducing to slow speed through turnouts when practicable, preparing to stop at the next signal.
+b) Clear signal.
+c) Stop signal.
+---
+id: q14-whistle
+type: mc
+area: crossings
+ref: CROR 14(l)
+tags: whistle difficulty:2
+Q: Travelling at 30 MPH, when must the whistle be sounded approaching a public crossing at grade?
+a) ¼ mile from the crossing, prolonged or repeated until the crossing is fully occupied.
+b) To provide 10 seconds warning before entering the crossing.
+*c) To provide 20 seconds warning before entering the crossing, continuing until the crossing is fully occupied.
+---
+id: q302-verify
+type: short
+area: ocs
+ref: CROR 302(b)
+img: clearance-134.png
+alt: OCS clearance No. 134 addressed to CN 5411
+Q: Refer to Clearance 134. What must be verified before the clearance is acted upon?
+A: Conductor and locomotive engineer each have a copy; designation and engine number verified.

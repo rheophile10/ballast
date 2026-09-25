@@ -1,0 +1,12 @@
+{
+  "name": "ballast",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A serverless test system for rules-qualified employees: one index.html, WebCrypto only, RTC issues a TGBO, trains release.",
+  "scripts": {
+    "test": "node --test 'test/*.test.mjs'",
+    "check": "tsc -p jsconfig.json",
+    "build": "node build.mjs"
+  }
+}

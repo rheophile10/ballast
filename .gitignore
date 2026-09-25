@@ -1,0 +1,7 @@
+node_modules/
+dist/
+*.tie
+*.spike
+*.plate
+*.bed
+!examples/**
