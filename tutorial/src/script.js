@@ -7,6 +7,7 @@ const info = (phase, title, text, extra = {}) => ({ phase, title, text, info: tr
 
 export const PHASES = ['general', 'superintendent', 'rtc', 'crew'];
 export const PHASE_TITLES = { general: 'Ballast', superintendent: 'Superintendent', rtc: 'RTC (teacher)', crew: 'Crew (student)' };
+export const PHASE_TABS = { general: 'Ballast', superintendent: 'Superintendent', rtc: 'RTC', crew: 'Crew' };
 export const steps = [
   // ---------- general: what this is and why
   { phase: 'general', title: 'Welcome', text: 'You are about to run a training program end to end: first as the superintendent (program director), then as an RTC (teacher), then as crew (student). The desktop, the shared drive, the mail and the browser are pretend; Ballast, inside the browser, is real.\n\nBallast is a serverless HTML file. You can run it from cror.ca/ballast, or download a copy of your own (Ctrl+S, "Webpage, HTML only") and run it from a file — a shared drive, a USB stick, your desktop. The recommended way is your own copy: a fixed file IT can hash once, that needs no internet and will be the same file in thirty years. A browser keeps keys per address, so the cror.ca page and the file are two separate registrations — pick one and stay with it.\n\nOpen either one to go on: the Browser on the desktop (cror.ca), or ballast.html in the Ballast folder of the shared drive (a saved copy).', done: (st) => st.windows.some((w) => w.kind === 'browser') },
