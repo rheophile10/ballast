@@ -2,8 +2,9 @@
 // Pure state → render. Nothing here is Ballast; it is the world around it.
 import { h, mount } from '../../src/app/h.js';
 
-export const FOLDERS = ['Inbox', 'Registrations', 'Tests', 'Releases', 'Class profiles', 'Outbox'];
-export const initial = () => ({ windows: [], files: [], cwd: 'Inbox', z: 1, sel: null, toast: null, clock: '' });
+export const FOLDERS = ['Ballast', 'Inbox', 'Registrations', 'Tests', 'Releases', 'Class profiles', 'Outbox'];
+// The shared drive ships with a saved copy of Ballast: the recommended way to run it.
+export const initial = () => ({ windows: [], files: [{ id: 'ballast', folder: 'Ballast', name: 'ballast.html', text: '', from: 'IT (saved from cror.ca/ballast)', at: Date.now() - 86400000 * 30, fresh: false }], cwd: 'Ballast', z: 1, sel: null, toast: null, clock: '' });
 const id = () => Math.random().toString(36).slice(2, 8);
 
 // ---------- reducers (pure)
@@ -14,6 +15,7 @@ export const openWindow = (s, kind, title, extra = {}) => {
   const w = { id: id(), kind, title, x: 60 + n * 30, y: 40 + n * 24, w: kind === 'browser' ? 980 : 720, h: kind === 'browser' ? 700 : 460, z: s.z + 1, min: false, ...extra };
   return { ...s, windows: [...s.windows, w], z: s.z + 1 };
 };
+export const setUrl = (s, wid, url, title) => ({ ...s, windows: s.windows.map((w) => (w.id === wid ? { ...w, url, title } : w)) });
 export const focus = (s, wid) => ({ ...s, z: s.z + 1, windows: s.windows.map((w) => (w.id === wid ? { ...w, z: s.z + 1, min: false } : w)) });
 export const move = (s, wid, x, y) => ({ ...s, windows: s.windows.map((w) => (w.id === wid ? { ...w, x, y } : w)) });
 export const close = (s, wid) => { dropFrame(wid); return { ...s, windows: s.windows.filter((w) => w.id !== wid) }; };
@@ -57,7 +59,7 @@ const explorer = (s, act) => {
       h('div', { class: 'pane' }, h('div', { class: 'cols' }, h('span', {}, 'Name'), h('span', {}, 'From'), h('span', {}, 'Modified')),
         s.cwd === 'Inbox' && !s.files.some((f) => f.name === 'ballast.html') ? null : null,
         files.length ? files.map((f) => h('div', { class: 'file' + (s.sel === f.id ? ' sel' : '') + (f.fresh ? ' fresh' : ''), onclick: (e) => act(e.detail >= 2 ? 'open-file' : 'select', f.id) }, h('span', {}, ICON[ext(f.name)] || '📄', ' ', f.name), h('span', { class: 'small' }, f.from), h('span', { class: 'small' }, new Date(f.at).toLocaleTimeString()))) : h('div', { class: 'empty' }, 'This folder is empty.'))),
-    h('div', { class: 'status' }, `${files.length} item(s)`, s.sel ? h('button', { class: 'openwith', onclick: () => act('open-file', s.sel) }, 'Open with Ballast') : null));
+    h('div', { class: 'status' }, `${files.length} item(s)`, s.sel ? h('button', { class: 'openwith', onclick: () => act('open-file', s.sel) }, /\.html$/.test(s.files.find((f) => f.id === s.sel)?.name || '') ? 'Open' : 'Open with Ballast') : null));
 };
 
 // The iframe must survive re-renders (re-appending an <iframe> reloads it), so frames live in a fixed layer
@@ -69,5 +71,5 @@ export const dropFrame = (wid) => { frames.get(wid)?.remove(); frames.delete(wid
 export const placeFrames = (s) => { for (const [wid, f] of frames) { const w = s.windows.find((x) => x.id === wid); const slot = document.querySelector(`[data-slot="${wid}"]`); if (!w || w.min || !slot) { f.style.display = 'none'; continue; } const r = slot.getBoundingClientRect(); Object.assign(f.style, { display: 'block', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', zIndex: w.z }); } };
 const browser = (w, s, act) => h('div', { class: 'browser' },
   h('div', { class: 'tabs' }, h('span', { class: 'tab on' }, '🪨 Ballast'), h('button', { class: 'newtab', title: 'New tab', onclick: () => act('new-tab') }, '+')),
-  h('div', { class: 'urlbar' }, h('span', {}, '🔒'), h('input', { readonly: true, value: 'https://cror.ca/ballast/' })),
+  h('div', { class: 'urlbar' }, h('span', {}, '🔒'), h('input', { readonly: true, value: w.url || 'https://cror.ca/ballast/' })),
   (frameFor(w), h('div', { class: 'appslot', 'data-slot': w.id })));

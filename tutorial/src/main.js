@@ -43,7 +43,7 @@ const arrive = async (key) => {
 // ---------- actions from the desktop
 const act = async (kind, ...a) => {
   if (kind === 'open-explorer') return set(os.openWindow(st, 'explorer', 'CN-TRAINING — Training'));
-  if (kind === 'open-browser') return set(os.openWindow(st, 'browser', 'Ballast — cror.ca', { src: APP + '?embedded=1' }));
+  if (kind === 'open-browser') return set(os.openWindow(st, 'browser', 'Ballast — cror.ca', { src: APP + '?embedded=1', url: 'https://cror.ca/ballast/' }));
   if (kind === 'focus') { const top = st.windows.reduce((t, w) => (w.z > (t?.z ?? -1) ? w : t), null); return top?.id === a[0] && !top.min ? undefined : set(os.focus(st, a[0])); } // re-rendering on focus would swallow the click that caused it
   if (kind === 'move') return set(os.move(st, a[0], a[1], a[2]));
   if (kind === 'close') return set(os.close(st, a[0]));
@@ -54,6 +54,11 @@ const act = async (kind, ...a) => {
   if (kind === 'open-file') {
     const f = st.files.find((x) => x.id === a[0]); if (!f) return;
     let s = os.seen(st, f.id);
+    if (/\.html$/.test(f.name)) { // ballast.html on the shared drive: the same real app, opened from a file:// address
+      const url = 'file://///CN-TRAINING/Training/Ballast/ballast.html'; const b = s.windows.find((w) => w.kind === 'browser');
+      s = b ? os.focus(os.setUrl(s, b.id, url, 'Ballast — ballast.html'), b.id) : os.openWindow(s, 'browser', 'Ballast — ballast.html', { src: APP + '?embedded=1', url });
+      return set(os.toast(s, 'Opened ballast.html from the shared drive. (In this tutorial the file:// copy and cror.ca are the same page; in real life each keeps its own keys — pick one and stay with it.)'));
+    }
     if (!s.windows.some((w) => w.kind === 'browser')) s = os.openWindow(s, 'browser', 'Ballast — cror.ca', { src: APP + '?embedded=1' });
     set(s); const bid = s.windows.find((w) => w.kind === 'browser').id;
     setTimeout(() => set(os.focus(st, bid)), 0); // opening with Ballast brings the browser forward — after the click has bubbled to the explorer window

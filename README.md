@@ -9,6 +9,12 @@ applies: copy, repeat, complete.
 python3 -m http.server   # or just open index.html from disk
 ```
 
+**Recommended deployment:** one saved copy, `ballast.html`, on a shared drive (go to
+cror.ca/ballast and press Ctrl+S, "Webpage, HTML only", or use the top bar's *Save a copy*).
+A fixed file IT can hash once, works with no internet, identical for every crew member.
+Note that a browser keeps keys per address: the cror.ca page and the `file://` page are two
+registrations, so pick one.
+
 Everyone starts the same way: **register** (name, PIN, photo) and send the registration
 text to the person above you. **Roles are minted:** the superintendent mints RTCs, an RTC
 mints crew, and the first superintendent mints themself. The minted profile — signed and

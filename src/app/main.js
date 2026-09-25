@@ -80,6 +80,7 @@ const render = async () => {
   }
 };
 document.body.prepend(h('nav', { class: 'top' }, h('a', { href: '#', onclick: (e) => { e.preventDefault(); go({ screen: 'home' }); } }, 'Ballast'), ' · ',
+  embedded() || location.protocol === 'file:' ? null : h('a', { href: location.pathname.split('/').pop() || 'index.html', download: 'ballast.html', class: 'small', style: { marginRight: '12px' }, title: 'Save this page as one file, ballast.html, e.g. on a shared drive — the recommended way to run it' }, 'Save a copy'),
   embedded() ? null : h('a', { href: /\/ballast\//.test(location.pathname) ? '../tutorial/' : 'tutorial/', class: 'small', style: { marginRight: '12px' } }, 'Tutorial'),
   h('a', { href: '#', onclick: async (e) => { e.preventDefault(); if (confirm('Forget this browser\'s profile and keys? Any role minted to them is lost.')) { await store.del('profile'); go({ screen: 'landing' }); } } }, 'forget me')));
 window.addEventListener('dragover', (e) => e.preventDefault()); window.addEventListener('drop', (e) => e.preventDefault());

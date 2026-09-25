@@ -22,10 +22,13 @@ test('the whole tutorial: superintendent, RTC, crew — with the appeal and the 
   const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } }); const p = await ctx.newPage(); const errors = [];
   p.on('pageerror', (e) => errors.push(e.message)); p.on('dialog', (d) => d.accept(d.type() === 'prompt' ? 'Block C' : 'pw'));
   await p.goto(base + '/tutorial/index.html'); await p.waitForSelector('text=Welcome');
-  await p.dblclick('.dicon:has-text("Browser")'); await p.waitForSelector('iframe.app');
+  // the recommended way in: ballast.html on the shared drive, opened from a file:// address
+  await p.dblclick('.dicon:has-text("Shared drive")'); await p.click('.file:has-text("ballast.html")'); await p.click('.openwith:has-text("Open")');
+  await p.waitForSelector('iframe.app'); assert.match(await p.inputValue('.urlbar input'), /^file:.*ballast\.html$/);
   const app = p.frameLocator('iframe.app');
   const step = (title) => p.waitForSelector(`#coach >> text=${title}`, { timeout: 20000 });
   const next = () => p.click('#coach button.primary');
+  await step('Shared drive or cror.ca'); await next();
   const openFiles = async (re, n) => { await p.waitForSelector(`.file:has-text("${re}")`); for (let i = 0; i < n; i++) { await p.click('.task:has-text("CN-TRAINING")'); await p.locator(`.file:has-text("${re}")`).nth(i).click(); await p.click('.openwith'); await p.waitForTimeout(400); } }; // opening a file brings the browser forward, so refocus the explorer from the taskbar each time
   // --- the three explanations, then registration
   await step('railroad metaphor'); await next(); await step('Built for function'); await next(); await step('armored text file'); await next(); await step('Low-permission IT'); await next();
