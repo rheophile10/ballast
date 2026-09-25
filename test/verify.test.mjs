@@ -13,7 +13,7 @@ import { scoreAttempt } from '../src/score.js';
 import { newSheet, saveSheet } from '../src/sheet.js';
 
 test('verify.py agrees with src/ on a real release', async () => {
-  const src = readFileSync(new URL('../examples/test3.txt', import.meta.url), 'utf8');
+  const src = readFileSync(new URL('../samples/test3-block-c.txt', import.meta.url), 'utf8');
   const { test: t } = await parseTest(src);
   const sheet = await newSheet(await makeProfile('rtc', 'RTC ABC', '777777', '', true));
   const train = await makeProfile('crew', 'Alice', '123456');

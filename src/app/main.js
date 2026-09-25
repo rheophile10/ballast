@@ -7,6 +7,7 @@ import * as crew from './crew.js';
 import * as rtc from './rtc.js';
 import * as sup from './super.js';
 import { renderRegister, profileCard } from './profile-ui.js';
+import { listen, announce } from '../embed.js';
 
 const root = document.querySelector('main');
 let ctx = { screen: 'home' };
@@ -60,13 +61,13 @@ const renderWaiting = async (p) => {
 };
 
 const render = async () => {
-  const p = await me();
+  const p = await me(); announce(ctx.screen);
   if (ctx.screen === 'landing' || (!p && ctx.screen === 'home')) return renderRegister(root, async (np) => { await store.set('profile', np); go({ screen: 'home' }); });
   if (p && (p.role === 'none' || !p.minted) && !['work', 'practice', 'marks', 'released'].includes(ctx.screen)) return renderWaiting(p);
   switch (ctx.screen) {
     case 'home': return p.role === 'rtc' ? rtc.render(root, ctx, go) : p.role === 'superintendent' ? sup.render(root, ctx, go) : crew.renderHome(root, go, dropBox);
     case 'copy': return crew.renderCopy(root, ctx, go);
-    case 'practice': return crew.renderCopy(root, { practice: true }, go);
+    case 'practice': return crew.renderCopy(root, { practice: true, source: ctx.source }, go);
     case 'work': return crew.renderWork(root, ctx, go);
     case 'released': return crew.renderReleased(root, ctx, go);
     case 'cancel': return crew.renderCancel(root, ctx, go);
@@ -79,4 +80,6 @@ const render = async () => {
 document.body.prepend(h('nav', { class: 'top' }, h('a', { href: '#', onclick: (e) => { e.preventDefault(); go({ screen: 'home' }); } }, 'Ballast'), ' · ',
   h('a', { href: '#', onclick: async (e) => { e.preventDefault(); if (confirm('Forget this browser\'s profile and keys? Any role minted to them is lost.')) { await store.del('profile'); go({ screen: 'landing' }); } } }, 'forget me')));
 window.addEventListener('dragover', (e) => e.preventDefault()); window.addEventListener('drop', (e) => e.preventDefault());
+listen((text, name) => openText(text, name));
+try { const bc = new BroadcastChannel('ballast'); bc.addEventListener('message', (e) => { if (e.data?.type === 'busy') mount(root, h('h1', {}, 'A test is in progress in another tab'), h('p', {}, 'Close this tab and return to it. Opening this tab was recorded on that attempt.')); }); bc.postMessage({ type: 'hello', tab: 'new' }); } catch { /* no BroadcastChannel */ }
 render();

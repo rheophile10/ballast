@@ -5,7 +5,6 @@ import { approveSource, checkApproval, readApproval, sendReport, takeReport } fr
 import { newBook, openBook, saveBook } from '../src/sheet.js';
 import { utf8 } from '../src/bytes.js';
 import { parseTest } from '../src/txt.js';
-import { PRACTICE } from '../src/practice.js';
 
 test('profiles travel as text with the photo inside; signatures verify', async () => {
   const s = await makeProfile('none', 'Alice', '123456', '/9j/fakejpeg');
@@ -28,6 +27,3 @@ test('director approves a source and reads a report; book round-trips', async ()
   assert.ok(await checkApproval(await readApproval(await approveSource(back.rtc, src, 'T')), src), 'the reopened book can still sign');
 });
 
-test('the practice test parses clean', async () => {
-  const { test: t, errors } = await parseTest(PRACTICE); assert.deepEqual(errors, []); assert.equal(t.items.length, 9); assert.equal(t.areas.length, 5);
-});

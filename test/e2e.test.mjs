@@ -18,7 +18,7 @@ const dl = async (p, trigger) => { const [d] = await Promise.all([p.waitForEvent
 const register = async (p, name, pin) => { await p.fill('input[placeholder="Name"]', name); await p.fill('input[placeholder^="PIN"]', pin); await p.click('button[type=submit]'); await p.waitForSelector('text=waiting for a role'); return p.inputValue('textarea[readonly]'); };
 const take = async (p, text) => { await p.fill('textarea[placeholder^="Or paste"]', text); await p.click('text=Take'); };
 const accept = async (p, text) => { await p.fill('textarea[placeholder^="Drop or paste the profile"]', text); await p.click('button:has-text("Open")'); };
-const src = readFileSync(new URL('../examples/test3.txt', import.meta.url), 'utf8').replace(/\nimg:.*\nalt:.*\n/, '\n');
+const src = readFileSync(new URL('../samples/test3-block-c.txt', import.meta.url), 'utf8').replace(/\nimg:.*\nalt:.*\n/, '\n');
 
 test('minting chain, then the exchange', async () => {
   // --- everyone registers; nobody has a role
@@ -77,7 +77,7 @@ test('minting chain, then the exchange', async () => {
   const row = await r.p.textContent('table tr:nth-child(2)'); assert.match(row, /CN 123456/); assert.match(row, /unmarked/); assert.match(row, /ok/);
   await r.p.click('button:has-text("review")'); await r.p.waitForSelector('text=Playback'); await r.p.fill('input[type=number]', '1'); await r.p.press('input[type=number]', 'Tab'); await r.p.click('text=← back');
   const plate = await dl(r.p, () => r.p.click('button:has-text("cancel (send marks)")')); assert.match(plate, /BEGIN BALLAST CANCEL/);
-  const report = await dl(r.p, () => r.p.click('button:has-text("Report to Sup")')); assert.match(report, /BEGIN BALLAST REPORT/);
+  const report = await dl(r.p, () => r.p.click('button:has-text("Class profile to Sup")')); assert.match(report, /BEGIN BALLAST REPORT/);
   const sheet = await dl(r.p, () => r.p.click('button:has-text("Save sheet")')); assert.match(sheet, /BEGIN BALLAST SHEET/);
   writeFileSync(join(dir, 'sheet.txt'), sheet); writeFileSync(join(dir, 'release.txt'), release); writeFileSync(join(dir, 'test3.txt'), src);
 
@@ -91,9 +91,4 @@ test('minting chain, then the exchange', async () => {
   console.log('artifacts in', dir);
 });
 
-test('practice needs a minted crew profile too, then marks itself', async () => {
-  const c = await page(); const reg = await register(c.p, 'Bob', '654321');
-  // bootstrap a self-minted superintendent in another context just to mint an RTC who mints Bob — long way round; use the root button instead:
-  await c.p.click('summary'); await c.p.click('button:has-text("Start as superintendent")'); await c.p.waitForSelector('text=Superintendent');
-  await c.ctx.close(); assert.match(reg, /BEGIN BALLAST PROFILE/);
-});
+

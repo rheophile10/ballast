@@ -7,7 +7,6 @@ import { giveRelease } from '../release.js';
 import { readCancel } from '../cancel.js';
 import { parseTest, publicItem } from '../txt.js';
 import { scoreAttempt } from '../score.js';
-import { PRACTICE } from '../practice.js';
 import { fold, toRelease } from './attempt.js';
 import { drawItem, imagesFor, forget } from './draw.js';
 import { svgFor } from '../svg.js';
@@ -29,18 +28,18 @@ export const renderHome = async (root, go, dropBox) => {
       step(2, 'Release', !!log.released, log.released ? `${log.released.title} at ${log.released.when}` : 'Fullscreen, one item at a time, then Release track.'),
       step(3, 'Read your cancellation', !!log.cancelled, log.cancelled ? `${log.cancelled.grade}% on ${log.cancelled.title}` : 'Drop the cancellation the RTC sends back to see your marks and what to read.')),
     dropBox('Drop or paste a test, or a cancellation'),
-    h('h2', {}, 'Practice'), h('p', { class: 'small' }, 'The same drill — repeat, fullscreen, one item at a time — on a built-in test that marks itself. Not for record.'),
-    h('button', { onclick: () => go({ screen: 'practice' }) }, 'Start practice'));
+    h('h2', {}, 'Practice'), h('p', { class: 'small' }, 'Drop a test source (.txt, with answers) here to run the same drill on it — repeat, fullscreen, one item at a time — and mark yourself. Not for record.'),
+    practiceBox(go));
 };
 
 
 // ---------- copy a test (or start the practice)
 const clearanceSvg = (tgbo, p) => svgFor(`form clearance kind="Clearance" no=${tgbo.clearance} to="CN ${p.pin}" proceed="item 1 → item ${tgbo.order.length}" until="repeated back" call="before ${fmtTime(tgbo.settings.time)}" complete="${hhmm()}" rtc="${tgbo.rtcName || ''}"`);
-export const renderCopy = async (root, { text, practice }, go) => {
+export const renderCopy = async (root, { text, practice, source }, go) => {
   const p = await me();
   if (!p) return mount(root, h('h1', {}, 'Not registered'), h('p', {}, 'Register first; a test is addressed to your key.'));
   let tgbo;
-  try { tgbo = practice ? await practiceTest(p) : await copyTest(text, p, p.pin); }
+  try { tgbo = practice ? await practiceTest(p, source) : await copyTest(text, p, p.pin); }
   catch (e) { return mount(root, h('h1', {}, 'Cannot copy this test'), h('p', { class: 'bad' }, e.message), h('button', { onclick: () => go({ screen: 'home' }) }, 'Back')); }
   const saved = practice ? null : await store.get('attempt:' + tgbo.id);
   const repeat = h('input', { placeholder: 'Repeat (4 characters)', maxlength: 4, autocomplete: 'off', style: { textTransform: 'uppercase', maxWidth: '240px' } });
@@ -64,9 +63,11 @@ export const renderCopy = async (root, { text, practice }, go) => {
       h('p', { class: 'small' }, 'From here on: one item at a time, fullscreen, no copying. Leaving fullscreen or the tab is recorded.')));
 };
 
+const practiceBox = (go) => { const ta = h('textarea', { rows: 3, placeholder: 'Paste a test source for practice…' }); return h('div', { class: 'row' }, ta, h('button', { onclick: () => ta.value.trim() && go({ screen: 'practice', source: ta.value }) }, 'Practice'), h('label', { class: 'btn' }, 'Choose a source', h('input', { type: 'file', style: { display: 'none' }, onchange: async (e) => go({ screen: 'practice', source: await e.target.files[0].text() }) }))); };
+
 /** The practice test, built locally: same reader shape as a real test file, no crypto, answers kept for self-marking. */
-const practiceTest = async (p) => {
-  const { test } = await parseTest(PRACTICE);
+const practiceTest = async (p, source) => {
+  const { test, errors } = await parseTest(source); if (errors.length) throw new Error(errors[0]);
   const sid = 'practice:' + p.pin;
   const order = shuffled(test.items.map((i) => i.id), sid);
   return { id: 'practice', title: test.title + ' (practice)', settings: test.settings, areas: test.areas, rtcName: 'BALLAST', clearance: 0, sid, order, complete: 'PRAC', test,
@@ -111,8 +112,11 @@ export const renderWork = async (root, { tgbo, p, events, practice }, go) => {
   const refuse = (e) => { e.preventDefault(); e.stopPropagation(); status.textContent = 'Copying is not permitted.'; };
   const keys = (e) => { const k = e.key.toLowerCase(); if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'a', 's', 'p', 'u'].includes(k)) refuse(e); if (e.key === 'PrintScreen') refuse(e); if (document.activeElement === canvas) { if (e.key === 'ArrowRight') next(); if (e.key === 'ArrowLeft') prev(); } };
   const onPrint = () => onBreak('print');
+  const bc = typeof BroadcastChannel === 'function' ? new BroadcastChannel('ballast') : null; const tabId = Math.random().toString(36).slice(2);
+  const onTab = (e) => { if (e.data?.tab && e.data.tab !== tabId && e.data.type === 'hello') { bc.postMessage({ type: 'busy', tab: tabId }); onBreak('another-tab'); } };
+  bc?.addEventListener('message', onTab); bc?.postMessage({ type: 'hello', tab: tabId });
   const arm = () => { document.addEventListener('visibilitychange', onVis); document.addEventListener('fullscreenchange', onFs); window.addEventListener('blur', onBlur); for (const ev of ['copy', 'cut', 'contextmenu', 'dragstart']) document.addEventListener(ev, refuse); document.addEventListener('keydown', keys); window.addEventListener('beforeprint', onPrint); };
-  const disarm = () => { document.removeEventListener('visibilitychange', onVis); document.removeEventListener('fullscreenchange', onFs); window.removeEventListener('blur', onBlur); for (const ev of ['copy', 'cut', 'contextmenu', 'dragstart']) document.removeEventListener(ev, refuse); document.removeEventListener('keydown', keys); window.removeEventListener('beforeprint', onPrint); clearInterval(iv); };
+  const disarm = () => { document.removeEventListener('visibilitychange', onVis); document.removeEventListener('fullscreenchange', onFs); window.removeEventListener('blur', onBlur); for (const ev of ['copy', 'cut', 'contextmenu', 'dragstart']) document.removeEventListener(ev, refuse); document.removeEventListener('keydown', keys); window.removeEventListener('beforeprint', onPrint); clearInterval(iv); bc?.removeEventListener('message', onTab); bc?.close(); };
   const submit = async (why) => {
     if (state().finished) return;
     if (why !== 'time') { const s = state(); const n = tgbo.order.filter((id) => s.answers[id] === undefined || s.answers[id] === '').length; if (n && !confirm(`${n} item(s) unanswered. Release anyway?`)) return; }

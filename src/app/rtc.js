@@ -15,7 +15,7 @@ import { drawItem, imagesFor } from './draw.js';
 import { b64 } from '../bytes.js';
 import { profileCard, avatar } from './profile-ui.js';
 
-let sheet = null, tab = 'trains', pass = '', notes = [], view = null, root, go;
+let sheet = null, tab = 'trains', pass = '', notes = [], view = null, root, go, klass = '';
 const note = (m, bad = false) => { notes.unshift({ m, bad }); notes = notes.slice(0, 6); };
 const rerender = () => render(root, {}, go);
 
@@ -39,29 +39,39 @@ const takeFiles = async (files) => { const items = []; for (const f of files) { 
 
 // ---------- tabs
 const mint = async (reg) => { const m = await mintProfile(sheet.rtc, reg, 'crew'); sheet.pending = sheet.pending.filter((x) => x !== reg); sheet.trains = sheet.trains.filter((t) => t.pin !== m.pin); sheet.trains.push(m); download(`profile-CN${m.pin}.txt`, await profileText(m)); note(`minted crew CN ${m.pin} ${m.name} — send them the profile`); rerender(); };
-const trainsTab = () => h('div', {}, sheet.pending.length ? h('div', { class: 'card' }, h('h2', {}, 'Registrations to mint'), h('table', {}, sheet.pending.map((r) => h('tr', {}, h('td', {}, avatar(r, 48)), h('td', {}, r.name), h('td', {}, r.pin), h('td', {}, h('button', { class: 'primary', onclick: () => mint(r) }, 'Mint as crew'), ' ', h('button', { onclick: () => { sheet.pending = sheet.pending.filter((x) => x !== r); rerender(); } }, 'discard')))))) : null,
+const classOf = (pin) => sheet.classes.find((c) => c.pins.includes(pin));
+const classBar = () => h('div', { class: 'row' }, h('b', {}, 'Class:'), h('select', { onchange: (e) => { klass = e.target.value; rerender(); } }, h('option', { value: '', selected: klass === '' }, 'all crew'), sheet.classes.map((c) => h('option', { value: c.id, selected: klass === c.id }, `${c.name} (${c.pins.length})`))),
+  h('button', { onclick: () => { const name = prompt('Class name (e.g. Block C · Sept 2026)'); if (!name) return; const c = { id: 'c' + Date.now().toString(36), name, pins: [] }; sheet.classes.push(c); klass = c.id; note(`class ${name}`); rerender(); } }, 'New class'),
+  klass ? h('button', { onclick: () => { const c = sheet.classes.find((x) => x.id === klass); if (c && confirm(`Delete class ${c.name}? Crew stay on the sheet.`)) { sheet.classes = sheet.classes.filter((x) => x !== c); klass = ''; rerender(); } } }, 'Delete class') : null);
+const noteBox = (t) => { const n = (sheet.notes[t.pin] ??= { rating: 0, note: '' }); return h('div', {}, h('select', { onchange: (e) => { n.rating = Number(e.target.value); } }, [0, 1, 2, 3, 4, 5].map((v) => h('option', { value: v, selected: n.rating === v }, v ? '★'.repeat(v) : 'unrated'))), h('textarea', { rows: 2, placeholder: 'Appraisal — goes to the superintendent with the class profile', value: n.note, oninput: (e) => { n.note = e.target.value; } })); };
+const trainsTab = () => h('div', {}, classBar(), sheet.pending.length ? h('div', { class: 'card' }, h('h2', {}, 'Registrations to mint'), h('table', {}, sheet.pending.map((r) => h('tr', {}, h('td', {}, avatar(r, 48)), h('td', {}, r.name), h('td', {}, r.pin), h('td', {}, h('button', { class: 'primary', onclick: () => mint(r) }, 'Mint as crew'), ' ', h('button', { onclick: () => { sheet.pending = sheet.pending.filter((x) => x !== r); rerender(); } }, 'discard')))))) : null,
   h('p', { class: 'small' }, 'Drop registrations on the desk and mint them; the minted profile goes back to the crew member. Minted crew profiles from other RTCs are accepted too.'),
-  h('table', {}, sheet.trains.sort((a, b) => a.pin.localeCompare(b.pin)).map((t) => h('tr', {}, h('td', {}, avatar(t, 48)), h('td', {}, `CN ${t.pin}`), h('td', {}, t.name), h('td', { class: 'small' }, t.pub.slice(0, 12) + '…'), h('td', {}, h('button', { onclick: () => { sheet.trains = sheet.trains.filter((x) => x !== t); rerender(); } }, 'remove'))))),
-  sheet.trains.length ? null : h('p', { class: 'status' }, 'No trains yet.'));
+  h('table', {}, h('tr', {}, h('th'), h('th', {}, 'Crew'), h('th', {}, 'Class'), h('th', {}, 'Rating & appraisal'), h('th')),
+    sheet.trains.filter((t) => !klass || classOf(t.pin)?.id === klass).sort((a, b) => a.pin.localeCompare(b.pin)).map((t) => h('tr', {}, h('td', {}, avatar(t, 48)), h('td', {}, h('b', {}, t.name), h('br'), `CN ${t.pin}`, h('div', { class: 'small' }, `since ${t.minted?.start || '?'}`)),
+      h('td', {}, h('select', { onchange: (e) => { for (const c of sheet.classes) c.pins = c.pins.filter((p) => p !== t.pin); const c = sheet.classes.find((x) => x.id === e.target.value); if (c) c.pins.push(t.pin); rerender(); } }, h('option', { value: '', selected: !classOf(t.pin) }, '—'), sheet.classes.map((c) => h('option', { value: c.id, selected: classOf(t.pin)?.id === c.id }, c.name)))),
+      h('td', {}, noteBox(t)), h('td', {}, h('button', { onclick: () => { sheet.trains = sheet.trains.filter((x) => x !== t); rerender(); } }, 'remove'))))),
+  sheet.trains.length ? null : h('p', { class: 'status' }, 'No crew yet.'));
 
 const approvalFor = async (source) => { for (const a of sheet.approvals) if (await checkApproval(a, source)) return a; return null; };
+let issueTo = '';
 const testsTab = () => {
-  const d = sheet.draft;
+  const d = sheet.draft; if (issueTo === '' && klass) issueTo = klass;
   const issue = async () => {
     if (!d?.test) return;
     const missing = [...new Set(d.test.items.flatMap((i) => i.img.map((im) => im.name)).filter((n) => !sheet.assets[n]))];
     if (missing.length) return note(`missing assets: ${missing.join(', ')} — drop them on the desk`, true), rerender();
-    if (!sheet.trains.length) return note('no trains on the sheet', true), rerender();
+    const c = sheet.classes.find((x) => x.id === issueTo); const crew = c ? sheet.trains.filter((t) => c.pins.includes(t.pin)) : sheet.trains;
+    if (!crew.length) return note(c ? `no crew in ${c.name}` : 'no crew on the sheet', true), rerender();
     const approval = await approvalFor(d.source);
-    const { text, record } = await issueTest(d.test, sheet.rtc, sheet.trains, sheet.assets, sheet.rtc.name, approval);
-    Object.assign(record, { source: d.source, text, issued: Date.now(), trains: sheet.trains.map((t) => t.pin), approved: !!approval });
+    const { text, record } = await issueTest(d.test, sheet.rtc, crew, sheet.assets, sheet.rtc.name, approval);
+    Object.assign(record, { source: d.source, text, issued: Date.now(), trains: crew.map((t) => t.pin), approved: !!approval, class: c?.name || 'all crew', classId: c?.id || '' });
     sheet.tests.push(record); download(`${d.test.title.replace(/\W+/g, '-')}.test.txt`, text); note(`issued ${record.title} to ${sheet.trains.length} crew — complete ${record.hash.slice(0, 4).toUpperCase()}`); rerender();
   };
   const approvedMark = h('span', { class: 'small' }); if (d?.test) approvalFor(d.source).then((a) => { approvedMark.textContent = a ? ` · approved by ${a.name}` : ' · not approved'; approvedMark.className = a ? 'small good' : 'small bad'; });
   return h('div', {}, h('p', { class: 'small' }, 'Drop a test source (.txt), any images it names, and the superintendent\'s approval if you have one. Issue writes one test file with a clearance for every crew member on the sheet.'),
     d ? h('div', { class: 'card' }, h('b', {}, d.name), d.errors.length ? h('ul', { class: 'bad' }, d.errors.map((e) => h('li', {}, e))) : h('p', {}, `${d.test.title} · ${d.test.items.length} items · ${fmtTime(d.test.settings.time)} · pass ${Math.round(d.test.settings.pass * 100)}% · areas: ${d.test.areas.map((a) => a.id).join(', ') || 'none'}`, approvedMark),
-      d.errors.length ? null : h('button', { class: 'primary', onclick: issue }, `Issue test to ${sheet.trains.length} crew`)) : h('p', { class: 'status' }, 'No test source loaded.'),
-    h('h2', {}, 'Issued'), h('table', {}, sheet.tests.map((t) => h('tr', {}, h('td', {}, t.title), h('td', { class: 'small' }, new Date(t.issued).toLocaleString()), h('td', {}, `${t.trains?.length ?? '?'} clearances`), h('td', { class: t.approved ? 'good small' : 'small' }, t.approved ? 'approved' : 'unapproved'), h('td', { class: 'complete small' }, t.hash.slice(0, 4).toUpperCase()), h('td', {}, h('button', { onclick: () => download(`${t.title.replace(/\W+/g, '-')}.test.txt`, t.text) }, 'download again'))))),
+      d.errors.length ? null : h('div', { class: 'row' }, h('select', { onchange: (e) => { issueTo = e.target.value; } }, h('option', { value: '', selected: !issueTo }, `all crew (${sheet.trains.length})`), sheet.classes.map((c) => h('option', { value: c.id, selected: issueTo === c.id }, `${c.name} (${c.pins.length})`))), h('button', { class: 'primary', onclick: issue }, 'Issue test'))) : h('p', { class: 'status' }, 'No test source loaded.'),
+    h('h2', {}, 'Issued'), h('table', {}, sheet.tests.map((t) => h('tr', {}, h('td', {}, t.title), h('td', { class: 'small' }, t.class || ''), h('td', { class: 'small' }, new Date(t.issued).toLocaleString()), h('td', {}, `${t.trains?.length ?? '?'} clearances`), h('td', { class: t.approved ? 'good small' : 'small' }, t.approved ? 'approved' : 'unapproved'), h('td', { class: 'complete small' }, t.hash.slice(0, 4).toUpperCase()), h('td', {}, h('button', { onclick: () => download(`${t.title.replace(/\W+/g, '-')}.test.txt`, t.text) }, 'download again'))))),
     h('h2', {}, 'Assets'), h('p', { class: 'small' }, Object.keys(sheet.assets).join(', ') || 'none'), h('h2', {}, 'Approvals'), h('p', { class: 'small' }, sheet.approvals.map((a) => `${a.title} (${a.name})`).join(', ') || 'none'));
 };
 
@@ -80,13 +90,14 @@ const releaseTable = (rec, test) => {
       scored.map(({ r, s }) => h('tr', {}, h('td', {}, photo(r.pin)), h('td', {}, `CN ${r.pin}`), h('td', {}, r.name), h('td', {}, `${s.score}/${s.total}${s.pending ? ` (+${s.pending} unmarked)` : ''}`), h('td', { class: s.pass ? 'good' : 'bad' }, `${Math.round(s.grade * 100)}%`), h('td', {}, r.attempt.breaks?.length || 0), h('td', { class: r.identity === 'ok' ? 'good' : 'bad' }, r.identity),
         h('td', {}, h('button', { onclick: () => { view = { rec, test, r }; rerender(); } }, 'review'), ' ', h('button', { onclick: async () => download(`cancel-CN${r.pin}.txt`, await cancelTest(rec, sheet.rtc, r.train, r.pin, s)) }, 'cancel (send marks)'))))),
     h('div', { class: 'row' }, h('button', { onclick: async () => { for (const { r, s } of scored) download(`cancel-CN${r.pin}.txt`, await cancelTest(rec, sheet.rtc, r.train, r.pin, s)); } }, 'Cancel all'), h('button', { onclick: () => download(`${rec.title.replace(/\W+/g, '-')}-summary.csv`, csv(test, scored)) }, 'Summary CSV'),
-      sheet.superintendent ? h('button', { onclick: async () => download(`report-${rec.title.replace(/\W+/g, '-')}.txt`, await sendReport(sheet.rtc, sheet.superintendent.pub, reportFor(rec, test, scored, sum))) }, `Report to ${sheet.superintendent.name}`) : h('span', { class: 'small' }, 'Drop the superintendent\'s profile on the desk to send reports.')),
+      sheet.superintendent ? h('button', { onclick: async () => download(`class-profile-${rec.title.replace(/\W+/g, '-')}.txt`, await sendReport(sheet.rtc, sheet.superintendent.pub, reportFor(rec, test, scored, sum))) }, `Class profile to ${sheet.superintendent.name}`) : h('span', { class: 'small' }, 'Drop the superintendent\'s profile on the desk to send reports.')),
     h('h2', {}, 'By area (class mean)'), h('table', {}, sum.byArea.map((a) => h('tr', {}, h('td', {}, a.label), h('td', {}, `${Math.round(a.mean * 100)}%`), h('td', {}, h('div', { class: 'meter' }, h('div', { style: { width: Math.round(a.mean * 100) + '%' } })))))),
     h('h2', {}, 'Hardest items'), h('table', {}, sum.byItem.slice(0, 10).map((i) => h('tr', {}, h('td', {}, i.id), h('td', {}, i.ref.join(', ')), h('td', {}, `${i.correct}/${i.n} fully correct`)))));
 };
-const reportFor = (rec, test, scored, sum) => ({ test: rec.id, title: rec.title, hash: rec.hash, approved: !!rec.approved, rtc: { name: sheet.rtc.name, pin: sheet.rtc.pin }, issued: rec.issued, sent: Date.now(),
+const reportFor = (rec, test, scored, sum) => ({ test: rec.id, title: rec.title, hash: rec.hash, approved: !!rec.approved, rtc: { name: sheet.rtc.name, pin: sheet.rtc.pin }, class: rec.class || '', issued: rec.issued, sent: Date.now(),
   pass: test.settings.pass, n: sum.n, passed: sum.passed, mean: sum.mean, byArea: sum.byArea.map((a) => ({ id: a.id, label: a.label, mean: a.mean })), hardest: sum.byItem.slice(0, 10).map((i) => ({ id: i.id, ref: i.ref, difficulty: i.difficulty })),
-  rows: scored.map(({ r, s }) => ({ pin: r.pin, name: r.name, score: s.score, total: s.total, grade: s.grade, pass: s.pass, pending: s.pending, breaks: r.attempt.breaks?.length || 0, identity: r.identity, areas: s.areas.map((a) => ({ id: a.id, correct: a.correct, total: a.total })), read: s.read })) });
+  rows: scored.map(({ r, s }) => { const n = sheet.notes[r.pin] || { rating: 0, note: '' }; const pct = (a) => (a.total ? a.correct / a.total : null); return { pin: r.pin, name: r.name, score: s.score, total: s.total, grade: s.grade, pass: s.pass, pending: s.pending, breaks: r.attempt.breaks?.length || 0, identity: r.identity, areas: s.areas.map((a) => ({ id: a.id, label: a.label, correct: a.correct, total: a.total })),
+    strengths: s.areas.filter((a) => pct(a) !== null && pct(a) >= 0.8).map((a) => a.label), weaknesses: s.areas.filter((a) => pct(a) !== null && pct(a) < 0.6).map((a) => a.label), read: s.read, rating: n.rating, note: n.note }; }) });
 const csv = (test, scored) => { const head = ['pin', 'name', 'score', 'total', 'grade', 'pass', 'breaks', 'identity', ...test.areas.map((a) => a.id), ...test.items.map((i) => i.id)]; const rows = scored.map(({ r, s }) => [r.pin, r.name, s.score, s.total, s.grade.toFixed(3), s.pass, r.attempt.breaks?.length || 0, r.identity, ...s.areas.map((a) => `${a.correct}/${a.total}`), ...s.perItem.map((i) => i.got)]); return [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n'); };
 
 const reviewView = () => {
@@ -97,7 +108,8 @@ const reviewView = () => {
   let cursor = r.attempt.events.length; const slider = h('input', { type: 'range', min: 0, max: r.attempt.events.length, value: cursor, oninput: (e) => { cursor = Number(e.target.value); paint(); } }); const info = h('p', { class: 'small' });
   const paint = async () => { const st = fold(order, r.attempt.events.slice(0, cursor)); const id = order[st.at]; if (!id) return; const item = await openItem(rec, raw, id); if (item.pairs?.length) item.rights = item.pairs.map((p) => ({ id: p.id, text: p.right })); drawItem(canvas, item, { answer: st.answers[id], images: await imagesFor(item), watermark: 'REVIEW', index: st.at, count: order.length }); const ev = r.attempt.events[cursor - 1]; info.textContent = ev ? `event ${cursor}/${r.attempt.events.length}: ${ev[1]} ${ev[2] ?? ''} at +${Math.round((ev[0] - r.attempt.started) / 1000)}s` : ''; };
   paint();
-  return h('div', {}, h('button', { onclick: () => { view = null; rerender(); } }, '← back'), h('div', { class: 'row' }, avatar(sheet.trains.find((t) => t.pin === r.pin) || { name: '?' }, 56), h('h2', {}, `CN ${r.pin} ${r.name} — ${rec.title}: ${s.score}/${s.total} (${Math.round(s.grade * 100)}%)`)),
+  const crewRow = sheet.trains.find((t) => t.pin === r.pin);
+  return h('div', {}, h('button', { onclick: () => { view = null; rerender(); } }, '← back'), h('div', { class: 'row' }, avatar(crewRow || { name: '?' }, 56), h('h2', {}, `CN ${r.pin} ${r.name} — ${rec.title}: ${s.score}/${s.total} (${Math.round(s.grade * 100)}%)`)), crewRow ? h('div', { class: 'card' }, h('b', {}, 'Rating & appraisal'), noteBox(crewRow)) : null,
     h('h2', {}, 'Answers'), h('table', {}, test.items.map((it) => { const a = r.attempt.answers[it.id]; const pi = s.perItem.find((x) => x.id === it.id);
       return h('tr', {}, h('td', { class: 'small' }, it.id, h('br'), it.ref.join(', ')), h('td', {}, it.prompt.split('\n')[0].slice(0, 90)),
         h('td', {}, it.type === 'short' ? h('div', {}, h('div', {}, h('b', {}, 'answer: '), a || '—'), h('div', { class: 'small' }, h('b', {}, 'model: '), it.answer), h('label', {}, 'mark ', h('input', { type: 'number', min: 0, max: it.worth, step: 0.5, value: marks[it.id] ?? '', style: { width: '70px' }, onchange: (e) => { marks[it.id] = Number(e.target.value); rerender(); } }))) : it.type === 'match' ? Object.entries(a || {}).map(([l, rr]) => `${l}→${rr} `).join('') || '—' : `${a ?? '—'} (key ${it.key})`),
@@ -112,7 +124,7 @@ export const render = async (r, ctx, g) => {
   if (ctx.fresh) { sheet = await newSheet(await store.get('profile')); note('new sheet'); }
   if (ctx.sheetText) { const pw = prompt('Sheet passphrase'); if (pw == null) return go({ screen: 'home' }); try { sheet = await openSheet(ctx.sheetText, pw); pass = pw; note(`opened sheet for ${sheet.rtc.name}`); } catch (e) { return go({ screen: 'home', error: e.message }); } }
   if (!sheet) { const p = await store.get('profile'); return mount(root, h('h1', {}, 'RTC'), profileCard(p, await profileText(p)), h('p', {}, 'Your desk is a sheet file, encrypted under your passphrase. Open yours, or start a new one.'), h('div', { class: 'row' }, h('button', { class: 'primary', onclick: () => go({ screen: 'rtc', fresh: true }) }, 'Start a sheet'), h('label', { class: 'btn' }, 'Open a sheet', h('input', { type: 'file', style: { display: 'none' }, onchange: async (e) => go({ screen: 'rtc', sheetText: await readFileText(e.target.files[0]) }) })))); }
-  for (const k of ['marks', 'assets']) sheet[k] ??= {}; for (const k of ['releases', 'approvals', 'trains', 'tests', 'pending']) sheet[k] ??= [];
+  for (const k of ['marks', 'assets', 'notes']) sheet[k] ??= {}; for (const k of ['releases', 'approvals', 'trains', 'tests', 'pending', 'classes']) sheet[k] ??= [];
   if (ctx.incoming) { await intake(ctx.incoming); ctx.incoming = null; }
   const save = async () => { if (!pass) { pass = prompt('Choose a passphrase for this sheet (you will need it every time)') || ''; if (!pass) return; } const { draft, ...persist } = sheet; for (const t of persist.tests) delete t._test; download(`sheet-${sheet.rtc.name.replace(/\W+/g, '-')}.txt`, await saveSheet(persist, pass)); note('sheet saved'); rerender(); };
   const drop = h('div', { class: 'drop', ondragover: (e) => { e.preventDefault(); drop.classList.add('over'); }, ondragleave: () => drop.classList.remove('over'), ondrop: (e) => { e.preventDefault(); drop.classList.remove('over'); takeFiles(e.dataTransfer.files); } },

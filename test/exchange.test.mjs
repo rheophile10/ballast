@@ -11,7 +11,7 @@ import { cancelTest, readCancel } from '../src/cancel.js';
 import { newSheet, openSheet, saveSheet } from '../src/sheet.js';
 import { dearmor } from '../src/armor.js';
 
-const src = await readFile(new URL('../examples/test3.txt', import.meta.url), 'utf8');
+const src = await readFile(new URL('../samples/test3-block-c.txt', import.meta.url), 'utf8');
 const png1x1 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 test('test → copy → release → score → cancel', async () => {

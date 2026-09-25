@@ -5,7 +5,7 @@ import { openJSON, passKey, sealJSON } from './crypto.js';
 import { exportKeys, importKeys, makeProfile } from './profile.js';
 
 /** A sheet (teacher) or a book (director) is the same shape under a different armor kind. */
-export const newSheet = async (profile) => ({ rtc: profile, trains: [], tests: [], releases: [], marks: {}, approvals: [], reports: [], sources: [], pending: [] });
+export const newSheet = async (profile) => ({ rtc: profile, trains: [], tests: [], releases: [], marks: {}, notes: {}, classes: [], approvals: [], reports: [], sources: [], pending: [] });
 export const newBook = newSheet;
 
 export const saveSheet = async (sheet, passphrase, kind = 'SHEET') => {

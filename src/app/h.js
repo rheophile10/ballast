@@ -13,7 +13,9 @@ export const h = (tag, attrs = {}, ...children) => {
   return el;
 };
 export const mount = (root, ...nodes) => { root.replaceChildren(...nodes.flat(Infinity).filter(Boolean)); return root; };
+import { hostDownload } from '../embed.js';
 export const download = (name, content, type = 'text/plain') => {
+  if (hostDownload(name, content, type)) return;
   const url = URL.createObjectURL(content instanceof Blob ? content : new Blob([content], { type }));
   const a = h('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 5000);

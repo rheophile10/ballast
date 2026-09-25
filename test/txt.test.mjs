@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import { parseTest, publicItem } from '../src/txt.js';
 
 test('parses the sample test', async () => {
-  const { test: t, errors } = await parseTest(await readFile(new URL('../examples/test3.txt', import.meta.url), 'utf8'));
+  const { test: t, errors } = await parseTest(await readFile(new URL('../samples/test3-block-c.txt', import.meta.url), 'utf8'));
   assert.deepEqual(errors, []);
   assert.equal(t.title, 'Test 3 · Block C (sample)');
   assert.equal(t.settings.time, 5400);
