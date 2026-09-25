@@ -34,8 +34,8 @@ test('the whole tutorial: general, superintendent, RTC, crew — with Notepad au
   await step('Free, durable'); await next(); await step('railroad metaphor'); await next();
   await step('Armored text files'); await openFiles('example-armored', 1, 'Ballast'); await p.waitForSelector('pre.note >> text=BEGIN BALLAST PROFILE');
   await step('What is in the file'); await p.click('.task:has-text("Ballast")'); await next();
-  await step('How signing'); assert.ok((await p.locator('.nav li.past').count()) >= 3, 'the contents pane marks past sections');
-  await p.click('.nav summary'); await p.click('.nav li.past a >> nth=0'); await p.waitForSelector('#coach .phase:has-text("re-reading")'); await p.click('#coach button:has-text("Back to where I am")'); await next();
+  await step('How signing'); assert.ok((await p.locator('.sections li.past').count()) >= 3, 'the contents marks past sections');
+  await p.click('.sections li.past a >> nth=0'); await p.waitForSelector('#coach .phase:has-text("re-reading")'); await p.click('#coach button:has-text("Back to where I am")'); await next();
   // --- superintendent
   await step('Register'); await app.locator('input[placeholder="Name"]').fill('Tutorial Person'); await app.locator('input[placeholder^="PIN"]').fill('555555'); await app.locator('button[type=submit]').click();
   await app.locator('text=waiting for a role').waitFor();
@@ -98,5 +98,21 @@ test('the whole tutorial: general, superintendent, RTC, crew — with Notepad au
   await app.locator('text=Does it compare?').waitFor(); const prov = await app.locator('.card:has-text("Does it compare?")').textContent();
   assert.match(prov, /YES — these marks are for the file you released/); assert.match(prov, /your RTC \(the one who minted you\)/); assert.ok(prov.includes(shown), 'the cancellation names the release hash shown at release time');
   await step('Does it compare'); await next(); await step('Exercises and the rulebook'); await next(); await p.waitForSelector('#coach p.done:has-text("The end")');
+  assert.deepEqual(errors, []); await ctx.close();
+});
+
+test('jump straight to the crew chunk: register, get minted as crew, and the test is waiting', async () => {
+  const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } }); const p = await ctx.newPage(); const errors = [];
+  p.on('pageerror', (e) => errors.push(e.message)); p.on('dialog', (d) => d.accept(d.type() === 'prompt' ? d.defaultValue() || 'pw' : 'pw'));
+  await p.goto(base + '/tutorial/index.html'); await p.waitForSelector('#coach h2:has-text("Welcome")');
+  await p.click('.chunk:has-text("Crew")'); await p.waitForSelector('#coach h2:has-text("Become crew")');
+  await p.waitForSelector('#coach >> text=Not yet'); // nobody to mint until you register
+  await p.dblclick('.dicon:has-text("Browser")'); const app = p.frameLocator('iframe.app');
+  await app.locator('input[placeholder="Name"]').fill('Jumper'); await app.locator('input[placeholder^="PIN"]').fill('777000'); await app.locator('button[type=submit]').click();
+  await p.waitForSelector('.file:has-text("profile-crew-you")', { timeout: 20000 });
+  await p.click('.task:has-text("WNR-TRAINING")'); await p.click('.file:has-text("profile-crew-you")'); await p.click('.win.explorer .openwith');
+  await p.waitForSelector('#coach h2:has-text("What protects the test")', { timeout: 20000 }); await p.click('#coach button.primary');
+  await p.waitForSelector('#coach h2:has-text("Do a test")'); await p.waitForSelector('.file:has-text(".test.txt")');
+  await app.locator('text=under superintendent Marguerite Boudreau').waitFor();
   assert.deepEqual(errors, []); await ctx.close();
 });

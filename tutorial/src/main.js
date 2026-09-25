@@ -38,9 +38,9 @@ const userApproval = async () => { const a = await cast.userApprovalOf(st.files.
 const userPublic = () => { const reg = st.files.find((f) => f.folder === 'Outbox' && /^profile-/.test(f.name) && f.user); return reg?.parsed || st.userReg; };
 
 const arrive = async (key) => {
-  if (!key || st.arrived[key] || !arrivals[key]) return;
-  st = { ...st, arrived: { ...st.arrived, [key]: true } };
-  const items = await arrivals[key]().catch((e) => { console.error(e); set(os.toast(st, `Could not stage ${key}: ${e.message}`)); return []; });
+  if (!key || st.arrived[key] === true || !arrivals[key]) return;
+  let items; try { items = await arrivals[key](); } catch (e) { const first = !st.arrived[key]; st = { ...st, arrived: { ...st.arrived, [key]: 'waiting' }, stage: e.message }; if (first) set(os.toast(st, `Not yet: ${e.message}`)); else render(); return; } // retried by the clock until it can be staged
+  st = { ...st, arrived: { ...st.arrived, [key]: true }, stage: null };
   let s = st; for (const [folder, f] of items) s = folder === 'mail' ? os.addMail(s, f) : folder === 'chat' ? os.addChat(s, f) : os.addFile(s, folder, f.name, f.text, f.from, f.note ? { note: true } : {});
   set(items.length ? os.toast(s, `${items.length} file(s) arrived in ${items[0][0]}`) : s);
 };
@@ -110,24 +110,30 @@ const coach = () => {
 };
 const next = async () => {
   const n = st.step + 1; if (n >= steps.length) return;
-  set({ ...st, step: n, stepDone: false });
-  const s = steps[n]; if (s.explorer) set(os.cd(os.openWindow(st, 'explorer', 'WNR-TRAINING — Training'), s.explorer));
+  set({ ...st, step: n, stepDone: false, viewStep: null, stage: null });
+  const s = steps[n]; if (s.skipIf?.(st)) return next(); // e.g. 'Become an RTC' when you already are one
+  if (s.explorer) set(os.cd(os.openWindow(st, 'explorer', 'WNR-TRAINING — Training'), s.explorer));
   await arrive(s.arrive); coach();
 };
-let navOpen = false; // the contents pane opens on request; the current section comes first
-/** The contents: chunks and their sections; past ones can be re-read, the current one is marked, the rest wait. */
-const nav = () => h('details', { class: 'nav', open: navOpen, ontoggle: (e) => { navOpen = e.target.open; } }, h('summary', {}, 'Contents'),
-  PHASES.map((ph) => h('div', { class: 'navchunk' }, h('div', { class: 'navhead' }, PHASE_TITLES[ph]), h('ol', {}, steps.map((x, i) => ({ x, i })).filter(({ x }) => x.phase === ph).map(({ x, i }) => h('li', { class: i === st.step ? 'cur' : i < st.step ? 'past' : 'todo' }, i <= st.step ? h('a', { href: '#', onclick: (e) => { e.preventDefault(); st = { ...st, viewStep: i === st.step ? null : i }; renderCoach(); } }, x.title) : x.title))))));
+/** Skip ahead to section i: every section between is passed through, so whatever they would have staged arrives in order. */
+const jumpTo = async (i) => { if (i <= st.step) { st = { ...st, viewStep: i === st.step ? null : i }; return renderCoach(); } while (st.step < i) { const before = st.step; await next(); if (st.step === before) break; } };
+const jumpChunk = (ph) => jumpTo(steps.findIndex((x) => x.phase === ph));
+/** The contents, always in view: four chunk tabs to jump between, and the current chunk's sections — past ones to re-read, future ones to skip to. */
+const nav = () => { const cur = steps[st.step].phase; return h('div', { class: 'toc' },
+  h('div', { class: 'chunks' }, PHASES.map((ph) => h('button', { class: 'chunk' + (ph === cur ? ' on' : PHASES.indexOf(ph) < PHASES.indexOf(cur) ? ' done' : ''), onclick: () => jumpChunk(ph), title: `Jump to ${PHASE_TITLES[ph]}` }, PHASE_TITLES[ph]))),
+  h('ol', { class: 'sections' }, steps.map((x, i) => ({ x, i })).filter(({ x }) => x.phase === cur).map(({ x, i }) => h('li', { class: i === st.step ? 'cur' : i < st.step ? 'past' : 'todo' }, h('a', { href: '#', onclick: (e) => { e.preventDefault(); jumpTo(i); }, title: i < st.step ? 'Re-read' : i > st.step ? 'Skip to this section' : '' }, x.title)))),
+  h('p', { class: 'small tochelp' }, 'Do only the parts you care about: jump to a chunk or skip to a section — the coach stages what each part needs.')); };
 const renderCoach = () => {
   const s = current(); const done = s.done(st) || st.stepDone; const phaseIx = PHASES.indexOf(s.phase);
   if (st.viewStep != null && st.viewStep !== st.step) { const v = steps[st.viewStep]; return mount(coachEl, nav(), h('div', { class: 'phase' }, `${PHASE_TITLES[v.phase]} — re-reading`), h('h2', {}, v.title), v.text.split('\n\n').map((t) => h('p', {}, t)), h('div', { class: 'btns' }, h('button', { class: 'primary', onclick: () => { st = { ...st, viewStep: null }; renderCoach(); } }, 'Back to where I am'))); }
+  const stage = st.stage ? h('p', { class: 'waiting' }, `Not yet: ${st.stage}`) : null;
   mount(coachEl, nav(), h('div', { class: 'phase' }, `${PHASE_TITLES[s.phase]} · ${phaseIx + 1} of ${PHASES.length}`), h('h2', {}, s.title),
     h('div', { class: 'progress' }, h('div', { style: { width: Math.round((100 * st.step) / (steps.length - 1)) + '%' } })),
-    s.text.split('\n\n').map((t) => h('p', {}, t)), s.arrive && !st.arrived[s.arrive] ? h('p', { class: 'waiting' }, 'staging files…') : null,
+    s.text.split('\n\n').map((t) => h('p', {}, t)), s.arrive && st.arrived[s.arrive] !== true ? (stage || h('p', { class: 'waiting' }, 'staging files…')) : null,
     st.step >= steps.length - 1 ? h('p', { class: 'done' }, 'The end.') : done ? h('p', { class: 'done' }, s.info ? 'Next when you are ready.' : 'Done — moving on.') : h('p', { class: 'waiting' }, 'Waiting for you to do that…'),
     h('div', { class: 'btns' }, h('button', { class: 'primary', disabled: !done || st.step >= steps.length - 1, onclick: next }, 'Next'), h('button', { onclick: next, disabled: st.step >= steps.length - 1 }, 'Skip'), h('button', { onclick: () => { tell({ type: 'hint' }); } }, 'Hide hint')),
     h('p', { class: 'small', style: { marginTop: '14px', color: '#92400e' } }, 'Files that "arrive" are generated on your computer by fictional people whose keys ship with this tutorial. Nothing is sent anywhere.'));
 };
 const render = () => { os.render(root, st, act); os.placeFrames(st); renderCoach(); };
-setInterval(() => { const now = new Date(); const c = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); if (c !== st.clock) set({ ...st, clock: c }); const s = current(); if (s && !st.stepDone && s.done(st)) coach(); }, 1000);
+setInterval(() => { const now = new Date(); const c = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); if (c !== st.clock) set({ ...st, clock: c }); const s = current(); if (s && !st.stepDone && s.done(st)) coach(); if (s?.arrive && st.arrived[s.arrive] === 'waiting') arrive(s.arrive); }, 1000);
 render(); arrive(steps[0].arrive);
