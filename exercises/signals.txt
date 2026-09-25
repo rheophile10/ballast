@@ -1,0 +1,896 @@
+# Signals — aspects and indications
+time: 90m
+pass: 90%
+shuffle: items options
+back: yes
+cror: open
+areas: aspects "Reading aspects" · indications "Indications"
+---
+Q: Which signal indication is this?
+a) Clear To Medium
+b) Slow To Clear
+*c) Clear To Stop
+d) Slow To Stop
+id: asp-411-1
+svg: signal Y,R,R
+area: aspects
+ref: CROR 411
+cror: 411@e274ca6a3f4f
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Clear To Medium
+b) Limited To Diverging
+*c) Advance Clear To Diverging
+d) Slow To Stop
+id: asp-414A-2
+svg: signal Yf,Y,R DV
+area: aspects
+ref: CROR 414A
+cror: 414A@49770fd951f6
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Diverging
+*b) Advance Clear To Limited
+c) Diverging To Clear
+d) Limited To Slow
+id: asp-412-3
+svg: signal Yf,Gf,R
+area: aspects
+ref: CROR 412
+cror: 412@0f56ab6952be
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Medium To Diverging
+b) Clear To Medium
+*c) Advance Clear To Medium
+d) Limited To Medium
+id: asp-413-4
+svg: signal Yf,G,R
+area: aspects
+ref: CROR 413
+cror: 413@453bcd91368e
+tags: signals aspect
+---
+Q: Which signal indication is this?
+*a) Advance Clear To Slow
+b) Advance Clear To Stop
+c) Diverging To Stop
+d) Clear To Diverging
+id: asp-414-5
+svg: signal Yf,Y,R
+area: aspects
+ref: CROR 414
+cror: 414@86db2f0afd2a
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Medium To Clear
+*b) Advance Clear To Stop
+c) Medium To Slow
+d) Diverging To Diverging
+id: asp-415-6
+svg: signal Yf,R,R
+area: aspects
+ref: CROR 415
+cror: 415@5ea5219b57b0
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Limited To Slow
+*b) Clear
+c) Medium To Medium
+d) Slow To Stop
+id: asp-405-7
+svg: signal G,R,R
+area: aspects
+ref: CROR 405
+cror: 405@7cdb3a9b9319
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Stop
+b) Slow To Slow
+c) Restricting
+*d) Clear To Diverging
+id: asp-408-8
+svg: signal G,R,Yf DV
+area: aspects
+ref: CROR 408
+cror: 408@908a798e6497
+tags: signals aspect
+---
+Q: Which signal indication is this?
+*a) Clear To Diverging
+b) Diverging To Diverging
+c) Slow To Slow
+d) Clear
+id: asp-408-9
+svg: signal Y,Y,R DV
+area: aspects
+ref: CROR 408
+cror: 408@908a798e6497
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Slow To Stop
+b) Advance Clear To Diverging
+*c) Clear To Limited
+d) Medium To Slow
+id: asp-406-10
+svg: signal G,R,Gf
+area: aspects
+ref: CROR 406
+cror: 406@5e5a3b5a5b48
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Slow To Limited
+*b) Clear To Limited
+c) Advance Clear To Medium
+d) Diverging
+id: asp-406-11
+svg: signal Y,Gf,R
+area: aspects
+ref: CROR 406
+cror: 406@5e5a3b5a5b48
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Limited To Slow
+*b) Clear To Limited
+c) Clear
+d) Advance Clear To Medium
+id: asp-406-12
+svg: signal Y,G,R L
+area: aspects
+ref: CROR 406
+cror: 406@5e5a3b5a5b48
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Advance Clear To Limited
+b) Medium To Clear
+*c) Clear To Medium
+d) Clear To Limited
+id: asp-407-13
+svg: signal G,R,G
+area: aspects
+ref: CROR 407
+cror: 407@f8eb18c7289e
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Limited To Limited
+b) Limited To Diverging
+*c) Clear To Medium
+d) Limited To Medium
+id: asp-407-14
+svg: signal Y,G,R
+area: aspects
+ref: CROR 407
+cror: 407@f8eb18c7289e
+tags: signals aspect
+---
+Q: Which signal indication is this?
+*a) Clear To Slow
+b) Advance Clear To Stop
+c) Diverging To Diverging
+d) Restricting
+id: asp-409-15
+svg: signal G,R,Yf
+area: aspects
+ref: CROR 409
+cror: 409@68c9508b546f
+tags: signals aspect
+---
+Q: Which signal indication is this?
+*a) Clear To Slow
+b) Restricting
+c) Clear To Medium
+d) Advance Clear To Diverging
+id: asp-409-16
+svg: signal Y,Y,R
+area: aspects
+ref: CROR 409
+cror: 409@68c9508b546f
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Medium To Stop
+b) Stop
+*c) Diverging
+d) Slow To Slow
+id: asp-430-17
+svg: signal R,R,Y DV
+area: aspects
+ref: CROR 430
+cror: 430@f7fe24a77a91
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Clear To Limited
+*b) Diverging To Clear
+c) Advance Clear To Diverging
+d) Advance Clear To Medium
+id: asp-428-18
+svg: signal R,R,G DV
+area: aspects
+ref: CROR 428
+cror: 428@b0ed3d6947b4
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Limited To Slow
+b) Stop
+*c) Diverging To Stop
+d) Medium To Clear
+id: asp-429-19
+svg: signal R,R,Yf DV
+area: aspects
+ref: CROR 429
+cror: 429@7fb8e9a5f266
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Limited To Slow
+*b) Limited To Clear
+c) Stop
+d) Restricting
+id: asp-416-20
+svg: signal R,Gf,R
+area: aspects
+ref: CROR 416
+cror: 416@9f480eebb39e
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Slow To Limited
+b) Diverging To Diverging
+*c) Limited To Clear
+d) Medium To Diverging
+id: asp-416-21
+svg: signal R,G,R L
+area: aspects
+ref: CROR 416
+cror: 416@9f480eebb39e
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Slow To Clear
+*b) Limited To Diverging
+c) Restricting
+d) Diverging To Medium
+id: asp-419A-22
+svg: signal R,Gf,Yf DV
+area: aspects
+ref: CROR 419A
+cror: 419A@7c78129bc091
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Medium To Clear
+b) Slow To Slow
+*c) Limited To Limited
+d) Medium To Diverging
+id: asp-417-23
+svg: signal R,Gf,Gf
+area: aspects
+ref: CROR 417
+cror: 417@f3ed3f96058f
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Clear
+b) Limited To Limited
+c) Limited To Stop
+*d) Limited To Medium
+id: asp-418-24
+svg: signal R,Gf,G
+area: aspects
+ref: CROR 418
+cror: 418@b65d2854e6c9
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Limited To Diverging
+b) Diverging
+*c) Limited To Slow
+d) Clear
+id: asp-419-25
+svg: signal R,Gf,Yf
+area: aspects
+ref: CROR 419
+cror: 419@d0578abc7d63
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Diverging To Clear
+b) Slow To Limited
+c) Clear To Limited
+*d) Limited To Stop
+id: asp-421-26
+svg: signal R,Yf,R
+area: aspects
+ref: CROR 421
+cror: 421@71fd50695ad3
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Diverging
+*b) Limited To Stop
+c) Medium To Clear
+d) Medium To Diverging
+id: asp-421-27
+svg: signal R,Y,R L
+area: aspects
+ref: CROR 421
+cror: 421@71fd50695ad3
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Limited To Stop
+b) Medium To Diverging
+c) Limited To Slow
+*d) Medium To Clear
+id: asp-422-28
+svg: signal R,G,R
+area: aspects
+ref: CROR 422
+cror: 422@c70fbca4ba68
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Clear
+*b) Medium To Diverging
+c) Diverging
+d) Limited To Limited
+id: asp-425A-29
+svg: signal R,G,Yf DV
+area: aspects
+ref: CROR 425A
+cror: 425A@895261263a2f
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Clear To Slow
+*b) Medium To Limited
+c) Medium To Medium
+d) Clear To Diverging
+id: asp-423-30
+svg: signal R,G,Gf
+area: aspects
+ref: CROR 423
+cror: 423@a092c070936a
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Diverging To Clear
+b) Medium To Diverging
+*c) Medium To Medium
+d) Limited To Limited
+id: asp-424-31
+svg: signal R,G,G
+area: aspects
+ref: CROR 424
+cror: 424@d17771711695
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Clear To Slow
+b) Slow To Stop
+c) Limited To Slow
+*d) Medium To Slow
+id: asp-425-32
+svg: signal R,G,Yf
+area: aspects
+ref: CROR 425
+cror: 425@81d047a16cb0
+tags: signals aspect
+---
+Q: Which signal indication is this?
+*a) Medium To Stop
+b) Clear
+c) Clear To Medium
+d) Limited To Clear
+id: asp-427-33
+svg: signal R,Y,R
+area: aspects
+ref: CROR 427
+cror: 427@6d650b4d5eaa
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Clear To Limited
+b) Medium To Stop
+c) Limited To Stop
+*d) Restricting
+id: asp-436-34
+svg: signal R,R,Y
+area: aspects
+ref: CROR 436
+cror: 436@37f490734909
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Advance Clear To Stop
+*b) Slow To Clear
+c) Medium To Limited
+d) Limited To Slow
+id: asp-431-35
+svg: signal R,R,G
+area: aspects
+ref: CROR 431
+cror: 431@7d34eaa5dae3
+tags: signals aspect
+---
+Q: Which signal indication is this?
+*a) Slow To Limited
+b) Advance Clear To Stop
+c) Limited To Limited
+d) Slow To Clear
+id: asp-432-36
+svg: signal R,Yf,Gf
+area: aspects
+ref: CROR 432
+cror: 432@3ae77fefd3f4
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Diverging To Clear
+*b) Slow To Medium
+c) Limited To Slow
+d) Diverging To Stop
+id: asp-433-37
+svg: signal R,Yf,G
+area: aspects
+ref: CROR 433
+cror: 433@e28c011ceb30
+tags: signals aspect
+---
+Q: Which signal indication is this?
+*a) Slow To Slow
+b) Limited To Stop
+c) Clear
+d) Clear To Medium
+id: asp-434-38
+svg: signal R,Yf,Yf
+area: aspects
+ref: CROR 434
+cror: 434@21c893ba9e72
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Advance Clear To Medium
+b) Clear To Medium
+*c) Slow To Stop
+d) Medium To Slow
+id: asp-435-39
+svg: signal R,R,Yf
+area: aspects
+ref: CROR 435
+cror: 435@cc78dee9fb57
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Advance Clear To Medium
+*b) Stop
+c) Limited To Diverging
+d) Medium To Diverging
+id: asp-439-40
+svg: signal R,R,R
+area: aspects
+ref: CROR 439
+cror: 439@aaa8ce183001
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Limited To Medium
+b) Limited To Limited
+*c) Diverging To Diverging
+d) Advance Clear To Limited
+id: asp-434A-41
+svg: signal R,Yf,Yf DV
+area: aspects
+ref: CROR 434A
+cror: 434A@7536714d3836
+tags: signals aspect
+---
+Q: Which signal indication is this?
+a) Limited To Diverging
+*b) Diverging To Medium
+c) Advance Clear To Slow
+d) Slow To Limited
+id: asp-433A-42
+svg: signal R,Y,G DV
+area: aspects
+ref: CROR 433A
+cror: 433A@e6f01e044a86
+tags: signals aspect
+---
+Q: Clear To Stop (Rule 411) — what does it require?
+a) Proceed.
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-411
+area: indications
+ref: CROR 411
+cror: 411@e274ca6a3f4f
+tags: signals indication
+---
+Q: Advance Clear To Diverging (Rule 414A) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-414A
+area: indications
+ref: CROR 414A
+cror: 414A@49770fd951f6
+tags: signals indication
+---
+Q: Advance Clear To Limited (Rule 412) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-412
+area: indications
+ref: CROR 412
+cror: 412@0f56ab6952be
+tags: signals indication
+---
+Q: Advance Clear To Medium (Rule 413) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-413
+area: indications
+ref: CROR 413
+cror: 413@453bcd91368e
+tags: signals indication
+---
+Q: Advance Clear To Slow (Rule 414) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-414
+area: indications
+ref: CROR 414
+cror: 414@86db2f0afd2a
+tags: signals indication
+---
+Q: Advance Clear To Stop (Rule 415) — what does it require?
+a) Proceed at REDUCED speed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-415
+area: indications
+ref: CROR 415
+cror: 415@5ea5219b57b0
+tags: signals indication
+---
+Q: Clear (Rule 405) — what does it require?
+a) Proceed
+*b) Proceed.
+c) Proceed
+d) Proceed
+id: ind-405
+area: indications
+ref: CROR 405
+cror: 405@7cdb3a9b9319
+tags: signals indication
+---
+Q: Clear To Diverging (Rule 408) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-408
+area: indications
+ref: CROR 408
+cror: 408@908a798e6497
+tags: signals indication
+---
+Q: Clear To Limited (Rule 406) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-406
+area: indications
+ref: CROR 406
+cror: 406@5e5a3b5a5b48
+tags: signals indication
+---
+Q: Clear To Medium (Rule 407) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+d) Proceed at RESTRICTED speed.
+id: ind-407
+area: indications
+ref: CROR 407
+cror: 407@f8eb18c7289e
+tags: signals indication
+---
+Q: Clear To Slow (Rule 409) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-409
+area: indications
+ref: CROR 409
+cror: 409@68c9508b546f
+tags: signals indication
+---
+Q: Diverging (Rule 430) — what does it require?
+a) Proceed
+*b) Proceed at REDUCED speed
+c) Proceed
+d) Proceed
+id: ind-430
+area: indications
+ref: CROR 430
+cror: 430@f7fe24a77a91
+tags: signals indication
+---
+Q: Diverging To Clear (Rule 428) — what does it require?
+a) Proceed, DIVERGING speed passing signal and through turnouts, approaching next signal at MEDIUM speed.
+*b) Proceed
+*c) Proceed
+d) Proceed.
+id: ind-428
+area: indications
+ref: CROR 428
+cror: 428@b0ed3d6947b4
+tags: signals indication
+---
+Q: Diverging To Stop (Rule 429) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+d) Proceed at REDUCED speed
+id: ind-429
+area: indications
+ref: CROR 429
+cror: 429@7fb8e9a5f266
+tags: signals indication
+---
+Q: Limited To Clear (Rule 416) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+d) Proceed at REDUCED speed
+id: ind-416
+area: indications
+ref: CROR 416
+cror: 416@9f480eebb39e
+tags: signals indication
+---
+Q: Limited To Diverging (Rule 419A) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-419A
+area: indications
+ref: CROR 419A
+cror: 419A@7c78129bc091
+tags: signals indication
+---
+Q: Limited To Limited (Rule 417) — what does it require?
+*a) Proceed
+b) Stop.
+*c) Proceed
+*d) Proceed
+id: ind-417
+area: indications
+ref: CROR 417
+cror: 417@f3ed3f96058f
+tags: signals indication
+---
+Q: Limited To Medium (Rule 418) — what does it require?
+a) Stop.
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-418
+area: indications
+ref: CROR 418
+cror: 418@b65d2854e6c9
+tags: signals indication
+---
+Q: Limited To Slow (Rule 419) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+d) Proceed at REDUCED speed
+id: ind-419
+area: indications
+ref: CROR 419
+cror: 419@d0578abc7d63
+tags: signals indication
+---
+Q: Limited To Stop (Rule 421) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-421
+area: indications
+ref: CROR 421
+cror: 421@71fd50695ad3
+tags: signals indication
+---
+Q: Medium To Clear (Rule 422) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-422
+area: indications
+ref: CROR 422
+cror: 422@c70fbca4ba68
+tags: signals indication
+---
+Q: Medium To Diverging (Rule 425A) — what does it require?
+a) Stop.
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-425A
+area: indications
+ref: CROR 425A
+cror: 425A@895261263a2f
+tags: signals indication
+---
+Q: Medium To Limited (Rule 423) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-423
+area: indications
+ref: CROR 423
+cror: 423@a092c070936a
+tags: signals indication
+---
+Q: Medium To Medium (Rule 424) — what does it require?
+*a) Proceed
+b) Proceed at REDUCED speed
+*c) Proceed
+*d) Proceed
+id: ind-424
+area: indications
+ref: CROR 424
+cror: 424@d17771711695
+tags: signals indication
+---
+Q: Medium To Slow (Rule 425) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-425
+area: indications
+ref: CROR 425
+cror: 425@81d047a16cb0
+tags: signals indication
+---
+Q: Medium To Stop (Rule 427) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+d) Proceed at RESTRICTED speed.
+id: ind-427
+area: indications
+ref: CROR 427
+cror: 427@6d650b4d5eaa
+tags: signals indication
+---
+Q: Restricting (Rule 436) — what does it require?
+*a) Proceed at RESTRICTED speed.
+b) Proceed
+c) Proceed
+d) Proceed, DIVERGING speed passing signal and through turnouts, approaching next signal at MEDIUM speed.
+id: ind-436
+area: indications
+ref: CROR 436
+cror: 436@37f490734909
+tags: signals indication
+---
+Q: Slow To Clear (Rule 431) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+d) Proceed at RESTRICTED speed.
+id: ind-431
+area: indications
+ref: CROR 431
+cror: 431@7d34eaa5dae3
+tags: signals indication
+---
+Q: Slow To Limited (Rule 432) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-432
+area: indications
+ref: CROR 432
+cror: 432@3ae77fefd3f4
+tags: signals indication
+---
+Q: Slow To Medium (Rule 433) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-433
+area: indications
+ref: CROR 433
+cror: 433@e28c011ceb30
+tags: signals indication
+---
+Q: Slow To Slow (Rule 434) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-434
+area: indications
+ref: CROR 434
+cror: 434@21c893ba9e72
+tags: signals indication
+---
+Q: Slow To Stop (Rule 435) — what does it require?
+*a) Proceed
+*b) Proceed
+*c) Proceed
+*d) Proceed
+id: ind-435
+area: indications
+ref: CROR 435
+cror: 435@cc78dee9fb57
+tags: signals indication
+---
+Q: Stop (Rule 439) — what does it require?
+a) Proceed
+b) Proceed
+*c) Stop.
+d) Proceed
+id: ind-439
+area: indications
+ref: CROR 439
+cror: 439@aaa8ce183001
+tags: signals indication
+---
+Q: Diverging To Diverging (Rule 434A) — what does it require?
+*a) Proceed
+*b) Proceed
+c) Proceed at RESTRICTED speed.
+*d) Proceed
+id: ind-434A
+area: indications
+ref: CROR 434A
+cror: 434A@7536714d3836
+tags: signals indication
+---
+Q: Diverging To Medium (Rule 433A) — what does it require?
+a) Proceed
+b) Proceed
+*c) Proceed, DIVERGING speed passing signal and through turnouts, approaching next signal at MEDIUM speed.
+d) Proceed
+id: ind-433A
+area: indications
+ref: CROR 433A
+cror: 433A@e6f01e044a86
+tags: signals indication

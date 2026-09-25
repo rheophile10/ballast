@@ -36,6 +36,6 @@ export const renderRegister = (root, done) => {
 };
 
 export const profileCard = (p, text, extra = []) => h('div', { class: 'card row' }, avatar(p, 72),
-  h('div', {}, h('b', {}, p.name), ` · ${p.role === 'crew' ? 'Crew ' : ''}${p.pin} · ${p.role === 'none' ? 'not yet minted' : p.role}`, p.minted ? h('div', { class: 'small' }, `${p.role} since ${p.minted.start}, minted by ${p.minted.by.name}`) : null, h('div', { class: 'row' },
+  h('div', {}, h('b', {}, p.name), ` · ${p.role === 'crew' ? 'Crew ' : ''}${p.pin} · ${p.role === 'none' ? 'not yet minted' : p.role}`, p.minted ? h('div', { class: 'small' }, `${p.role} since ${p.minted.start}, minted by ${p.minted.by.name}`, p.minted.root && p.minted.root.sig !== p.sig ? ` · under superintendent ${p.minted.root.name}` : '') : null, h('div', { class: 'row' },
     text ? h('button', { onclick: () => download(`profile-${p.pin}.txt`, text) }, 'Download profile') : null,
     text ? h('button', { onclick: () => navigator.clipboard?.writeText(text) }, 'Copy profile text') : null, ...extra)));

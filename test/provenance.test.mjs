@@ -97,3 +97,32 @@ test('a bundle is blocks concatenated; each side finds its own', async () => {
   const cb = bundle(cans); const mine = blocks(cb).find((x) => /^train: Crew 654321$/m.test(x)); assert.ok(mine);
   assert.equal((await readCancel(mine, bob)).pin, '654321'); await assert.rejects(readCancel(mine, alice));
 });
+
+test('the chain: a crew mint carries the superintendent; crew refuse tests not approved by that superintendent; a swapped item is caught', async () => {
+  const { t } = await setup();
+  const sup0 = await makeProfile('superintendent', 'Root', '900100', '', true); const sup = { ...sup0, ...(await mintProfile(sup0, sup0, 'superintendent')) };
+  const rtc0 = await makeProfile('none', 'Teacher', '710100', '', true); const rtc = { ...rtc0, ...(await mintProfile(sup, rtc0, 'rtc')) };
+  const c0 = await makeProfile('none', 'Carol', '123499', '', true); const carol = { ...c0, ...(await mintProfile(rtc, c0, 'crew')) };
+  const { checkMint } = await import('../src/profile.js');
+  assert.equal(carol.minted.root.sig, sup.sig); assert.equal(carol.minted.via.by.sig, sup.sig); assert.equal(await checkMint(carol), true);
+  const other = await makeProfile('superintendent', 'Other', '900101', '', true);
+  assert.equal(await checkMint({ ...carol, minted: { ...carol.minted, root: { name: 'Other', sig: other.sig, pub: other.pub } } }), false, 'the root is under the signature');
+  assert.equal(await checkMint({ ...carol, minted: { ...carol.minted, via: null } }), false, 'an RTC mint must show its own mint');
+  const roster = [{ pin: carol.pin, pub: carol.pub, sig: carol.sig, name: 'Carol' }]; const trust = { root: carol.minted.root.sig };
+  // unapproved: refused
+  const plain = await issueTest(t, rtc, roster, assets, 'RTC', null);
+  await assert.rejects(copyTest(plain.text, carol, carol.pin, Date.now(), trust), /no superintendent approval/);
+  // approved by a stranger: refused
+  const otherMinted = { ...other, ...(await mintProfile(other, other, 'superintendent')) };
+  const strangers = await readApproval(await approveSource(otherMinted, src, t.title));
+  await assert.rejects(copyTest((await issueTest(t, rtc, roster, assets, 'RTC', strangers)).text, carol, carol.pin, Date.now(), trust), /not by the superintendent/);
+  // approved by the root: every item opens and hashes to the approval
+  const approval = await readApproval(await approveSource(sup, src, t.title)); assert.equal(approval.v, 2); assert.equal(Object.keys(approval.items).length, t.items.length);
+  const good = await issueTest(t, rtc, roster, assets, 'RTC', approval); const copy = await copyTest(good.text, carol, carol.pin, Date.now(), trust);
+  for (const id of copy.order) assert.ok((await copy.item(id)).prompt);
+  // the RTC swaps an item for their own: the approval names a different hash, the crew's copy stops
+  const t2 = { ...t, items: t.items.map((it, i) => (i === 0 ? { ...it, prompt: it.prompt + ' (edited by the RTC)' } : it)) };
+  const bad = await issueTest(t2, rtc, roster, assets, 'RTC', approval); const copy2 = await copyTest(bad.text, carol, carol.pin, Date.now(), trust);
+  await assert.rejects(copy2.item(t.items[0].id), /not what the superintendent approved/);
+  assert.ok((await copy2.item(t.items[1].id)).prompt, 'untouched items still open');
+});

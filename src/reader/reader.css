@@ -1,0 +1,11 @@
+.reader { display:flex; gap:0; height:100%; min-height:70vh; border:1px solid #ccc; background:#fff }
+.reader .rside { width:300px; min-width:220px; border-right:1px solid #ddd; padding:10px; overflow:auto; display:flex; flex-direction:column; gap:8px }
+.reader .rside input { width:100%; font:inherit; padding:6px 8px }
+.reader .rmain { flex:1; padding:12px 18px; overflow:auto; max-height:85vh }
+.reader.compact { min-height:0; height:100% } .reader.compact .rmain { max-height:none }
+.rbar { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px }
+.rcrumbs { font-size:13px; color:#555; margin-bottom:6px } .rcrumbs a { color:#1d4ed8; text-decoration:none }
+.rtext { white-space:pre-wrap; line-height:1.5; font-size:15px } .rlink { color:#1d4ed8; text-decoration:underline dotted }
+mark.rnote { background:#fde68a; cursor:help; padding:0 1px; border-bottom:2px solid #f59e0b }
+.rlist, .rresults, .rtoc { list-style:none; padding:0; margin:0 } .rlist li, .rresults li { padding:4px 0; border-bottom:1px solid #f0f0f0 } .rtoc li a { display:block; padding:3px 4px; color:#1d4ed8; text-decoration:none } .rtoc li a.on { background:#eef }
+.rresults a, .rlist a { color:#1d4ed8; text-decoration:none; font-weight:600 }

@@ -50,6 +50,12 @@ instructor can derive, which also authenticates the sender. `verify.py` (Python 
 library + `cryptography`) re-scores any attempt from the instructor's file and the test
 source and must agree with the app — an auditor can run it without trusting the app.
 
+**Can an instructor tamper with a test?** No. The superintendent's approval signs the source hash and a
+hash of every item's public form; the test file carries the approval; a crew member's minted profile
+carries (and can verify) the superintendent at the top of their chain. The crew's copy refuses a test with
+no approval, or one approved by any other key, and checks each item as it is decrypted against the
+approval's hash for that item. Editing, adding or substituting items breaks the check item by item.
+
 **Provenance: can a grade be proven to come from the answers submitted?** Yes, for
 everything that is arithmetic. The crew member signs their release with their own key
 (the RTC cannot alter the answers), keeps the file's SHA-256, and gets back a cancellation

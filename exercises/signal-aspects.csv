@@ -1,0 +1,128 @@
+rule,name,form,top,middle,bottom,plate,indication
+411,Clear To Stop,high mast,yellow,red,red,,"Proceed, preparing to stop at next signal."
+411,Clear To Stop,high mast,yellow,,,,"Proceed, preparing to stop at next signal."
+411,Clear To Stop,staggered,yellow,red,,,"Proceed, preparing to stop at next signal."
+411,Clear To Stop,high mast,yellow,red,,,"Proceed, preparing to stop at next signal."
+414A,Advance Clear To Diverging,high mast,flashing yellow,yellow,red,DV,"Proceed, approaching second signal at DIVERGING speed"
+414A,Advance Clear To Diverging,staggered,flashing yellow,yellow,,DV,"Proceed, approaching second signal at DIVERGING speed"
+414A,Advance Clear To Diverging,high mast,flashing yellow,yellow,,DV,"Proceed, approaching second signal at DIVERGING speed"
+412,Advance Clear To Limited,high mast,flashing yellow,flashing green,red,,"Proceed, approaching second signal at LIMITED speed."
+412,Advance Clear To Limited,staggered,flashing yellow,flashing green,,,"Proceed, approaching second signal at LIMITED speed."
+412,Advance Clear To Limited,high mast,flashing yellow,flashing green,,,"Proceed, approaching second signal at LIMITED speed."
+413,Advance Clear To Medium,high mast,flashing yellow,green,red,,"Proceed, approaching second signal at MEDIUM speed."
+413,Advance Clear To Medium,staggered,flashing yellow,green,,,"Proceed, approaching second signal at MEDIUM speed."
+413,Advance Clear To Medium,high mast,flashing yellow,green,,,"Proceed, approaching second signal at MEDIUM speed."
+414,Advance Clear To Slow,high mast,flashing yellow,yellow,red,,"Proceed, approaching second signal at SLOW speed."
+414,Advance Clear To Slow,staggered,flashing yellow,yellow,,,"Proceed, approaching second signal at SLOW speed."
+414,Advance Clear To Slow,high mast,flashing yellow,yellow,,,"Proceed, approaching second signal at SLOW speed."
+415,Advance Clear To Stop,high mast,flashing yellow,red,red,,"Proceed, prepared to Stop at second signal."
+415,Advance Clear To Stop,high mast,flashing yellow,,,,"Proceed, prepared to Stop at second signal."
+415,Advance Clear To Stop,staggered,flashing yellow,red,,,"Proceed, prepared to Stop at second signal."
+415,Advance Clear To Stop,high mast,flashing yellow,red,,,"Proceed, prepared to Stop at second signal."
+405,Clear,high mast,green,red,red,,Proceed.
+405,Clear,high mast,green,,,,Proceed.
+405,Clear,staggered,green,red,,,Proceed.
+405,Clear,high mast,green,red,,,Proceed.
+405,Clear,low mast,green,green,,,Proceed.
+408,Clear To Diverging,high mast,green,red,flashing yellow,DV,"Proceed, approaching next signal at DIVERGING speed."
+408,Clear To Diverging,high mast,yellow,yellow,red,DV,"Proceed, approaching next signal at DIVERGING speed."
+408,Clear To Diverging,staggered,yellow,yellow,,DV,"Proceed, approaching next signal at DIVERGING speed."
+408,Clear To Diverging,staggered,yellow,flashing yellow,,DV,"Proceed, approaching next signal at DIVERGING speed."
+408,Clear To Diverging,high mast,yellow,yellow,,DV,"Proceed, approaching next signal at DIVERGING speed."
+408,Clear to Diverging,low mast,yellow,yellow,,DV,"Proceed, approaching next signal at DIVERGING speed."
+406,Clear To Limited,high mast,green,red,flashing green,,"Proceed, approaching next signal at LIMITED speed."
+406,Clear To Limited,high mast,yellow,flashing green,red,,"Proceed, approaching next signal at LIMITED speed."
+406,Clear To Limited,high mast,yellow,green,red,L,"Proceed, approaching next signal at LIMITED speed."
+406,Clear To Limited,staggered,yellow,flashing green,,,"Proceed, approaching next signal at LIMITED speed."
+406,Clear To Limited,staggered,yellow,green,,L,"Proceed, approaching next signal at LIMITED speed."
+406,Clear To Limited,high mast,yellow,flashing green,,,"Proceed, approaching next signal at LIMITED speed."
+406,Clear To Limited,high mast,yellow,green,,L,"Proceed, approaching next signal at LIMITED speed."
+406,Clear To Limited,low mast,yellow,flashing green,,,"Proceed, approaching next signal at LIMITED speed."
+406,Clear To Limited,low mast,yellow,green,,L,"Proceed, approaching next signal at LIMITED speed."
+407,Clear To Medium,high mast,green,red,green,,"Proceed, approaching next signal at MEDIUM speed."
+407,Clear To Medium,high mast,yellow,green,red,,"Proceed, approaching next signal at MEDIUM speed."
+407,Clear To Medium,staggered,yellow,green,,,"Proceed, approaching next signal at MEDIUM speed."
+407,Clear To Medium,high mast,yellow,green,,,"Proceed, approaching next signal at MEDIUM speed."
+407,Clear To Medium,low mast,yellow,green,,,"Proceed, approaching next signal at MEDIUM speed."
+410,Clear To Restricting,staggered,yellow,flashing red,,,"Proceed, next signal is displaying restricting signal."
+410,Clear To Restricting,high mast,yellow,flashing red,,,"Proceed, next signal is displaying restricting signal."
+409,Clear To Slow,high mast,green,red,flashing yellow,,"Proceed, approaching next signal at SLOW speed."
+409,Clear To Slow,high mast,yellow,yellow,red,,"Proceed, approaching next signal at SLOW speed."
+409,Clear To Slow,staggered,yellow,yellow,,,"Proceed, approaching next signal at SLOW speed."
+409,Clear To Slow,staggered,yellow,flashing yellow,,,"Proceed, approaching next signal at SLOW speed."
+409,Clear To Slow,high mast,yellow,yellow,,,"Proceed, approaching next signal at SLOW speed."
+409,Clear To Slow,low mast,yellow,yellow,,,"Proceed, approaching next signal at SLOW speed."
+430,Diverging,high mast,red,yellow,,DV,"Proceed at REDUCED speed, not exceeding DIVERGING speed passing signal and through turnouts."
+430,Diverging,high mast,red,red,yellow,DV,"Proceed at REDUCED speed, not exceeding DIVERGING speed passing signal and through turnouts."
+430,Diverging,low mast,red,yellow,,DV,"Proceed at REDUCED speed, not exceeding DIVERGING speed passing signal and through turnouts."
+430,Diverging,low mast,yellow,,,DV,"Proceed at REDUCED speed, not exceeding DIVERGING speed passing signal and through turnouts."
+428,Diverging To Clear,staggered,,,,,
+428,Diverging To Clear,high mast,red,red,green,DV,"Proceed, DIVERGING speed passing signal and through turnouts"
+428,Diverging To Clear,high mast,red,green,,DV,"Proceed, DIVERGING speed passing signal and through turnouts."
+428,Diverging To Clear,low mast,red,green,,DV,"Proceed, DIVERGING speed passing signal and through turnouts"
+428,Diverging To Clear,low mast,green,,,DV,"Proceed, DIVERGING speed passing signal and through turnouts"
+429,Diverging To Stop,staggered,red,flashing yellow,,DV,"Proceed, DIVERGING speed passing signal and through turnouts preparing to stop at next signal."
+429,Diverging To Stop,high mast,red,red,flashing yellow,DV,"Proceed, DIVERGING speed passing signal and through turnouts preparing to stop at next signal."
+429,Diverging To Stop,high mast,red,flashing yellow,,DV,"Proceed, DIVERGING speed passing signal and through turnouts preparing to stop at next signal."
+429,Diverging To Stop,low mast,red,flashing yellow,,DV,"Proceed, DIVERGING speed passing signal and through turnouts preparing to stop at next signal."
+429,Diverging To Stop,low mast,flashing yellow,,,DV,Proceed. DIVERGING speed passing signal and through turnouts preparing to stop at next signal.
+429,Diverging To Stop,low mast,yellow,A,,DV,"Proceed, DIVERGING speed passing signal and through turnouts preparing to stop at next signal."
+416,Limited To Clear,high mast,red,flashing green,red,,"Proceed, LIMITED speed passing signal and through turnouts"
+416,Limited To Clear,high mast,red,green,red,L,"Proceed, LIMITED speed passing signal and through turnouts"
+416,Limited To Clear,low mast,flashing green,red,,,"Proceed, LIMITED speed passing signal and through turnouts"
+416,Limited To Clear,low mast,green,red,,L,"Proceed, LIMITED speed passing signal and through turnouts"
+419A,Limited To Diverging,high mast,red,flashing green,flashing yellow,DV,"Proceed, LIMITED speed passing signal and through turnouts, approaching next signal at DIVERGING speed."
+419A,Limited To Diverging,low mast,flashing green,flashing yellow,,DV,"Proceed, LIMITED speed passing signal and through turnouts, approaching next signal at DIVERGING speed."
+417,Limited To Limited,high mast,red,flashing green,flashing green,,"Proceed, LIMITED speed passing signal and through turnouts, approaching next signal at LIMITED speed."
+418,Limited To Medium,high mast,red,flashing green,green,,"Proceed, LIMITED speed passing signal and through turnouts, approaching next signal at MEDIUM speed."
+419,Limited To Slow,high mast,red,flashing green,flashing yellow,,"Proceed, LIMITED speed passing signal and through turnouts, approaching next signal at SLOW speed."
+419,Limited To Slow,low mast,flashing green,flashing yellow,,,"Proceed, LIMITED speed passing signal and through turnouts, approaching next signal at SLOW speed."
+420,Limited To Restricting,,,,,,
+420,Limited To Restricting,,,,,,
+420,Limited To Restricting,,,,,,
+420,Limited To Restricting,,,,,,
+420,Limited To Restricting,,,,,,
+421,Limited To Stop,high mast,red,flashing yellow,red,,"Proceed, LIMITED speed passing signal and through turnouts, preparing to stop at next signal."
+421,Limited To Stop,high mast,red,yellow,red,L,"Proceed, LIMITED speed passing signal and through turnouts, preparing to stop at next signal."
+421,Limited To Stop,low mast,flashing yellow,red,,,"Proceed, LIMITED speed passing signal and through turnouts, preparing to stop at next signal."
+421,Limited To Stop,low mast,yellow,red,,L,"Proceed, LIMITED speed passing signal and through turnouts, preparing to stop at next signal."
+422,Medium To Clear,high mast,red,green,red,,"Proceed, MEDIUM speed passing signal and through turnouts"
+422,Medium To Clear,low mast,green,red,,,"Proceed, MEDIUM speed passing signal and through turnouts"
+425A,Medium To Diverging,high mast,red,green,flashing yellow,DV,"Proceed, MEDIUM speed passing signal and through turnouts, approaching next signal at DIVERGING speed."
+425A,Medium To Diverging,low mast,green,flashing yellow,,DV,"Proceed, MEDIUM speed passing signal and through turnouts, approaching next signal at DIVERGING speed."
+423,Medium To Limited,high mast,red,green,flashing green,,"Proceed, MEDIUM speed passing signal and through turnouts, approaching next signal at LIMITED speed."
+423,Medium To Limited,low mast,green,flashing green,,,"Proceed, MEDIUM speed passing signal and through turnouts, approaching next signal at LIMITED speed."
+424,Medium To Medium,high mast,red,green,green,,"Proceed, MEDIUM speed passing signal and through turnouts, approaching next signal at MEDIUM speed."
+425,Medium To Slow,high mast,red,green,flashing yellow,,"Proceed, MEDIUM speed passing signal and through turnouts, approaching next signal at SLOW speed."
+425,Medium To Slow,low mast,green,flashing yellow,,,"Proceed, MEDIUM speed passing signal and through turnouts, approaching next signal at SLOW speed."
+427,Medium To Stop,high mast,red,yellow,red,,"Proceed, MEDIUM speed passing signal and through turnouts, preparing to stop at next signal."
+427,Medium To Stop,low mast,yellow,red,,,"Proceed, MEDIUM speed passing signal and through turnouts, preparing to stop at next signal."
+436,Restricting,high mast,red,red,yellow,,Proceed at RESTRICTED speed.
+436,Restricting,high mast,red,,,R,Proceed at RESTRICTED speed.
+436,Restricting,staggered,red,red,,R,Proceed at RESTRICTED speed.
+436,Restricting,staggered,red,yellow,,,Proceed at RESTRICTED speed.
+436,Restricting,high mast,red,yellow,,,Proceed at RESTRICTED speed.
+436,Restricting,low mast,red,yellow,,,Proceed at RESTRICTED speed.
+436,Restricting,low mast,yellow,,,,Proceed at RESTRICTED speed.
+431,Slow To Clear,high mast,red,red,green,,"Proceed, SLOW speed passing signal and through turnouts."
+431,Slow To Clear,high mast,red,green,,,"Proceed, SLOW speed passing signal and through turnouts."
+431,Slow To Clear,low mast,red,green,,,"Proceed, SLOW speed passing signal and through turnouts"
+431,Slow To Clear,low mast,green,,,,"Proceed, SLOW speed passing signal and through turnouts"
+432,Slow To Limited,high mast,red,flashing yellow,flashing green,,"Proceed, SLOW speed passing signal and through turnouts, approaching next signal at LIMITED speed."
+433,Slow To Medium,high mast,red,flashing yellow,green,,"Proceed, SLOW speed passing signal and through turnouts, approaching next signal at MEDIUM speed."
+434,Slow To Slow,high mast,red,flashing yellow,flashing yellow,,"Proceed, SLOW speed passing signal and through turnouts, approaching next signal at SLOW speed."
+435,Slow To Stop,staggered,red,flashing yellow,,,"Proceed, SLOW speed passing signal and through turnouts, preparing to stop at next signal."
+435,Slow To Stop,high mast,red,red,flashing yellow,,"Proceed, SLOW speed passing signal and through turnouts, preparing to stop at next signal."
+435,Slow To Stop,high mast,red,flashing yellow,,,"Proceed, SLOW speed passing signal through turnouts, preparing to stop at next signal."
+435,Slow To Stop,low mast,red,flashing yellow,,,"Proceed, SLOW speed passing signal and through turnouts, preparing to stop at next signal."
+435,Slow To Stop,low mast,flashing yellow,,,,"Proceed, SLOW speed passing signal and through turnouts, preparing to stop at next signal."
+435,Slow To Stop,low mast,yellow,A,,,"Proceed, SLOW speed passing signal and through turnouts, preparing to stop at next signal."
+439,Stop,high mast,red,red,red,,Stop.
+439,Stop,high mast,red,A,,,Stop.
+439,Stop,high mast,red,red,,,Stop.
+439,Stop,low mast,red,red,,,Stop.
+439,Stop,low mast,red,,,,Stop.
+437,Stop and Proceed,high mast,red,,,,"Stop, then proceed at RESTRICTED speed."
+437,Stop and Proceed,staggered,red,red,,,"Stop, then proceed at RESTRICTED speed."
+434A,Diverging To Diverging,high mast,red,flashing yellow,flashing yellow,DV,"Proceed, DIVERGING speed passing signal and through turnouts, approaching next signal at DIVERGING speed."
+433A,Diverging To Medium,high mast,red,yellow,green,DV,"Proceed, DIVERGING speed passing signal and through turnouts, approaching next signal at MEDIUM speed."

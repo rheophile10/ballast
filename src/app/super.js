@@ -11,6 +11,7 @@ import { approveSource, takeReport } from '../director.js';
 import { sourceHash } from '../profile.js';
 import { profileCard, avatar } from './profile-ui.js';
 import { announce } from '../embed.js';
+import { bookCheck } from './bookcheck.js';
 
 let book = null, tab = 'reports', pass = '', notes = [], root, go;
 const note = (m, bad = false) => { notes.unshift({ m, bad }); notes = notes.slice(0, 6); };
@@ -49,10 +50,13 @@ const authorBox = () => { const ta = h('textarea', { rows: 14, value: editor.tex
   return h('div', { class: 'card' }, h('h2', {}, 'Write a test'), h('p', { class: 'small' }, 'The source format is in SPEC.md §10. Validate shows problems; Add puts it in the inventory, where you can approve it.'), ta,
     editor.errors?.length ? h('ul', { class: 'bad small' }, editor.errors.map((e) => h('li', {}, e))) : editor.errors ? h('p', { class: 'good small' }, `Valid: ${editor.test.title}, ${editor.test.items.length} items`) : null,
     h('div', { class: 'row' }, h('button', { onclick: async () => { const { test, errors } = await parseTest(editor.text); editor = { ...editor, errors, test: errors.length ? null : test }; rerender(); } }, 'Validate'), h('button', { class: 'primary', onclick: async () => { await addSource('written on the book', editor.text); rerender(); } }, 'Add to inventory'))); };
+let checking = null;
 const inventoryTab = () => h('div', {}, authorBox(), h('p', { class: 'small' }, 'Or drop test sources. Approve signs the source\'s hash; give the approval file to the RTC, who drops it on their desk. A test built from a byte-identical source then carries the approval.'),
   h('table', {}, h('tr', {}, h('th', {}, 'Test'), h('th', {}, 'Items'), h('th', {}, 'Hash'), h('th', {}, 'Status'), h('th')),
     book.sources.map((s) => h('tr', {}, h('td', {}, s.title), h('td', {}, s.items), h('td', { class: 'small complete' }, s.hash.slice(0, 12)), h('td', { class: s.approved ? 'good' : 'small' }, s.approved ? `approved ${new Date(s.approved).toLocaleDateString()}` : 'not approved'),
-      h('td', {}, h('button', { class: s.approved ? '' : 'primary', onclick: async () => { const text = await approveSource(book.rtc, s.source, s.title); s.approved = Date.now(); download(`approval-${s.title.replace(/\W+/g, '-')}.txt`, text); note(`approved ${s.title}`); rerender(); } }, s.approved ? 'approval again' : 'Approve'), ' ', h('button', { onclick: () => download(s.name, s.source) }, 'source'))))));
+      h('td', {}, h('button', { onclick: () => { checking = checking === s.hash ? null : s.hash; rerender(); } }, 'Rulebook check')),
+      h('td', {}, h('button', { class: s.approved ? '' : 'primary', onclick: async () => { const text = await approveSource(book.rtc, s.source, s.title); s.approved = Date.now(); download(`approval-${s.title.replace(/\W+/g, '-')}.txt`, text); note(`approved ${s.title}`); rerender(); } }, s.approved ? 'approval again' : 'Approve'), ' ', h('button', { onclick: () => download(s.name, s.source) }, 'source'))))),
+  checking && book.sources.find((s) => s.hash === checking) ? bookCheck(book.sources.find((s) => s.hash === checking).source, async (src) => { const old = book.sources.find((s) => s.hash === checking); await addSource(old.name, src); checking = null; note('source linked to the rulebook: new hash, approve it again', true); rerender(); }) : null);
 let openReport = null;
 const profileView = (x) => { const r = x.report; return h('div', { class: 'card' }, h('button', { onclick: () => { openReport = null; rerender(); } }, '← back'), h('h2', {}, `${r.title} — ${r.class || 'all crew'} — RTC ${x.rtcName}`),
   h('p', { class: 'small' }, `${r.n} crew · ${r.passed} passed · mean ${Math.round(r.mean * 100)}% · ${r.approved ? 'approved test' : 'UNAPPROVED test'}`),

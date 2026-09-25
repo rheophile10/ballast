@@ -1,0 +1,667 @@
+# Definitions
+time: 60m
+pass: 90%
+shuffle: items options
+back: yes
+cror: open
+areas: definitions "Definitions"
+---
+Q: Which term does the CROR define as: “A fixed signal used in connection with one or more signals to govern the approach of a movement to such signal.”
+a) Running Switch
+*b) Advance Signal
+c) Advanced Train Dispatching System
+d) Mountain Grade
+id: def-advance-signal
+area: definitions
+ref: CROR Advance Signal
+cror: def:advance-signal@1107ed70c1a3
+tags: definitions
+---
+Q: Which term does the CROR define as: “Train control technologies that provide enhancements for protecting overlapping authorities with ability to provide signal indications into protected track.”
+a) Limited Speed
+*b) Advanced Train Dispatching System
+c) Running Switch
+d) Humping
+id: def-advanced-train-dispatching-system
+area: definitions
+ref: CROR Advanced Train Dispatching System
+cror: def:advanced-train-dispatching-system@a58fa7d4dc1c
+tags: definitions
+---
+Q: Which term does the CROR define as: “A series of consecutive blocks in which ABS rules apply.”
+a) Humping
+b) Exclusive Top
+c) Controlled Point
+*d) Automatic Block Signal System (ABS)
+id: def-automatic-block-signal-system-abs
+area: definitions
+ref: CROR Automatic Block Signal System (ABS)
+cror: def:automatic-block-signal-system-abs@69067e66f233
+tags: definitions
+---
+Q: Which term does the CROR define as: “A length of track of defined limits, the use of which by a movement is governed by block signals.”
+a) Railway Company Grade Crossing
+b) Slow Speed
+c) Fixed Signal
+*d) Block
+id: def-block
+area: definitions
+ref: CROR Block
+cror: def:block@c747edf02dfc
+tags: definitions
+---
+Q: Which term does the CROR define as: “A fixed signal at the entrance to a block to govern a movement entering or using that block.”
+a) Fixed Signal
+b) Station
+c) Non-Main Track (Nmt)
+*d) Block Signal
+id: def-block-signal
+area: definitions
+ref: CROR Block Signal
+cror: def:block-signal@1c770c972769
+tags: definitions
+---
+Q: Which term does the CROR define as: “That portion of the main track or main tracks within limits defined by cautionary limit sign(s).”
+*a) Cautionary Limits
+b) Limited Speed
+c) Electronic Communications Method (ECM)
+d) Reduced Speed
+id: def-cautionary-limits
+area: definitions
+ref: CROR Cautionary Limits
+cror: def:cautionary-limits@c4051eed47de
+tags: definitions
+---
+Q: Which term does the CROR define as: “A block in CTC between consecutive controlled locations or points.”
+a) Reduced Speed
+*b) Controlled Block
+c) Controlled Point
+d) Equipment
+id: def-controlled-block
+area: definitions
+ref: CROR Controlled Block
+cror: def:controlled-block@1c6cf3c82dff
+tags: definitions
+---
+Q: Which term does the CROR define as: “A CTC block signal which is capable of displaying a Stop indication until requested to display a less restrictive indication by the RTC.”
+a) Controlled Point
+b) Medium Speed
+c) Multi-Track
+*d) Controlled Signal
+id: def-controlled-signal
+area: definitions
+ref: CROR Controlled Signal
+cror: def:controlled-signal@cc533b05b2fc
+tags: definitions
+---
+Q: Which term does the CROR define as: “A location in CTC the limits of which are defined by opposing controlled signals.”
+a) Running Switch
+*b) Controlled Location
+c) Track Occupancy Permit (TOP)
+d) Engine In Yard Service
+id: def-controlled-location
+area: definitions
+ref: CROR Controlled Location
+cror: def:controlled-location@f903df298e06
+tags: definitions
+---
+Q: Which term does the CROR define as: “A signal location in CTC consisting of controlled signal(s) in one direction only.”
+*a) Controlled Point
+b) Follow-Up Top
+c) Signal Indication
+d) Transfer
+id: def-controlled-point
+area: definitions
+ref: CROR Controlled Point
+cror: def:controlled-point@b511ea72c8c3
+tags: definitions
+---
+Q: Which term does the CROR define as: “A track joining adjacent main tracks, or a main track and another track.”
+a) Tabular General Bulletin Order (Tgbo)
+b) Controlled Block
+c) Train
+*d) Crossover
+id: def-crossover
+area: definitions
+ref: CROR Crossover
+cror: def:crossover@5be627c11384
+tags: definitions
+---
+Q: Which term does the CROR define as: “A document containing applicable information from each GBO, instructions and other information requiring compliance within limits indicated in special instructions.”
+a) Train
+b) Track Occupancy Permit (TOP)
+*c) Daily Operating Bulletin (DOB)
+d) Main Track
+id: def-daily-operating-bulletin-dob
+area: definitions
+ref: CROR Daily Operating Bulletin (DOB)
+cror: def:daily-operating-bulletin-dob@9d58b019b427
+tags: definitions
+---
+Q: Which term does the CROR define as: “An electronic method for transmission and cancellation of authorities, instructions or information.”
+a) Controlled Signal
+b) Unattended
+c) Train
+*d) Electronic Communications Method (ECM)
+id: def-electronic-communications-method-ecm
+area: definitions
+ref: CROR Electronic Communications Method (ECM)
+cror: def:electronic-communications-method-ecm@e931d5741a85
+tags: definitions
+---
+Q: Which term does the CROR define as: “A locomotive(s) operated from a single control or a cab control car, used in train, transfer or yard service.”
+a) Siding Control Territory (SCT)
+*b) Engine
+c) Railway Company Grade Crossing
+d) General Bulletin Order(S) (GBO)
+id: def-engine
+area: definitions
+ref: CROR Engine
+cror: def:engine@cc53b4ab8a14
+tags: definitions
+---
+Q: Which term does the CROR define as: “An engine with or without cars utilized exclusively in switching, marshalling, humping, trimming and industrial switching.”
+a) Time Table
+b) Station
+c) Exclusive Top
+*d) Engine In Yard Service
+id: def-engine-in-yard-service
+area: definitions
+ref: CROR Engine In Yard Service
+cror: def:engine-in-yard-service@7c18243432a4
+tags: definitions
+---
+Q: Which term does the CROR define as: “One or more engines and/or cars which can be handled on their own wheels in a movement.”
+a) Follow-Up Top
+b) Siding Control Territory (SCT)
+*c) Equipment
+d) Controlled Location
+id: def-equipment
+area: definitions
+ref: CROR Equipment
+cror: def:equipment@5f31c274e1d9
+tags: definitions
+---
+Q: Which term does the CROR define as: “A TOP that provides exclusive occupancy of the track to one foreman. No more than two track units can operate within the limits of an Exclusive TOP.”
+a) Gravity Drop
+*b) Exclusive Top
+c) Controlled Location
+d) Block
+id: def-exclusive-top
+area: definitions
+ref: CROR Exclusive Top
+cror: def:exclusive-top@5b9a38fac0d8
+tags: definitions
+---
+Q: Which term does the CROR define as: “A signal or sign at a fixed location indicating a condition affecting the operation of a movement.”
+a) Mountain Grade
+b) Main Track
+*c) Fixed Signal
+d) Electronic Communications Method (ECM)
+id: def-fixed-signal
+area: definitions
+ref: CROR Fixed Signal
+cror: def:fixed-signal@c9e2a00a753e
+tags: definitions
+---
+Q: Which term does the CROR define as: “A TOP issued within limits of a movement(s) that has passed or will be identified by the foreman as having passed the foreman’s location.”
+a) Time Table
+b) Transfer
+c) Advance Signal
+*d) Follow-Up Top
+id: def-follow-up-top
+area: definitions
+ref: CROR Follow-Up Top
+cror: def:follow-up-top@39e45672b430
+tags: definitions
+---
+Q: Which term does the CROR define as: “Instructions regarding track condition restrictions and other information that affect the safety and operation of a movement.”
+a) Limited Speed
+b) Gravity Drop
+c) Track Occupancy Permit (TOP)
+*d) General Bulletin Order(S) (GBO)
+id: def-general-bulletin-order-s-gbo
+area: definitions
+ref: CROR General Bulletin Order(S) (GBO)
+cror: def:general-bulletin-order-s-gbo@c4d681118854
+tags: definitions
+---
+Q: Which term does the CROR define as: “Releasing stationary equipment and permitting it to roll under its own momentum.”
+a) Turnout Speed
+b) Slow Speed
+c) Electronic Communications Method (ECM)
+*d) Gravity Drop
+id: def-gravity-drop
+area: definitions
+ref: CROR Gravity Drop
+cror: def:gravity-drop@ecd1350a74fa
+tags: definitions
+---
+Q: Which term does the CROR define as: “Any location where a railway track intersects with an authorized road, sidewalk, path, or trail, excluding Railway Company Grade Crossings.”
+*a) Grade Crossing
+b) Track Unit (Tu)
+c) Exclusive Top
+d) Movement(S)
+id: def-grade-crossing
+area: definitions
+ref: CROR Grade Crossing
+cror: def:grade-crossing@40aef22340a6
+tags: definitions
+---
+Q: Which term does the CROR define as: “A portion of a track 2 miles in length or greater, with an average grade greater than 1.0%, and less than or equal to 1.8%.”
+a) Engine
+b) Siding Control Territory (SCT)
+*c) Heavy Grade
+d) Schedule
+id: def-heavy-grade
+area: definitions
+ref: CROR Heavy Grade
+cror: def:heavy-grade@107c28a7b52a
+tags: definitions
+---
+Q: Which term does the CROR define as: “A track, or portion of a track, other than a main track, subdivision track, or siding; identified in special instructions, on which unattended equipment requires the application of Rule 112(a).”
+a) Equipment
+b) Trailing End
+c) Unattended
+*d) High Risk Location
+id: def-high-risk-location
+area: definitions
+ref: CROR High Risk Location
+cror: def:high-risk-location@604f17666d01
+tags: definitions
+---
+Q: Which term does the CROR define as: “Any location where a railway track intersects with a road, sidewalk, path, or trail, that is opened or maintained by a railway company that is the sole authority of the crossing.”
+a) Turnout Speed
+b) Automatic Block Signal System (ABS)
+c) High Risk Location
+*d) Railway Company Grade Crossing
+id: def-railway-company-grade-crossing
+area: definitions
+ref: CROR Railway Company Grade Crossing
+cror: def:railway-company-grade-crossing@010e279653a0
+tags: definitions
+---
+Q: Which term does the CROR define as: “Pushing equipment at a regulated speed then releasing it under its own momentum, in an engineered environment where the route and speed are controlled through automated or assisted devices.”
+a) Method Of Control
+*b) Humping
+c) Track Unit (Tu)
+d) Follow-Up Top
+id: def-humping
+area: definitions
+ref: CROR Humping
+cror: def:humping@45f34dd744ff
+tags: definitions
+---
+Q: Which term does the CROR define as: “An arrangement of interconnected signals and signal appliances for which interlocking rules and special instructions are in effect.”
+a) Engine In Yard Service
+b) Movement(S)
+*c) Interlocking
+d) Slow Speed
+id: def-interlocking
+area: definitions
+ref: CROR Interlocking
+cror: def:interlocking@f475fbb43979
+tags: definitions
+---
+Q: Which term does the CROR define as: “The tracks between the extreme or outer opposing interlocking signals of an interlocking.”
+*a) Interlocking Limits
+b) Siding
+c) Advanced Train Dispatching System
+d) Schedule
+id: def-interlocking-limits
+area: definitions
+ref: CROR Interlocking Limits
+cror: def:interlocking-limits@c9566a377f3d
+tags: definitions
+---
+Q: Which term does the CROR define as: “A fixed signal at the entrance to or within interlocking limits to govern the use of the routes.”
+a) Grade Crossing
+b) Siding
+*c) Interlocking Signal
+d) Gravity Drop
+id: def-interlocking-signal
+area: definitions
+ref: CROR Interlocking Signal
+cror: def:interlocking-signal@75dca187f69f
+tags: definitions
+---
+Q: Which term does the CROR define as: “Pushing equipment then releasing it under its own momentum. Does not include humping.”
+a) Multi-Track
+b) Mountain Grade
+c) Siding
+*d) Kicking
+id: def-kicking
+area: definitions
+ref: CROR Kicking
+cror: def:kicking@8295ad3d26f0
+tags: definitions
+---
+Q: Which term does the CROR define as: “A track of a subdivision extending through and between stations governed by one or more methods of control upon which movements, track units and track work must be authorized.”
+a) Exclusive Top
+b) Controlled Location
+*c) Main Track
+d) Limited Speed
+id: def-main-track
+area: definitions
+ref: CROR Main Track
+cror: def:main-track@53f9b67162ad
+tags: definitions
+---
+Q: Which term does the CROR define as: “Rules and/or special instructions governing the use of a track(s).”
+a) Trailing End
+b) Controlled Signal
+c) Block Signal
+*d) Method Of Control
+id: def-method-of-control
+area: definitions
+ref: CROR Method Of Control
+cror: def:method-of-control@6023eb6f2a99
+tags: definitions
+---
+Q: Which term does the CROR define as: “A portion of a track 2 miles in length or greater, with an average grade greater than 1.8%.”
+a) Heavy Grade
+b) Turnout Speed
+*c) Mountain Grade
+d) Method Of Control
+id: def-mountain-grade
+area: definitions
+ref: CROR Mountain Grade
+cror: def:mountain-grade@6392f5e521df
+tags: definitions
+---
+Q: Which term does the CROR define as: “The term used in these rules to indicate that the rule is applicable to trains, transfers or engines in yard service.”
+a) Time Table
+b) Advance Signal
+c) Unattended
+*d) Movement(S)
+id: def-movement-s
+area: definitions
+ref: CROR Movement(S)
+cror: def:movement-s@b4ae5b6fcd84
+tags: definitions
+---
+Q: Which term does the CROR define as: “Two or more main tracks of a subdivision at the same location.”
+a) Heavy Grade
+b) Main Track
+c) Limited Speed
+*d) Multi-Track
+id: def-multi-track
+area: definitions
+ref: CROR Multi-Track
+cror: def:multi-track@3a3fbb80fe38
+tags: definitions
+---
+Q: Which term does the CROR define as: “Any track(s) other than those listed in time table columns as having CTC, OCS, ABS or Cautionary Limits applicable and unless otherwise provided include a requirement to operate at REDUCED speed.”
+a) Method Of Control
+b) Automatic Block Signal System (ABS)
+c) Running Switch
+*d) Non-Main Track (Nmt)
+id: def-non-main-track-nmt
+area: definitions
+ref: CROR Non-Main Track (Nmt)
+cror: def:non-main-track-nmt@da3ffa00af39
+tags: definitions
+---
+Q: Which term does the CROR define as: “A siding where non-main track rules apply, the use of which may be governed by special instructions.”
+a) Controlled Point
+b) Siding
+c) Non-Main Track (Nmt)
+*d) Non-Signalled Siding
+id: def-non-signalled-siding
+area: definitions
+ref: CROR Non-Signalled Siding
+cror: def:non-signalled-siding@c69f12e5840a
+tags: definitions
+---
+Q: Which term does the CROR define as: “Pulling equipment then releasing it under its own momentum.”
+*a) Running Switch
+b) Signal Indication
+c) High Risk Location
+d) Siding
+id: def-running-switch
+area: definitions
+ref: CROR Running Switch
+cror: def:running-switch@46f0e1422fce
+tags: definitions
+---
+Q: Which term does the CROR define as: “Information pertaining to the operating times of a passenger train.”
+a) Advanced Train Dispatching System
+b) Transfer
+*c) Schedule
+d) Time Table
+id: def-schedule
+area: definitions
+ref: CROR Schedule
+cror: def:schedule@a494e3a29f3f
+tags: definitions
+---
+Q: Which term does the CROR define as: “A track adjacent and connected to the main track which is so designated in the time table, GBO or operating bulletin.”
+a) Movement(S)
+b) Method Of Control
+c) Grade Crossing
+*d) Siding
+id: def-siding
+area: definitions
+ref: CROR Siding
+cror: def:siding@2ae7f0a8510e
+tags: definitions
+---
+Q: Which term does the CROR define as: “Non-signalled sidings indicated in special instructions where SCT rules are applicable.”
+*a) Siding Control Territory (SCT)
+b) Heavy Grade
+c) Main Track
+d) Advance Signal
+id: def-siding-control-territory-sct
+area: definitions
+ref: CROR Siding Control Territory (SCT)
+cror: def:siding-control-territory-sct@2d994ce77230
+tags: definitions
+---
+Q: Which term does the CROR define as: “The information conveyed by a fixed signal.”
+a) Block
+*b) Signal Indication
+c) Slow Speed
+d) Kicking
+id: def-signal-indication
+area: definitions
+ref: CROR Signal Indication
+cror: def:signal-indication@1ee49d231a3b
+tags: definitions
+---
+Q: Which term does the CROR define as: “A speed not exceeding 25 miles per hour.”
+a) Track Occupancy Permit (TOP)
+b) Cautionary Limits
+c) Slow Speed
+*d) Diverging Speed
+id: def-diverging-speed
+area: definitions
+ref: CROR Diverging Speed
+cror: def:diverging-speed@aa2971b56b8d
+tags: definitions
+---
+Q: Which term does the CROR define as: “A speed not exceeding 45 miles per hour.”
+*a) Limited Speed
+b) Station
+c) Transfer
+d) General Bulletin Order(S) (GBO)
+id: def-limited-speed
+area: definitions
+ref: CROR Limited Speed
+cror: def:limited-speed@8ed3de477f3d
+tags: definitions
+---
+Q: Which term does the CROR define as: “A speed not exceeding 30 miles per hour.”
+a) Non-Main Track (Nmt)
+b) Interlocking Limits
+c) Railway Company Grade Crossing
+*d) Medium Speed
+id: def-medium-speed
+area: definitions
+ref: CROR Medium Speed
+cror: def:medium-speed@ca5e9f04bdc8
+tags: definitions
+---
+Q: Which term does the CROR define as: “A speed that will permit stopping within one-half the range of vision of equipment.”
+a) Schedule
+b) Non-Main Track (Nmt)
+*c) Reduced Speed
+d) Automatic Block Signal System (ABS)
+id: def-reduced-speed
+area: definitions
+ref: CROR Reduced Speed
+cror: def:reduced-speed@6f412e3f5042
+tags: definitions
+---
+Q: Which term does the CROR define as: “A speed not exceeding 15 miles per hour.”
+a) Equipment
+b) Advance Signal
+*c) Slow Speed
+d) Transfer
+id: def-slow-speed
+area: definitions
+ref: CROR Slow Speed
+cror: def:slow-speed@d6e3f7a49348
+tags: definitions
+---
+Q: Which term does the CROR define as: “Unless otherwise provided by signal indication or special instructions, a speed not exceeding 15 MPH.”
+a) Advance Signal
+b) Running Switch
+*c) Turnout Speed
+d) Interlocking Limits
+id: def-turnout-speed
+area: definitions
+ref: CROR Turnout Speed
+cror: def:turnout-speed@1a02966c4b89
+tags: definitions
+---
+Q: Which term does the CROR define as: “A location identified by a station name sign and designated by that name in the time table.”
+*a) Station
+b) Crossover
+c) Unattended
+d) Running Switch
+id: def-station
+area: definitions
+ref: CROR Station
+cror: def:station@78a919df7a3e
+tags: definitions
+---
+Q: Which term does the CROR define as: “Railway trackage designated by time table.”
+a) High Risk Location
+*b) Subdivision
+c) Non-Signalled Siding
+d) Movement(S)
+id: def-subdivision
+area: definitions
+ref: CROR Subdivision
+cror: def:subdivision@04e1870669ae
+tags: definitions
+---
+Q: Which term does the CROR define as: “A document specific to a movement, containing applicable information from each GBO, instructions and other information requiring compliance within limits indicated in the TGBO.”
+a) Medium Speed
+b) Engine
+c) Signal Indication
+*d) Tabular General Bulletin Order (Tgbo)
+id: def-tabular-general-bulletin-order-tgbo
+area: definitions
+ref: CROR Tabular General Bulletin Order (Tgbo)
+cror: def:tabular-general-bulletin-order-tgbo@f2e7f1e67c29
+tags: definitions
+---
+Q: Which term does the CROR define as: “The special instruction that contains subdivision description information and footnotes relating to the operation of movements and track units. Time table may contain information applicable on other tracks.”
+a) Kicking
+b) Running Switch
+*c) Time Table
+d) Transfer
+id: def-time-table
+area: definitions
+ref: CROR Time Table
+cror: def:time-table@4713121d906b
+tags: definitions
+---
+Q: Which term does the CROR define as: “Authority issued for the protection of track units and track work.”
+a) Controlled Signal
+b) Running Switch
+c) Reduced Speed
+*d) Track Occupancy Permit (TOP)
+id: def-track-occupancy-permit-top
+area: definitions
+ref: CROR Track Occupancy Permit (TOP)
+cror: def:track-occupancy-permit-top@fc32c7a5777b
+tags: definitions
+---
+Q: Which term does the CROR define as: “A vehicle or machine capable of on-track operation utilized for track inspection, track work and other railway activities when on a track.”
+a) Engine
+b) General Bulletin Order(S) (GBO)
+c) Medium Speed
+*d) Track Unit (Tu)
+id: def-track-unit-tu
+area: definitions
+ref: CROR Track Unit (Tu)
+cror: def:track-unit-tu@d3da9ce7e6d4
+tags: definitions
+---
+Q: Which term does the CROR define as: “Any work on or near the track that may render the track unsafe for movements at normal speed or where protection against movements may be required for employees and machines involved in track construction and repairs.”
+a) General Bulletin Order(S) (GBO)
+*b) Track Work
+c) Train
+d) Follow-Up Top
+id: def-track-work
+area: definitions
+ref: CROR Track Work
+cror: def:track-work@9be73c434d38
+tags: definitions
+---
+Q: Which term does the CROR define as: “The tail end of the last piece of equipment in a movement in the direction of travel.”
+a) Running Switch
+b) Turnout Speed
+*c) Trailing End
+d) Schedule
+id: def-trailing-end
+area: definitions
+ref: CROR Trailing End
+cror: def:trailing-end@75fbf99e671a
+tags: definitions
+---
+Q: Which term does the CROR define as: “An engine with or without cars intended to operate on the main track at speeds in excess of 15 MPH or a track unit when so designated.”
+a) Interlocking
+*b) Train
+c) Track Work
+d) Track Occupancy Permit (TOP)
+id: def-train
+area: definitions
+ref: CROR Train
+cror: def:train@a8df880123fd
+tags: definitions
+---
+Q: Which term does the CROR define as: “An engine with or without cars operating on main track at speeds not exceeding 15 MPH.”
+*a) Transfer
+b) Non-Main Track (Nmt)
+c) Running Switch
+d) Movement(S)
+id: def-transfer
+area: definitions
+ref: CROR Transfer
+cror: def:transfer@835052f7156c
+tags: definitions
+---
+Q: Which term does the CROR define as: “When an employee is not in close enough proximity to take effective action.”
+a) Interlocking Limits
+b) Engine In Yard Service
+c) Automatic Block Signal System (ABS)
+*d) Unattended
+id: def-unattended
+area: definitions
+ref: CROR Unattended
+cror: def:unattended@83cf5b7eb9ee
+tags: definitions
+---
+Q: Which term does the CROR define as: “A system of non-main tracks, utilized to switch equipment and for other purposes over which movements may operate subject to prescribed signals, rules and special instructions.”
+a) Fixed Signal
+*b) Yard
+c) Slow Speed
+d) Station
+id: def-yard
+area: definitions
+ref: CROR Yard
+cror: def:yard@56b2874ef810
+tags: definitions

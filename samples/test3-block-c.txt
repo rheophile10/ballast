@@ -9,7 +9,8 @@ areas: definitions "Definitions" · signals "Signals & Rule 27" · crossings "Cr
 id: q-def-reduced
 type: match
 area: definitions
-ref: CROR SPEEDS
+ref: CROR Reduced Speed, CROR Restricted Speed, CROR Transfer
+cror: def:reduced-speed@6f412e3f5042 def:restricted-speed@ab32ce180c82 def:transfer@835052f7156c
 Q: Match each term with its definition.
 L: Reduced speed = A speed that will permit stopping within one half the range of vision of equipment.
 L: Restricted speed = A speed that will permit stopping within one half the range of vision of equipment, prepared to stop short of a switch not properly lined, and in no case exceeding slow speed.
@@ -19,6 +20,7 @@ id: q27-green-dark
 type: mc
 area: signals
 ref: CROR 27(b)
+cror: 27(b)@344a95b9ee12
 tags: imperfect-display difficulty:2
 svg: signal G,x,R
 Q: What is the indication of this signal?
@@ -30,6 +32,7 @@ id: q14-whistle
 type: mc
 area: crossings
 ref: CROR 14(l)
+cror: 14(l)@65c74c15a686
 tags: whistle difficulty:2
 Q: Travelling at 30 MPH, when must the whistle be sounded approaching a public crossing at grade?
 a) ¼ mile from the crossing, prolonged or repeated until the crossing is fully occupied.
@@ -40,6 +43,7 @@ id: q302-verify
 type: short
 area: ocs
 ref: CROR 302(b)
+cror: 302(b)@2debdb59d8c5
 img: clearance-134.png
 alt: OCS clearance No. 134 addressed to WNR 5411
 Q: Refer to Clearance 134. What must be verified before the clearance is acted upon?

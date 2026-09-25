@@ -60,7 +60,9 @@ test('test → copy → release → score → cancel', async () => {
   assert.equal(r.score, 3); assert.equal(r.total, 6); assert.equal(r.pending, 1);
   r = scoreAttempt(t, taken.attempt, { 'q302-verify': 1 });
   assert.equal(r.score, 4); assert.equal(r.pending, 0); assert.equal(r.pass, false);
-  assert.deepEqual(r.read.map((x) => x.ref), ['CROR 14(l)', 'CROR SPEEDS']);
+  assert.deepEqual(r.read.map((x) => x.ref), ['CROR 14(l)', 'CROR Reduced Speed',
+    'CROR Restricted Speed',
+    'CROR Transfer']);
   assert.equal(r.areas.find((x) => x.id === 'signals').correct, 1);
   const sum = summarize(t, [r]); assert.equal(sum.byItem[0].id, 'q14-whistle'); assert.equal(sum.n, 1);
 

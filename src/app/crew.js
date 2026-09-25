@@ -13,6 +13,9 @@ import { drawItem, imagesFor, forget } from './draw.js';
 import { svgFor } from '../svg.js';
 import { shuffled } from '../shuffle.js';
 import { profileCard, avatar } from './profile-ui.js';
+import { renderReader } from '../reader/ui.js';
+import { getDocument, getNotes } from './docs.js';
+import { exercises } from '../../exercises/index.js';
 
 const now = () => Date.now();
 export const me = async () => (await store.get('profile')) || null;
@@ -30,9 +33,13 @@ export const renderHome = async (root, go, dropBox) => {
       step(3, 'Read your cancellation', !!log.cancelled, log.cancelled ? `${log.cancelled.grade}% on ${log.cancelled.title}${log.cancelled.match === true ? ' · marks compare with your release' : log.cancelled.match === false ? ' · DOES NOT COMPARE with your release' : ''}` : 'Drop the cancellation the RTC sends back to see your marks and what to read.')),
     log.released?.hash ? h('p', { class: 'small' }, 'Your last release: ', h('span', { class: 'complete' }, log.released.hash), ' — the cancellation must name this hash.') : null,
     dropBox('Drop or paste a test, or a cancellation'),
+    exerciseBox(go),
     h('h2', {}, 'Practice'), h('p', { class: 'small' }, 'Drop a test source (.txt, with answers) here to run the same drill on it — repeat, fullscreen, one item at a time — and mark yourself. Not for record.'),
     practiceBox(go));
 };
+/** Built-in exercises: open book, self-marked, every item tied to the public CROR 2025. */
+export const exerciseBox = (go) => { const box = h('div', { class: 'card' }, h('h2', {}, 'Exercises'), h('p', { class: 'small' }, 'Open book, not for record. Every question is tied to the public CROR 2025 (Rulebook in the top bar; load cror-2025.json once to have it beside you while you write).'),
+  h('ul', { class: 'steps' }, exercises.map((x) => h('li', {}, h('button', { onclick: () => go({ screen: 'practice', source: x.source }) }, x.name), ' ', h('span', { class: 'small' }, x.about))))); getDocument().then((d) => { if (!d) box.append(h('p', { class: 'small bad' }, 'No rulebook loaded in this browser yet.')); }); return box; };
 
 
 // ---------- copy a test (or start the practice)
@@ -41,9 +48,10 @@ export const renderCopy = async (root, { text, practice, source }, go) => {
   const p = await me();
   if (!p) return mount(root, h('h1', {}, 'Not registered'), h('p', {}, 'Register first; a test is addressed to your key.'));
   let tgbo;
-  try { tgbo = practice ? await practiceTest(p, source) : await copyTest(text, p, p.pin); }
+  const trust = p.minted?.root ? { root: p.minted.root.sig } : null; // the superintendent above my RTC, from my own minted profile
+  try { tgbo = practice ? await practiceTest(p, source) : await copyTest(text, p, p.pin, Date.now(), trust); }
   catch (e) { return mount(root, h('h1', {}, 'Cannot copy this test'), h('p', { class: 'bad' }, e.message), h('button', { onclick: () => go({ screen: 'home' }) }, 'Back')); }
-  const saved = practice ? null : await store.get('attempt:' + tgbo.id);
+  const saved = practice ? null : await store.get('attempt:' + tgbo.id); const book = tgbo.settings.openBook || practice ? await getDocument() : null;
   const repeat = h('input', { placeholder: 'Repeat (4 characters)', maxlength: 4, autocomplete: 'off', style: { textTransform: 'uppercase', maxWidth: '240px' } });
   const status = h('p', { class: 'status' });
   const form = h('img', { src: 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(clearanceSvg(tgbo, p)))), style: { maxWidth: '100%' }, alt: 'clearance' });
@@ -56,9 +64,10 @@ export const renderCopy = async (root, { text, practice, source }, go) => {
     if (!practice) await store.set('crewlog', { ...((await store.get('crewlog')) || {}), copied: { title: tgbo.title, when: hhmm() } });
     go({ screen: 'work', tgbo, p, events, practice });
   };
-  mount(root, h('h1', {}, tgbo.title), tgbo.approval ? h('p', { class: 'small good' }, `Approved by ${tgbo.approval.name}`) : null,
+  mount(root, h('h1', {}, tgbo.title), tgbo.approval ? h('p', { class: 'small good' }, `Approved by ${tgbo.approval.name}${trust ? ' — the superintendent over your RTC; every item is checked against that approval as it opens' : ''}`) : practice ? null : h('p', { class: 'small bad' }, 'Not approved by any superintendent.'),
     h('div', { class: 'card' }, form,
       h('p', {}, `Clearance No. ${tgbo.clearance} to Crew ${p.pin} · ${tgbo.order.length} items · ${fmtTime(tgbo.settings.time)} · pass ${Math.round(tgbo.settings.pass * 100)}%`),
+      tgbo.settings.openBook ? h('p', { class: 'small' }, 'Open book: the rulebook may be consulted while writing (Rulebook button). ', book ? `${book.title} ${book.edition || ''} is loaded.` : h('b', { class: 'bad' }, 'No rulebook is loaded in this browser — load cror-2025.json first if you want it.')) : null,
       tgbo.window ? h('p', { class: 'small' }, `Window: ${new Date(tgbo.window.from).toLocaleString()} → ${new Date(tgbo.window.until).toLocaleString()}. Outside it the clearance does not open, and a late release is flagged to the RTC.`) : null,
       h('p', {}, 'Rule 136 — copy as transmitted, then repeat back:'), h('p', { class: 'complete' }, `Complete ${hhmm()} · RTC ${tgbo.rtcName || ''} · `, h('b', {}, tgbo.complete)),
       saved?.events?.length ? h('p', { class: 'status' }, `An attempt in progress was found (${Object.keys(fold(tgbo.order, saved.events).answers).length} answered). It will resume.`) : null,
@@ -109,6 +118,9 @@ export const renderWork = async (root, { tgbo, p, events, practice }, go) => {
   const next = () => { const s = state(); if (s.at < tgbo.order.length - 1) show(s.at + 1); else status.textContent = 'Last item. Release the track when you are done.'; };
   const prev = () => { const s = state(); if (tgbo.settings.allowBack && s.at > 0) show(s.at - 1); };
   const guard = h('div', { class: 'guard', style: { display: 'none' } });
+  const book = tgbo.settings.openBook || practice ? await getDocument() : null;
+  const openBook = async () => { if (!book) return; log('book', 'open'); const ov = h('div', { class: 'overlay book' }); const box = h('div', { class: 'bookbox' }); ov.append(box); document.body.append(ov);
+    renderReader(box, { doc: book, notes: await getNotes(book.id), readOnly: true, compact: true, onClose: () => { ov.remove(); log('book', 'close'); canvas.focus(); } }); };
   const onBreak = (why) => { if (state().finished || state().open) return; log('break', why); mount(guard, h('div', { class: 'card' }, h('h2', {}, 'Rule 35 — protection'), h('p', {}, `You left the test (${why}) at ${hhmm()}. This is recorded. Re-enter fullscreen to resume.`), h('button', { class: 'primary', onclick: resume }, 'Resume in fullscreen'))); guard.style.display = 'flex'; };
   const resume = async () => { try { await document.documentElement.requestFullscreen({ navigationUI: 'hide' }); await navigator.keyboard?.lock?.(); } catch { return; } log('resume'); guard.style.display = 'none'; canvas.focus(); };
   const onVis = () => { if (document.hidden) onBreak('tab-hidden'); }; const onFs = () => { if (!document.fullscreenElement) onBreak('fullscreen-exit'); }; const onBlur = () => onBreak('blur');
@@ -132,7 +144,7 @@ export const renderWork = async (root, { tgbo, p, events, practice }, go) => {
     go({ screen: 'released', tgbo, text, why, hash: headers.sha256 });
   };
   mount(root, h('div', { class: 'bar' }, h('span', {}, tgbo.title), timer, h('span', { class: 'row' }, avatar(p, 28), ` Crew ${p.pin}`)),
-    h('div', { class: 'work' }, canvas, answerBox, h('div', { class: 'row' }, tgbo.settings.allowBack ? h('button', { onclick: prev }, '← Back') : null, h('button', { onclick: next }, 'Next →'), h('button', { class: 'primary', onclick: () => submit('done') }, 'Release track'), status)), guard);
+    h('div', { class: 'work' }, canvas, answerBox, h('div', { class: 'row' }, tgbo.settings.allowBack ? h('button', { onclick: prev }, '← Back') : null, h('button', { onclick: next }, 'Next →'), book ? h('button', { onclick: openBook }, 'Rulebook') : null, h('button', { class: 'primary', onclick: () => submit('done') }, 'Release track'), status)), guard);
   canvas.addEventListener('click', click); answerBox.addEventListener('input', () => log('answer', item.id, answerBox.value));
   arm(); tick(); if (!navigator.keyboard?.lock) log('note', 'keyboard-lock-unavailable');
   await show(state().at);

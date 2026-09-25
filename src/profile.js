@@ -37,21 +37,30 @@ export const sourceHash = async (source) => Array.from(await sha256(utf8(source.
 // ---------- minting: a role is granted by signature. Superintendents are self-minted (root); superintendents
 // mint RTCs; RTCs mint crew. A minted profile carries who granted it, when, and the signature.
 export const MINTS_BY = { crew: 'rtc', rtc: 'superintendent', superintendent: 'superintendent' };
-const mintString = (p, role, start, by) => `ballast/mint/1\n${role}\n${start}\n${p.pin}\n${p.pub}\n${p.sig}\n${by.sig}`;
+const mintString = (p, role, start, by, root) => `ballast/mint/2\n${role}\n${start}\n${p.pin}\n${p.pub}\n${p.sig}\n${by.sig}\n${root.sig}\n${root.pub}`;
 /** `minter` has a sign key and a role allowed to grant `role`. Returns the minted public profile. */
 export const mintProfile = async (minter, profile, role, start = new Date().toISOString().slice(0, 10)) => {
   if (!ROLES.includes(role)) throw new Error(`bad role ${role}`);
   if (minter.role !== MINTS_BY[role]) throw new Error(`a ${minter.role} cannot mint ${role}`);
-  const by = { name: minter.name, pin: minter.pin, sig: minter.sig, role: minter.role };
-  const signature = await signBytes(minter.sign, utf8(mintString(profile, role, start, by)));
-  return { ...publicProfile(profile), role, minted: { role, start, by, signature } };
+  const by = { name: minter.name, pin: minter.pin, sig: minter.sig, pub: minter.pub, role: minter.role };
+  // the root: the superintendent at the top of the chain — the minter when they are one, else the minter's own root
+  const root = minter.role === 'superintendent' ? { name: minter.name, sig: minter.sig, pub: minter.pub } : minter.minted?.root;
+  if (!root) throw new Error('the minter has no superintendent above them');
+  const via = minter.role === 'superintendent' ? null : minter.minted; // the minter's own mint, so anyone can check they really are under that root
+  const signature = await signBytes(minter.sign, utf8(mintString(profile, role, start, by, root)));
+  return { ...publicProfile(profile), role, minted: { role, start, by, root, via, signature } };
 };
 /** Is this profile's role genuinely granted? Checks the signature and the role chain (not who the minter is). */
 export const checkMint = async (p) => {
   const m = p.minted; if (!m || m.role !== p.role || !ROLES.includes(p.role)) return false;
   if (m.by.role !== MINTS_BY[p.role]) return false;
   if (p.role === 'superintendent' && m.by.sig !== p.sig) return false; // root is self-signed
-  return verifyBytes(m.by.sig, m.signature, utf8(mintString(p, p.role, m.start, m.by)));
+  if (!m.root?.sig || !m.root?.pub) return false;
+  if (!(await verifyBytes(m.by.sig, m.signature, utf8(mintString(p, p.role, m.start, m.by, m.root))))) return false;
+  if (p.role === 'superintendent') return m.root.sig === p.sig;
+  if (m.by.role === 'superintendent') return m.root.sig === m.by.sig && !m.via;
+  // minted by an RTC: their own mint must check out, under the same root
+  return !!m.via && m.via.role === 'rtc' && m.via.root?.sig === m.root.sig && checkMint({ ...m.by, pin: m.by.pin, minted: m.via });
 };
 /** An unminted registration: role "none" until someone mints it. */
 export const registration = (p) => ({ ...publicProfile(p), role: 'none' });

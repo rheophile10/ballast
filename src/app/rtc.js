@@ -15,6 +15,7 @@ import { drawItem, imagesFor } from './draw.js';
 import { b64 } from '../bytes.js';
 import { profileCard, avatar } from './profile-ui.js';
 import { announce, embedded } from '../embed.js';
+import { bookCheck } from './bookcheck.js';
 
 let sheet = null, tab = 'trains', pass = '', notes = [], view = null, root, go, klass = '';
 const note = (m, bad = false) => { notes.unshift({ m, bad }); notes = notes.slice(0, 6); };
@@ -70,6 +71,7 @@ const testsTab = () => {
     const c = sheet.classes.find((x) => x.id === issueTo); const crew = c ? sheet.trains.filter((t) => c.pins.includes(t.pin)) : sheet.trains;
     if (!crew.length) return note(c ? `no crew in ${c.name}` : 'no crew on the sheet', true), rerender();
     const approval = await approvalFor(d.source);
+    if (!approval && !confirm('No superintendent approval covers this source. Crew refuse unapproved tests. Issue anyway (for practice only)?')) return;
     let text, record; try { ({ text, record } = await issueTest(d.test, sheet.rtc, crew, sheet.assets, sheet.rtc.name, approval, win)); } catch (e) { return note(e.message, true), rerender(); }
     Object.assign(record, { source: d.source, text, issued: Date.now(), trains: crew.map((t) => t.pin), approved: !!approval, class: c?.name || 'all crew', classId: c?.id || '' });
     sheet.tests.push(record); download(`${d.test.title.replace(/\W+/g, '-')}.test.txt`, text); note(`issued ${record.title} to ${sheet.trains.length} crew — complete ${record.hash.slice(0, 4).toUpperCase()}`); rerender();
@@ -78,6 +80,7 @@ const testsTab = () => {
   return h('div', {}, h('p', { class: 'small' }, 'Drop a test source (.txt), any images it names, and the superintendent\'s approval if you have one. Issue writes one test file with a clearance for every crew member on the sheet.'),
     d ? h('div', { class: 'card' }, h('b', {}, d.name), d.errors.length ? h('ul', { class: 'bad' }, d.errors.map((e) => h('li', {}, e))) : h('p', {}, `${d.test.title} · ${d.test.items.length} items · ${fmtTime(d.test.settings.time)} · pass ${Math.round(d.test.settings.pass * 100)}% · areas: ${d.test.areas.map((a) => a.id).join(', ') || 'none'}`, approvedMark),
       d.errors.length ? null : h('div', { class: 'row' }, h('label', {}, 'opens ', h('input', { type: 'datetime-local', value: local(win.from), onchange: (e) => { win = { ...win, from: new Date(e.target.value).toISOString() }; } })), h('label', {}, 'closes ', h('input', { type: 'datetime-local', value: local(win.until), onchange: (e) => { win = { ...win, until: new Date(e.target.value).toISOString() }; } })), h('select', { onchange: (e) => { issueTo = e.target.value; } }, h('option', { value: '', selected: !issueTo }, `all crew (${sheet.trains.length})`), sheet.classes.map((c) => h('option', { value: c.id, selected: issueTo === c.id }, `${c.name} (${c.pins.length})`))), h('button', { class: 'primary', onclick: issue }, 'Issue test'))) : h('p', { class: 'status' }, 'No test source loaded.'),
+    d ? bookCheck(d.source, async (src) => { const { test, errors } = await parseTest(src); sheet.draft = { ...d, source: src, test: errors.length ? null : test, errors }; note('draft linked to the rulebook — its hash changed, so any approval no longer covers it', true); rerender(); }) : null,
     h('h2', {}, 'Issued'), h('table', {}, sheet.tests.map((t) => h('tr', {}, h('td', {}, t.title), h('td', { class: 'small' }, t.class || ''), h('td', { class: 'small' }, new Date(t.issued).toLocaleString()), h('td', {}, `${t.trains?.length ?? '?'} clearances`), h('td', { class: 'small' }, t.window ? `${new Date(t.window.from).toLocaleString()} → ${new Date(t.window.until).toLocaleString()}` : ''), h('td', { class: t.approved ? 'good small' : 'small' }, t.approved ? 'approved' : 'unapproved'), h('td', { class: 'complete small' }, t.hash.slice(0, 4).toUpperCase()), h('td', {}, h('button', { onclick: () => download(`${t.title.replace(/\W+/g, '-')}.test.txt`, t.text) }, 'download again'))))),
     h('h2', {}, 'Assets'), h('p', { class: 'small' }, Object.keys(sheet.assets).join(', ') || 'none'), h('h2', {}, 'Approvals'), h('p', { class: 'small' }, sheet.approvals.map((a) => `${a.title} (${a.name})`).join(', ') || 'none'));
 };

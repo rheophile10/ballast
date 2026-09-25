@@ -3,6 +3,7 @@ import { armor, dearmor } from './armor.js';
 import { b64url, unb64url, hex, random, sha256, utf8 } from './bytes.js';
 import { INFO, hkdfKey, openJSON, rawKey, sealJSON, shared, sidOf } from './crypto.js';
 import { publicItem } from './txt.js';
+import { checkApprovalSignature, itemHash } from './director.js';
 import { shuffled } from './shuffle.js';
 
 const itemsHash = async (items) => hex(await sha256(utf8(items.map((i) => i.id + '\n' + i.box).join('\n'))));
@@ -40,8 +41,18 @@ export const issueTest = async (test, rtc, trains, assets = {}, rtcName = '', ap
 };
 
 /** Crew side: open a test with my keypair and PIN. Returns a reader that decrypts one item at a time. */
-export const copyTest = async (text, train, pin, at = Date.now()) => {
+/**
+ * `trust`: { root: <the crew member's superintendent sign key> } — when given, the test must carry an approval signed by that
+ * key, and every item decrypted must hash to what the approval lists. Without it (practice, unit tests) nothing is required.
+ */
+export const copyTest = async (text, train, pin, at = Date.now(), trust = null) => {
   const { body } = await dearmor(text, 'TEST');
+  if (trust) {
+    const a = body.approval;
+    if (!a) throw new Error('This test carries no superintendent approval. Crew only write approved tests.');
+    if (a.by !== trust.root) throw new Error(`This test was approved by ${a.name || 'someone'}, not by the superintendent who stands over your RTC.`);
+    if (!(await checkApprovalSignature(a))) throw new Error('The approval on this test does not verify.');
+  }
   const w = checkWindow(body.window); const when = (iso) => new Date(iso).toLocaleString();
   if (at < Date.parse(w.from)) throw new Error(`This test opens at ${when(w.from)}.`);
   if (at > Date.parse(w.until)) throw new Error(`This test closed at ${when(w.until)}.`);
@@ -62,6 +73,7 @@ export const copyTest = async (text, train, pin, at = Date.now()) => {
     item: async (itemId) => {
       const it = byId[itemId]; if (!it) throw new Error(`no item ${itemId}`);
       const p = await openJSON(await hkdfKey(Kb, saltBytes, INFO.item(itemId)), it.box);
+      if (trust) { const want = body.approval.items[itemId]; if (!want || want !== (await itemHash(p))) throw new Error(`Item ${itemId} is not what the superintendent approved. Stop and tell the superintendent.`); }
       if (body.settings.shuffleOptions && p.options?.length) p.options = shuffled(p.options, sid + itemId);
       if (p.pairs?.length) p.rights = shuffled(p.pairs.map((x) => ({ id: x.id, text: x.right })), sid + itemId + 'r');
       return p;

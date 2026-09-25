@@ -40,6 +40,10 @@ as one base64url string. HKDF salt is always the test's 16-byte `salt`.
 
 ## 3. Identity — PROFILE
 
+Mint string v2: `ballast/mint/2\n<role>\n<start>\n<pin>\n<pub>\n<sig>\n<by.sig>\n<root.sig>\n<root.pub>`. `minted.root` is the
+superintendent over the chain (the minter when they are one); `minted.via` is the minter's own mint record when the
+minter is an RTC. `checkMint` verifies the signature, then that `via` is itself a good RTC mint under the same root.
+
 Every party (crew, RTC, superintendent) has an ECDH P-256 pair (to seal) and an ECDSA
 P-256 pair (to sign). Crew keep theirs non-extractable in the browser; RTCs and
 superintendents keep theirs inside their SHEET / BOOK. The public halves, name, PIN, role
@@ -64,6 +68,20 @@ authenticated as coming from the other party.
 test without exposing the PIN.
 
 ## 4. APPROVAL and REPORT (superintendent)
+
+APPROVAL v2: `{ v: 2, kind: "approval", hash: <source sha256>, items: { "<item id>": <item hash> }, title,
+by: <superintendent sign key>, pub: <their ECDH key>, name, signature }` where the signature is ECDSA over
+`"ballast/approval/2\n" ‖ hash ‖ "\n" ‖ items sorted as "id:hash" lines`. An **item hash** is SHA-256 of the
+item's canonical public form `{id, type, prompt, options, pairs, svg, img:[{name, alt}], worth, area}` — what a
+crew member can recompute after decrypting the item (images by name only; keys and citations never in it).
+So the approval binds not just the source file but every item the crew will see, and a test file assembled
+from different items under a copied approval is caught item by item.
+
+**Who a crew member trusts.** A minted profile carries `minted.root` — the superintendent at the top of the
+chain — and `minted.via`, the minter's own mint, so the chain RTC→superintendent is verifiable from the
+profile alone (§3). Crew refuse a test unless it carries an approval whose `by` is their root's sign key and
+whose signature verifies; then every item decrypted must hash to the approval's entry for its id. An RTC
+therefore cannot edit, add or substitute items, nor issue an unapproved test to crew (practice is exempt).
 
 APPROVAL carries `pub` (the superintendent's ECDH key) as well as `by` (their sign key), so
 releases under the approved test can carry an audit copy sealed to them. REPORT rows carry

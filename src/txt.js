@@ -14,7 +14,7 @@ const parseAreas = (s) => s.split('·').map((a) => a.trim()).filter(Boolean).map
   return { id: m[1], label: m[2] || m[1] };
 });
 
-const KEYS = new Set(['id', 'type', 'area', 'ref', 'lcr', 'tags', 'svg', 'img', 'alt', 'worth']);
+const KEYS = new Set(['id', 'type', 'area', 'ref', 'lcr', 'tags', 'svg', 'img', 'alt', 'worth', 'cror']);
 
 /** @returns {Promise<{test: object, errors: string[]}>} */
 export const parseTest = async (source) => {
@@ -32,6 +32,7 @@ export const parseTest = async (source) => {
       else if (k === 'pass') test.settings.pass = parsePct(v);
       else if (k === 'shuffle') { test.settings.shuffleItems = /items/.test(v); test.settings.shuffleOptions = /options/.test(v); }
       else if (k === 'back') test.settings.allowBack = /^(yes|true|on)$/i.test(v);
+      else if (k === 'cror') test.settings.openBook = /^(open|yes|true|on)$/i.test(v); // the rulebook may be consulted during the test
       else if (k === 'areas') test.areas = parseAreas(v);
       else errors.push(`header: unknown key "${k}"`);
     } catch (e) { errors.push(`header: ${e.message}`); }
@@ -40,7 +41,7 @@ export const parseTest = async (source) => {
   const seen = new Set();
   for (const [n, block] of blocks.entries()) {
     if (!block.trim()) continue;
-    const item = { type: 'mc', prompt: '', options: [], pairs: [], key: null, answer: '', ref: [], tags: [], img: [], worth: 1 };
+    const item = { type: 'mc', prompt: '', options: [], pairs: [], key: null, answer: '', ref: [], cror: [], tags: [], img: [], worth: 1 };
     let mode = null; // 'q' while the prompt continues
     for (const raw of block.split('\n')) {
       const line = raw.trimEnd();
@@ -54,6 +55,7 @@ export const parseTest = async (source) => {
         const k = m[1].toLowerCase(), v = m[2].trim();
         if (k === 'ref') item.ref.push(...v.split(/\s*[,;]\s*|\s+(?=CROR|GOI|GR)/).filter(Boolean));
         else if (k === 'tags') item.tags.push(...v.split(/\s+/).filter(Boolean));
+        else if (k === 'cror') item.cror.push(...v.split(/[\s,;]+/).filter(Boolean)); // node@hash links into the rulebook (SPEC §11)
         else if (k === 'img') item.img.push({ name: v, alt: '' });
         else if (k === 'alt') { if (item.img.length) item.img[item.img.length - 1].alt = v; else errors.push(`item ${n + 1}: alt: before img:`); }
         else if (k === 'worth') item.worth = Number(v) || 1;
@@ -79,4 +81,5 @@ export const parseTest = async (source) => {
 };
 
 /** Strip everything a student must not see. */
-export const publicItem = ({ key, answer, ...rest }) => rest;
+/** What the crew member's copy carries: never the key or model answer, never where the answer lives. */
+export const publicItem = ({ key, answer, ref, cror, lcr, tags, ...rest }) => rest;

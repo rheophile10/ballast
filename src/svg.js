@@ -2,10 +2,11 @@
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const LAMP = { G: '#2fbf4a', Y: '#f2c319', R: '#e23b2e', L: '#f4f4f4', x: '#2a2a2a' };
 
-/** signal G,x,R  — heads top to bottom; letters G Y R L (lunar) x (dark); suffix f = flashing (drawn with rays). */
+/** signal G,x,R [DV|R|L] [low]  — heads top to bottom; letters G Y R L (lunar) x (dark); suffix f = flashing (drawn with rays); an optional plate under the heads. */
 const signal = (arg) => {
-  const heads = arg.trim().split(/\s*,\s*/).filter(Boolean);
-  const h = 40 + heads.length * 70;
+  const words = arg.trim().split(/\s+/); const heads = (words.shift() || '').split(/\s*,\s*/).filter(Boolean);
+  const plate = words.find((w) => /^(DV|R|L|A|[A-Z]{1,2})$/.test(w)) || ''; const low = words.some((w) => /^low$/i.test(w));
+  const h = 40 + heads.length * 70 + (plate ? 40 : 0);
   let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 ${h}" width="240" height="${h * 2}">`;
   s += `<rect x="56" y="0" width="8" height="${h}" fill="#555"/>`;
   heads.forEach((raw, i) => {
@@ -14,6 +15,8 @@ const signal = (arg) => {
     s += `<rect x="30" y="${cy - 30}" width="60" height="60" rx="10" fill="#1b1b1b"/><circle cx="60" cy="${cy}" r="20" fill="${c}"/>`;
     if (flash) for (let k = 0; k < 8; k++) { const a = (k * Math.PI) / 4; s += `<line x1="${60 + 24 * Math.cos(a)}" y1="${cy + 24 * Math.sin(a)}" x2="${60 + 32 * Math.cos(a)}" y2="${cy + 32 * Math.sin(a)}" stroke="${c}" stroke-width="3"/>`; }
   });
+  if (plate) s += `<rect x="36" y="${h - 38}" width="48" height="30" rx="4" fill="#f4f4f4" stroke="#333" stroke-width="2"/><text x="60" y="${h - 16}" font-size="20" font-family="sans-serif" font-weight="bold" text-anchor="middle" fill="#111">${esc(plate)}</text>`;
+  if (low) s += `<rect x="20" y="${h - 8}" width="80" height="8" fill="#555"/>`;
   return s + '</svg>';
 };
 

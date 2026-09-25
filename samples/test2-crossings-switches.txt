@@ -10,6 +10,7 @@ id: t2-14l
 type: mc
 area: crossings
 ref: CROR 14(l)
+cror: 14(l)@65c74c15a686
 Q: At 30 MPH, when must the whistle be sounded approaching a public crossing at grade?
 a) At the whistle post, ¼ mile out.
 *b) To provide 20 seconds warning, prolonged or repeated until fully occupied.
@@ -19,6 +20,7 @@ id: t2-19
 type: mc
 area: crossings
 ref: CROR 19
+cror: 19@e75172222c4c
 Q: Ditch lights must be displayed in the direction of travel:
 a) Whenever the headlight is dimmed or full.
 *b) When the headlight is required to be displayed at full power.
@@ -28,6 +30,7 @@ id: t2-103-1
 type: mc
 area: crossings
 ref: CROR 103.1(b)
+cror: 103.1(b)@60c87f98b81a
 Q: A movement has stopped in the vicinity of a crossing with automatic warning devices. From 300 feet it must not exceed:
 *a) 10 MPH until the crossing is fully occupied.
 b) 15 MPH.
@@ -37,6 +40,7 @@ id: t2-104a
 type: mc
 area: switches
 ref: CROR 104(a)
+cror: 104(a)@386fd7db2f12
 svg: switch reversed
 Q: After a hand operated switch has been turned, what must be done?
 *a) Examine the points and observe the target, reflector or light to ensure the switch is properly lined for the route.
@@ -47,6 +51,7 @@ id: t2-104-5
 type: mc
 area: switches
 ref: CROR 104.5
+cror: 104.5@044d2cc18e5b
 Q: A movement approaching a derail set in the derailing position must stop at least:
 a) 10 feet before it.
 *b) 25 feet before it.
@@ -56,6 +61,7 @@ id: t2-112-test
 type: mc
 area: securement
 ref: CROR 112
+cror: 112@aae25e64a65f
 Q: How is the effectiveness of hand brakes tested?
 a) Ensure all pistons are extended.
 *b) Release all air brakes and allow or cause the slack to adjust.
@@ -65,6 +71,7 @@ id: t2-112-move
 type: mc
 area: securement
 ref: CROR 112(d)
+cror: 112(d)@e6597805a534
 Q: May hand brakes be applied while equipment is being pulled or shoved?
 a) Yes.
 *b) No.
@@ -73,6 +80,7 @@ id: t2-115
 type: mc
 area: shoving
 ref: CROR 115(a)
+cror: 115(a)@9c037578a44c
 Q: When equipment is shoved, a crew member must be:
 a) On the leading piece of equipment.
 *b) On the leading piece of equipment or on the ground, positioned to observe the track and control the move.
@@ -82,5 +90,6 @@ id: t2-115b
 type: short
 area: shoving
 ref: CROR 115(b)
+cror: 115(b)@725b5183e74a
 Q: Who may determine that a track is "known to be clear"?
 A: A qualified employee who can observe the track and has radio contact with the employee controlling the movement.

@@ -1,5 +1,9 @@
 // One page. You register once; someone mints your role; the page becomes that role's home.
 import { h, mount, readFileText, download } from './h.js';
+import { renderReader } from '../reader/ui.js';
+import { checkDocument } from '../reader/doc.js';
+import { importNotes, merge } from '../reader/notes.js';
+import { saveDocument, getDocument, getNotes, setNotes } from './docs.js';
 import { blocks, sniff } from '../armor.js';
 import { readProfile, profileText, mintProfile, checkMint } from '../profile.js';
 import * as store from './store.js';
@@ -25,6 +29,9 @@ const acceptMint = async (text) => {
 
 const openText = async (text, name = '') => {
   const p = await me();
+  if (/^\s*\{/.test(text)) { // a JSON document (rulebook) or a notes file
+    try { const j = JSON.parse(text); if (j.kind === 'document') { await saveDocument(checkDocument(j)); return go({ screen: 'reader', doc: j.id }); } if (j.kind === 'notes') { const n = importNotes(text); await setNotes(n.document, merge(await getNotes(n.document), n.notes)); return go({ screen: 'reader', doc: n.document }); } throw new Error('JSON, but neither a document nor notes'); } catch (e) { return go({ screen: 'home', error: `${name || 'file'}: ${e.message}` }); }
+  }
   const bs = blocks(text);
   if (bs.length > 1 && p?.role === 'crew') { const mine = bs.find((b) => new RegExp(`^train: Crew ${p.pin}$`, 'm').test(b)) || bs.find((b) => /BEGIN BALLAST TEST/.test(b)); if (!mine) return go({ screen: 'home', error: `${bs.length} files in one; none is addressed to Crew ${p.pin}` }); text = mine; } // a bundle: open the block for me
   else if (bs.length > 1 && p) return go({ screen: p.role === 'superintendent' ? 'super' : 'rtc', incoming: bs.map((b, i) => ({ name: `${name || 'bundle'} #${i + 1}`, text: b })) });
@@ -61,13 +68,21 @@ const renderWaiting = async (p) => {
     h('textarea', { readonly: true, rows: 6, value: text }),
     ctx.error ? h('p', { class: 'bad' }, ctx.error) : null,
     dropBox('Drop or paste the profile you get back'),
+    crew.exerciseBox(go),
     h('details', {}, h('summary', { class: 'small' }, 'Nobody to mint me'), h('p', { class: 'small' }, 'The first superintendent mints themself. Only do this if you are running the program.'),
       h('button', { onclick: async () => { const m = await mintProfile({ ...p, role: 'superintendent' }, p, 'superintendent'); await store.set('profile', { ...p, ...m }); root_(); } }, 'Start as superintendent')));
 };
 
+/** The rulebook: any loaded document, with this person's notes. Reachable from every role once registered. */
+const renderReaderScreen = async (p) => {
+  const doc = await getDocument(ctx.doc);
+  if (!doc) return mount(root, h('h1', {}, 'Rulebook'), h('p', {}, 'No rulebook is loaded in this browser. Get cror-2025.json from the Reader page (Document out) and drop it here; it stays in this browser. Notes files (from the reader\'s Notes out) drop here too.'), dropBox('Drop cror-2025.json here'), h('button', { onclick: () => go({ screen: 'home' }) }, 'Back'));
+  renderReader(root, { doc, notes: await getNotes(doc.id), onNotes: (n) => setNotes(doc.id, n), onDocument: async (d) => { await saveDocument(d); go({ screen: 'reader', doc: d.id }); }, by: p.name, at: ctx.at || null, onClose: () => go({ screen: 'home' }) });
+};
 const render = async () => {
   const p = await me(); announce(ctx.screen, p);
   if (ctx.screen === 'landing' || (!p && ctx.screen === 'home')) return renderRegister(root, async (np) => { await store.set('profile', np); go({ screen: 'home' }); });
+  if (ctx.screen === 'reader' && p) return renderReaderScreen(p);
   if (p && (p.role === 'none' || !p.minted) && !['work', 'practice', 'marks', 'released'].includes(ctx.screen)) return renderWaiting(p);
   switch (ctx.screen) {
     case 'home': return p.role === 'rtc' ? rtc.render(root, ctx, go) : p.role === 'superintendent' ? sup.render(root, ctx, go) : crew.renderHome(root, go, dropBox);
@@ -84,6 +99,7 @@ const render = async () => {
 };
 document.body.prepend(h('nav', { class: 'top' }, h('a', { href: '#', onclick: (e) => { e.preventDefault(); go({ screen: 'home' }); } }, 'Ballast'), ' · ',
   embedded() || location.protocol === 'file:' ? null : h('a', { href: location.pathname.split('/').pop() || 'index.html', download: 'ballast.html', class: 'small', style: { marginRight: '12px' }, title: 'Save this page as one file, ballast.html, e.g. on a shared drive — the recommended way to run it' }, 'Save a copy'),
+  h('a', { href: '#', class: 'small', style: { marginRight: '12px' }, onclick: (e) => { e.preventDefault(); go({ screen: 'reader' }); } }, 'Rulebook'),
   embedded() ? null : h('a', { href: /\/ballast\//.test(location.pathname) ? '../tutorial/' : 'tutorial/', class: 'small', style: { marginRight: '12px' } }, 'Tutorial'),
   h('a', { href: '#', onclick: async (e) => { e.preventDefault(); if (confirm('Forget this browser\'s profile and keys? Any role minted to them is lost.')) { await store.del('profile'); go({ screen: 'landing' }); } } }, 'forget me')));
 window.addEventListener('dragover', (e) => e.preventDefault()); window.addEventListener('drop', (e) => e.preventDefault());
