@@ -32,7 +32,8 @@ test('the whole tutorial: general, superintendent, RTC, crew — with Notepad au
   const openFiles = async (re, n, folder) => { await explorer(); if (folder) await p.click(`.treeitem:has-text("${folder}")`); await p.waitForSelector(`.file:has-text("${re}")`); for (let i = 0; i < n; i++) { await explorer(); await p.locator(`.file:has-text("${re}")`).nth(i).click(); await p.click('.win.explorer .openwith'); await p.waitForTimeout(400); } };
   // --- general
   await step('Free, durable'); await next(); await step('railroad metaphor'); await next();
-  await step('Armored text files'); await p.dblclick('.dicon:has-text("Armored text")'); await p.waitForSelector('pre.note >> text=IT IS A GBO'); await p.click('.task:has-text("Ballast")');
+  await step('Armored text files'); await openFiles('example-armored', 1, 'Ballast'); await p.waitForSelector('pre.note >> text=BEGIN BALLAST PROFILE');
+  await step('What is in the file'); await p.click('.task:has-text("Ballast")'); await next();
   await step('How signing'); assert.ok((await p.locator('.nav li.past').count()) >= 3, 'the contents pane marks past sections');
   await p.click('.nav summary'); await p.click('.nav li.past a >> nth=0'); await p.waitForSelector('#coach .phase:has-text("re-reading")'); await p.click('#coach button:has-text("Back to where I am")'); await next();
   // --- superintendent

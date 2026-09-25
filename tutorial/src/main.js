@@ -5,18 +5,17 @@ import { steps, PHASES, PHASE_TITLES } from './script.js';
 import TEMPLATE from './template.txt';
 import * as cast from './cast.js';
 import { profileText } from '../../src/profile.js';
-import why from '../../WHY.txt';
-import armorNote from '../../ARMOR.txt';
 
 const APP = new URLSearchParams(location.search).get('app') || '../ballast/index.html';
 const root = document.getElementById('desk'); const coachEl = document.getElementById('coach');
-let st = { ...os.initial({ 'Why Ballast.txt': why, 'Armored text.txt': armorNote }), ballast: { screen: '', role: undefined, pub: null, pin: null, minted: false }, step: 0, pendingSeen: 0, reportsSeen: 0, releasesSeen: 0, arrived: {}, issued: null, userReg: null };
+let st = { ...os.initial(), ballast: { screen: '', role: undefined, pub: null, pin: null, minted: false }, step: 0, pendingSeen: 0, reportsSeen: 0, releasesSeen: 0, arrived: {}, issued: null, userReg: null };
 const set = (next) => { st = next; render(); };
 const frame = () => document.querySelector('iframe.app');
 const tell = (msg) => frame()?.contentWindow?.postMessage({ ballast: 1, ...msg }, '*');
 
 // ---------- what arrives, per step
 const arrivals = {
+  armorExample: async () => { const [t] = await cast.registrationsOf([await cast.rtc(2)]); return [['Ballast', { name: 'example-armored-file.txt', text: t.text, from: 'IT', note: true }]]; },
   rtcRegistrations: async () => { const [d, r, t] = await cast.registrationsOf(await Promise.all([0, 1, 2].map(cast.rtc))); return [
     ['mail', { from: d.from, subject: 'Registration for the fall program', body: 'Hi — my registration is attached. Looking forward to it. — Denise', attachment: { name: d.name, text: d.text }, fresh: true }],
     ['chat', { from: r.from, text: `Hey, pasting my registration in here, the attachment got blocked by the mail filter:\n\n${r.text}\nRay`, fresh: true }],
@@ -42,7 +41,7 @@ const arrive = async (key) => {
   if (!key || st.arrived[key] || !arrivals[key]) return;
   st = { ...st, arrived: { ...st.arrived, [key]: true } };
   const items = await arrivals[key]().catch((e) => { console.error(e); set(os.toast(st, `Could not stage ${key}: ${e.message}`)); return []; });
-  let s = st; for (const [folder, f] of items) s = folder === 'mail' ? os.addMail(s, f) : folder === 'chat' ? os.addChat(s, f) : os.addFile(s, folder, f.name, f.text, f.from);
+  let s = st; for (const [folder, f] of items) s = folder === 'mail' ? os.addMail(s, f) : folder === 'chat' ? os.addChat(s, f) : os.addFile(s, folder, f.name, f.text, f.from, f.note ? { note: true } : {});
   set(items.length ? os.toast(s, `${items.length} file(s) arrived in ${items[0][0]}`) : s);
 };
 

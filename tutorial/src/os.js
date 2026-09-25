@@ -4,8 +4,7 @@ import { h, mount } from '../../src/app/h.js';
 
 export const FOLDERS = ['Ballast', 'Inbox', 'Registrations', 'Tests', 'Releases', 'Class profiles', 'Outbox'];
 // The shared drive ships with a saved copy of Ballast: the recommended way to run it.
-export const initial = (notes = {}) => ({ windows: [], files: [{ id: 'ballast', folder: 'Ballast', name: 'ballast.html', text: '', from: 'IT (saved from cror.ca/ballast)', at: Date.now() - 86400000 * 30, fresh: false },
-  ...Object.entries(notes).map(([name, text], i) => ({ id: 'note' + i, folder: 'Ballast', name, text, from: 'IT', at: Date.now() - 86400000 * 30, fresh: false, note: true }))], mail: [], chat: [], cwd: 'Ballast', z: 1, sel: null, toast: null, clock: '' });
+export const initial = () => ({ windows: [], files: [{ id: 'ballast', folder: 'Ballast', name: 'ballast.html', text: '', from: 'IT (saved from cror.ca/ballast)', at: Date.now() - 86400000 * 30, fresh: false }], mail: [], chat: [], cwd: 'Ballast', z: 1, sel: null, toast: null, clock: '' });
 export const addMail = (s, m) => ({ ...s, mail: [...s.mail, { id: id(), at: Date.now(), ...m }], toast: `Mail from ${m.from}: ${m.subject}` });
 export const addChat = (s, m) => ({ ...s, chat: [...s.chat, { id: id(), at: Date.now(), ...m }], toast: `Message from ${m.from}` });
 const id = () => Math.random().toString(36).slice(2, 8);
@@ -23,7 +22,7 @@ export const focus = (s, wid) => ({ ...s, z: s.z + 1, windows: s.windows.map((w)
 export const move = (s, wid, x, y) => ({ ...s, windows: s.windows.map((w) => (w.id === wid ? { ...w, x, y } : w)) });
 export const close = (s, wid) => { dropFrame(wid); return { ...s, windows: s.windows.filter((w) => w.id !== wid) }; };
 export const minimize = (s, wid) => ({ ...s, windows: s.windows.map((w) => (w.id === wid ? { ...w, min: !w.min } : w)) });
-export const addFile = (s, folder, name, text, from = '') => ({ ...s, files: [...s.files.filter((f) => !(f.folder === folder && f.name === name)), { id: id(), folder, name, text, from, at: Date.now(), fresh: true }], toast: from ? `${name} arrived from ${from}` : null });
+export const addFile = (s, folder, name, text, from = '', extra = {}) => ({ ...s, files: [...s.files.filter((f) => !(f.folder === folder && f.name === name)), { id: id(), folder, name, text, from, at: Date.now(), fresh: true, ...extra }], toast: from ? `${name} arrived from ${from}` : null });
 export const seen = (s, fid) => ({ ...s, files: s.files.map((f) => (f.id === fid ? { ...f, fresh: false } : f)), sel: fid });
 export const cd = (s, folder) => ({ ...s, cwd: folder, sel: null });
 export const toast = (s, msg) => ({ ...s, toast: msg });
@@ -41,7 +40,7 @@ export const render = (root, s, act) => {
       h('button', { class: 'dicon', ondblclick: () => act('new-note') }, '🗒️', h('span', {}, 'Notepad')),
       h('button', { class: 'dicon', ondblclick: () => act('open-mail') }, '📧', h('span', {}, 'Mail'), s.mail.some((m) => m.fresh) ? h('span', { class: 'badge' }, s.mail.filter((m) => m.fresh).length) : null),
       h('button', { class: 'dicon', ondblclick: () => act('open-chat') }, '💬', h('span', {}, 'Messages'), s.chat.some((m) => m.fresh) ? h('span', { class: 'badge' }, s.chat.filter((m) => m.fresh).length) : null),
-      s.files.filter((f) => f.note).map((f) => h('button', { class: 'dicon', ondblclick: () => act('open-file', f.id) }, '📝', h('span', {}, f.name)))),
+      ),
     ...s.windows.filter((w) => !w.min).sort((a, b) => a.z - b.z).map((w) => win(w, s, act)),
     s.toast ? h('div', { class: 'toast' }, s.toast) : null,
     h('div', { class: 'taskbar' }, h('button', { class: 'start', onclick: () => act('open-explorer') }, '⊞'),
