@@ -9,7 +9,7 @@
     "test": "node --test 'test/[!e]*.test.mjs'",
     "e2e": "node --test test/e2e.test.mjs",
     "check": "tsc -p jsconfig.json",
-    "build": "node build.mjs"
+    "build": "node build.mjs && node tutorial/build.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.0",

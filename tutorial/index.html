@@ -1,0 +1,2029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-vAFQ7GusuxLhme355r78pGqmMg/lmdz469fuMiClhZY='; style-src 'sha256-I2JYYkK2zdnnCoamNX0mZ2WrIt+z7qDmgaeZiazbFps='; frame-src 'self' file:; img-src blob: data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Ballast tutorial</title>
+<style>* { box-sizing:border-box } html, body { margin:0; height:100%; font:14px/1.4 "Segoe UI", Arial, sans-serif; overflow:hidden; background:#0b3d5c }
+.desk { position:absolute; inset:0; background:radial-gradient(ellipse at 30% 20%, #1e6a8f 0%, #0b3d5c 55%, #072a40 100%); overflow:hidden }
+.banner { position:absolute; top:0; left:0; right:0; background:rgba(0,0,0,.55); color:#ffd166; font-size:12px; padding:4px 12px; text-align:center; z-index:5 }
+.icons { position:absolute; left:340px; top:36px; display:flex; flex-direction:column; gap:14px } .dicon { width:84px; background:none; border:none; color:#fff; font-size:32px; cursor:pointer; text-align:center } .dicon span { display:block; font-size:12px; text-shadow:0 1px 3px #000 }
+.win { position:absolute; background:#fff; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,.45); display:flex; flex-direction:column; overflow:hidden; border:1px solid #9ab }
+.titlebar { display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:#f3f3f3; border-bottom:1px solid #ddd; cursor:move; user-select:none; font-weight:600 } .winbtns button { border:none; background:none; font-size:14px; padding:2px 8px; cursor:pointer } .winbtns button:hover { background:#e5e5e5 }
+.explorer { display:flex; flex-direction:column; flex:1; min-height:0 } .addr { padding:6px 10px; background:#fafafa; border-bottom:1px solid #eee } .crumb { background:#fff; border:1px solid #ddd; padding:1px 6px; border-radius:4px }
+.panes { display:flex; flex:1; min-height:0 } .tree { width:190px; border-right:1px solid #eee; padding:8px 0; overflow:auto } .treehead { font-size:11px; color:#888; padding:6px 12px 2px; text-transform:uppercase } .treeitem { padding:5px 12px; cursor:pointer } .treeitem.sub { padding-left:28px } .treeitem.on { background:#dbeafe } .treeitem:hover { background:#eef }
+.badge { background:#e11d48; color:#fff; border-radius:9px; font-size:10px; padding:0 6px; margin-left:6px }
+.pane { flex:1; overflow:auto } .cols, .file { display:grid; grid-template-columns:1fr 160px 110px; padding:5px 12px; align-items:center } .cols { color:#888; font-size:12px; border-bottom:1px solid #eee; position:sticky; top:0; background:#fff }
+.file { cursor:default; user-select:none } .file:hover { background:#f3f6ff } .file.sel { background:#cfe0ff } .file.fresh > span:first-child { font-weight:700 } .empty { padding:30px; color:#999; text-align:center } .small { font-size:12px; color:#666 }
+.status { border-top:1px solid #eee; padding:4px 10px; font-size:12px; color:#666; display:flex; justify-content:space-between; align-items:center } .openwith { font:inherit; padding:3px 10px; border:1px solid #9ab; background:#eef; border-radius:4px; cursor:pointer }
+.mail { display:flex; flex:1; min-height:0; background:#fff } .maillist { width:220px; border-right:1px solid #eee; overflow:auto } .msg { padding:8px 12px; border-bottom:1px solid #f0f0f0; cursor:pointer } .msg.fresh b { color:#1d4ed8 } .msg:hover { background:#f3f6ff } .mailbody { flex:1; padding:12px 18px; overflow:auto } .mailbody h3 { margin:0 0 4px } .attach { background:#f3f4f6; border:1px solid #ddd; border-radius:6px; padding:8px 10px; display:inline-flex; gap:8px; align-items:center }
+.chat { flex:1; min-height:0; overflow:auto; background:#e5ddd5; padding:12px } .bubble { background:#fff; border-radius:10px; padding:8px 12px; margin-bottom:10px; max-width:460px; box-shadow:0 1px 1px rgba(0,0,0,.1) } .bubble pre { font:12px/1.35 Consolas, 'Courier New', monospace; white-space:pre-wrap; max-height:220px; overflow:auto; margin:6px 0; background:#f7f7f7; padding:6px } .bubble.fresh b { color:#1d4ed8 }
+pre.note { flex:1; margin:0; padding:16px 20px; overflow:auto; font:13px/1.5 Consolas, 'Courier New', monospace; white-space:pre-wrap; background:#fff }
+.browser { display:flex; flex-direction:column; flex:1; min-height:0; background:#dee1e6 } .tabs { display:flex; align-items:flex-end; gap:4px; padding:6px 8px 0 } .tab { background:#fff; border-radius:8px 8px 0 0; padding:6px 14px; font-size:13px } .newtab { border:none; background:none; font-size:16px; cursor:pointer; padding:2px 8px }
+.urlbar { display:flex; gap:8px; align-items:center; background:#fff; padding:6px 10px; border-bottom:1px solid #ccc } .urlbar input { flex:1; border:1px solid #ddd; border-radius:14px; padding:4px 10px; background:#f1f3f4; font:inherit }
+#frames iframe.app { position:fixed; border:none; background:#fff; display:none } .appslot { flex:1; background:#fff }
+.taskbar { position:absolute; left:0; right:0; bottom:0; height:40px; background:rgba(20,30,40,.92); display:flex; align-items:center; gap:6px; padding:0 8px; color:#fff } .start { font-size:18px; background:none; border:none; color:#fff; padding:4px 10px; cursor:pointer } .task { background:rgba(255,255,255,.12); border:none; color:#fff; padding:6px 12px; border-radius:4px; cursor:pointer } .clock { margin-left:auto; font-variant-numeric:tabular-nums; padding-right:8px }
+.toast { position:absolute; right:16px; bottom:52px; background:#111; color:#fff; padding:10px 14px; border-radius:8px; box-shadow:0 6px 20px rgba(0,0,0,.4); z-index:9 }
+/* coach */
+.coach { position:absolute; left:0; top:22px; bottom:40px; width:320px; background:#fff7ed; border-right:3px solid #f59e0b; padding:14px 16px; overflow:auto; z-index:6; box-shadow:6px 0 20px rgba(0,0,0,.25) }
+.coach h2 { margin:0 0 4px; font-size:16px } .coach .phase { font-size:11px; color:#92400e; text-transform:uppercase; letter-spacing:.06em } .coach p { margin:8px 0 } .coach .btns { display:flex; gap:8px; margin-top:12px } .coach button { font:inherit; padding:6px 12px; border:1px solid #f59e0b; border-radius:6px; background:#fff; cursor:pointer } .coach button.primary { background:#f59e0b; color:#fff } .coach button:disabled { opacity:.4; cursor:default }
+.coach .progress { height:6px; background:#fde68a; border-radius:3px; margin:8px 0 } .coach .progress div { height:100%; background:#f59e0b; border-radius:3px }
+.coach .waiting { color:#92400e; font-style:italic } .coach ul { padding-left:18px; margin:6px 0 } .coach .done { color:#6b7280; text-decoration:line-through }
+.hilite { outline:3px solid #f59e0b; outline-offset:2px; border-radius:6px; animation:pulse 1.2s ease-in-out infinite alternate } @keyframes pulse { from { outline-color:#f59e0b } to { outline-color:#fde68a } }
+</style>
+</head>
+<body>
+<div id="desk"></div>
+<aside id="coach" class="coach"></aside>
+<script>(() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+
+  // src/bytes.js
+  var utf8, text, B64, b64, unb64, b64url, unb64url, hex, concat, random, sha256;
+  var init_bytes = __esm({
+    "src/bytes.js"() {
+      utf8 = (s) => new TextEncoder().encode(s);
+      text = (b) => new TextDecoder().decode(b);
+      B64 = typeof btoa === "function" ? { enc: (bin) => btoa(bin), dec: (s) => atob(s) } : { enc: (bin) => Buffer.from(bin, "binary").toString("base64"), dec: (s) => Buffer.from(s, "base64").toString("binary") };
+      b64 = (bytes) => B64.enc(Array.from(bytes, (c) => String.fromCharCode(c)).join(""));
+      unb64 = (s) => Uint8Array.from(B64.dec(s.replace(/\s+/g, "")), (c) => c.charCodeAt(0));
+      b64url = (bytes) => b64(bytes).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      unb64url = (s) => {
+        const t = s.replace(/-/g, "+").replace(/_/g, "/");
+        return unb64(t + "=".repeat((4 - t.length % 4) % 4));
+      };
+      hex = (bytes) => Array.from(bytes, (c) => c.toString(16).padStart(2, "0")).join("");
+      concat = (...parts) => {
+        const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+        let o = 0;
+        for (const p of parts) {
+          out.set(p, o);
+          o += p.length;
+        }
+        return out;
+      };
+      random = (n) => crypto.getRandomValues(new Uint8Array(n));
+      sha256 = async (bytes) => new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+    }
+  });
+
+  // src/armor.js
+  var armor_exports = {};
+  __export(armor_exports, {
+    armor: () => armor,
+    blocks: () => blocks,
+    bundle: () => bundle,
+    dearmor: () => dearmor,
+    sniff: () => sniff
+  });
+  var KINDS, wrap76, armor, dearmor, blocks, bundle, sniff;
+  var init_armor = __esm({
+    "src/armor.js"() {
+      init_bytes();
+      KINDS = ["PROFILE", "TEST", "RELEASE", "CANCEL", "SHEET", "BOOK", "APPROVAL", "REPORT"];
+      wrap76 = (s) => s.replace(/(.{76})/g, "$1\n").trim();
+      armor = async (kind, body, headers = {}) => {
+        const bytes = utf8(JSON.stringify(body));
+        const lines = [`-----BEGIN BALLAST ${kind}-----`, "version: 1"];
+        for (const [k, v] of Object.entries(headers)) lines.push(`${k}: ${v}`);
+        lines.push(`sha256: ${hex(await sha256(bytes))}`, "", wrap76(b64(bytes)), `-----END BALLAST ${kind}-----`, "");
+        return lines.join("\n");
+      };
+      dearmor = async (s, expectKind) => {
+        const m = /-----BEGIN BALLAST ([A-Z]+)-----\r?\n([\s\S]*?)-----END BALLAST \1-----/.exec(s);
+        if (!m) throw new Error("not a Ballast file");
+        const [, kind, inner] = m;
+        if (!KINDS.includes(kind)) throw new Error(`unknown kind ${kind}`);
+        if (expectKind && kind !== expectKind) throw new Error(`expected a ${expectKind}, got a ${kind}`);
+        const [head, ...rest] = inner.split(/\r?\n\r?\n/);
+        const headers = Object.fromEntries(head.split(/\r?\n/).filter(Boolean).map((l) => {
+          const i = l.indexOf(":");
+          return [l.slice(0, i).trim(), l.slice(i + 1).trim()];
+        }));
+        if (headers.version !== "1") throw new Error(`unsupported version ${headers.version}`);
+        const bytes = unb64(rest.join(""));
+        if (hex(await sha256(bytes)) !== headers.sha256) throw new Error("corrupt file: sha256 mismatch");
+        const body = JSON.parse(text(bytes));
+        if (body.kind !== kind.toLowerCase()) throw new Error("armor kind does not match body");
+        return { kind, headers, body };
+      };
+      blocks = (s) => s.match(/-----BEGIN BALLAST ([A-Z]+)-----\r?\n[\s\S]*?-----END BALLAST \1-----/g) || [];
+      bundle = (texts) => texts.join("\n");
+      sniff = (s) => (/-----BEGIN BALLAST ([A-Z]+)-----/.exec(s) || [])[1] || null;
+    }
+  });
+
+  // src/profile.js
+  var profile_exports = {};
+  __export(profile_exports, {
+    MINTS_BY: () => MINTS_BY,
+    ROLES: () => ROLES,
+    checkMint: () => checkMint,
+    exportKeys: () => exportKeys,
+    importKeys: () => importKeys,
+    makeProfile: () => makeProfile,
+    mintProfile: () => mintProfile,
+    profileText: () => profileText,
+    publicProfile: () => publicProfile,
+    readProfile: () => readProfile,
+    registration: () => registration,
+    signBytes: () => signBytes,
+    sourceHash: () => sourceHash,
+    verifyBytes: () => verifyBytes
+  });
+  var subtle, ECDH, ECDSA, ROLES, ROLE_OR_NONE, makeProfile, publicProfile, profileText, readProfile, exportKeys, importKeys, signBytes, verifyBytes, sourceHash, MINTS_BY, mintString, mintProfile, checkMint, registration;
+  var init_profile = __esm({
+    "src/profile.js"() {
+      init_armor();
+      init_bytes();
+      subtle = crypto.subtle;
+      ECDH = { name: "ECDH", namedCurve: "P-256" };
+      ECDSA = { name: "ECDSA", namedCurve: "P-256" };
+      ROLES = ["crew", "rtc", "superintendent"];
+      ROLE_OR_NONE = [...ROLES, "none"];
+      makeProfile = async (role, name, pin, photo = "", extractable = false) => {
+        if (!ROLE_OR_NONE.includes(role)) throw new Error(`bad role ${role}`);
+        if (!/^\d{4,8}$/.test(String(pin))) throw new Error("PIN must be 4\u20138 digits");
+        const kx = await subtle.generateKey(ECDH, extractable, ["deriveBits"]);
+        const ks = await subtle.generateKey(ECDSA, extractable, ["sign", "verify"]);
+        return {
+          role,
+          name: String(name).trim(),
+          pin: String(pin).trim(),
+          photo,
+          pub: b64url(new Uint8Array(await subtle.exportKey("raw", kx.publicKey))),
+          sig: b64url(new Uint8Array(await subtle.exportKey("raw", ks.publicKey))),
+          priv: kx.privateKey,
+          sign: ks.privateKey
+        };
+      };
+      publicProfile = ({ role, name, pin, pub, sig, photo, minted }) => ({ role, name, pin, pub, sig, photo, ...minted ? { minted } : {} });
+      profileText = (p) => armor("PROFILE", { v: 1, kind: "profile", ...publicProfile(p) }, { role: p.role, name: p.name, pin: p.pin });
+      readProfile = async (t) => {
+        const { body } = await dearmor(t, "PROFILE");
+        if (!ROLE_OR_NONE.includes(body.role)) throw new Error("bad role");
+        if (!/^\d{4,8}$/.test(body.pin)) throw new Error("bad PIN");
+        if (body.role !== "none" && !await checkMint(body)) throw new Error(`${body.name}'s ${body.role} role is not properly minted`);
+        return body;
+      };
+      exportKeys = async (p) => ({ priv: await subtle.exportKey("jwk", p.priv), sign: await subtle.exportKey("jwk", p.sign) });
+      importKeys = async (p, jwks) => ({ ...p, priv: await subtle.importKey("jwk", jwks.priv, ECDH, true, ["deriveBits"]), sign: await subtle.importKey("jwk", jwks.sign, ECDSA, true, ["sign"]) });
+      signBytes = async (signKey, bytes) => b64url(new Uint8Array(await subtle.sign({ name: "ECDSA", hash: "SHA-256" }, signKey, bytes)));
+      verifyBytes = async (sigPub, signature, bytes) => {
+        const k = await subtle.importKey("raw", unb64url(sigPub), ECDSA, true, ["verify"]);
+        return subtle.verify({ name: "ECDSA", hash: "SHA-256" }, k, unb64url(signature), bytes);
+      };
+      sourceHash = async (source) => Array.from(await sha256(utf8(source.replace(/\r\n/g, "\n")))).map((b) => b.toString(16).padStart(2, "0")).join("");
+      MINTS_BY = { crew: "rtc", rtc: "superintendent", superintendent: "superintendent" };
+      mintString = (p, role, start, by) => `ballast/mint/1
+${role}
+${start}
+${p.pin}
+${p.pub}
+${p.sig}
+${by.sig}`;
+      mintProfile = async (minter, profile, role, start = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10)) => {
+        if (!ROLES.includes(role)) throw new Error(`bad role ${role}`);
+        if (minter.role !== MINTS_BY[role]) throw new Error(`a ${minter.role} cannot mint ${role}`);
+        const by = { name: minter.name, pin: minter.pin, sig: minter.sig, role: minter.role };
+        const signature = await signBytes(minter.sign, utf8(mintString(profile, role, start, by)));
+        return { ...publicProfile(profile), role, minted: { role, start, by, signature } };
+      };
+      checkMint = async (p) => {
+        const m = p.minted;
+        if (!m || m.role !== p.role || !ROLES.includes(p.role)) return false;
+        if (m.by.role !== MINTS_BY[p.role]) return false;
+        if (p.role === "superintendent" && m.by.sig !== p.sig) return false;
+        return verifyBytes(m.by.sig, m.signature, utf8(mintString(p, p.role, m.start, m.by)));
+      };
+      registration = (p) => ({ ...publicProfile(p), role: "none" });
+    }
+  });
+
+  // src/app/h.js
+  var h = (tag, attrs = {}, ...children) => {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+      else if (k === "class") el.className = v;
+      else if (k === "style" && typeof v === "object") Object.assign(el.style, v);
+      else if (k === "value" || k in el && typeof v !== "string") el[k] = v;
+      else el.setAttribute(k, String(v));
+    }
+    for (const c of children.flat(Infinity)) if (c != null && c !== false) el.append(c instanceof Node ? c : document.createTextNode(String(c)));
+    return el;
+  };
+  var mount = (root2, ...nodes) => {
+    root2.replaceChildren(...nodes.flat(Infinity).filter(Boolean));
+    return root2;
+  };
+
+  // tutorial/src/os.js
+  var FOLDERS = ["Ballast", "Inbox", "Registrations", "Tests", "Releases", "Class profiles", "Outbox"];
+  var initial = (notes = {}) => ({ windows: [], files: [
+    { id: "ballast", folder: "Ballast", name: "ballast.html", text: "", from: "IT (saved from cror.ca/ballast)", at: Date.now() - 864e5 * 30, fresh: false },
+    ...Object.entries(notes).map(([name, text2], i) => ({ id: "note" + i, folder: "Ballast", name, text: text2, from: "IT", at: Date.now() - 864e5 * 30, fresh: false, note: true }))
+  ], mail: [], chat: [], cwd: "Ballast", z: 1, sel: null, toast: null, clock: "" });
+  var addMail = (s, m) => ({ ...s, mail: [...s.mail, { id: id(), at: Date.now(), ...m }], toast: `Mail from ${m.from}: ${m.subject}` });
+  var addChat = (s, m) => ({ ...s, chat: [...s.chat, { id: id(), at: Date.now(), ...m }], toast: `Message from ${m.from}` });
+  var id = () => Math.random().toString(36).slice(2, 8);
+  var openWindow = (s, kind, title, extra = {}) => {
+    const existing = s.windows.find((w2) => w2.kind === kind);
+    if (existing) return focus(s, existing.id);
+    const n = s.windows.length;
+    const w = { id: id(), kind, title, x: 440 + n * 30, y: 40 + n * 24, w: kind === "browser" ? 980 : kind === "notepad" ? 640 : kind === "chat" ? 520 : 720, h: kind === "browser" ? 700 : kind === "notepad" ? 560 : 460, z: s.z + 1, min: false, ...extra };
+    return { ...s, windows: [...s.windows, w], z: s.z + 1 };
+  };
+  var setUrl = (s, wid, url, title) => ({ ...s, windows: s.windows.map((w) => w.id === wid ? { ...w, url, title } : w) });
+  var focus = (s, wid) => ({ ...s, z: s.z + 1, windows: s.windows.map((w) => w.id === wid ? { ...w, z: s.z + 1, min: false } : w) });
+  var move = (s, wid, x, y) => ({ ...s, windows: s.windows.map((w) => w.id === wid ? { ...w, x, y } : w) });
+  var close = (s, wid) => {
+    dropFrame(wid);
+    return { ...s, windows: s.windows.filter((w) => w.id !== wid) };
+  };
+  var minimize = (s, wid) => ({ ...s, windows: s.windows.map((w) => w.id === wid ? { ...w, min: !w.min } : w) });
+  var addFile = (s, folder, name, text2, from = "") => ({ ...s, files: [...s.files.filter((f) => !(f.folder === folder && f.name === name)), { id: id(), folder, name, text: text2, from, at: Date.now(), fresh: true }], toast: from ? `${name} arrived from ${from}` : null });
+  var seen = (s, fid) => ({ ...s, files: s.files.map((f) => f.id === fid ? { ...f, fresh: false } : f), sel: fid });
+  var cd = (s, folder) => ({ ...s, cwd: folder, sel: null });
+  var toast = (s, msg) => ({ ...s, toast: msg });
+  var ICON = { txt: "\u{1F4C4}", html: "\u{1F310}", folder: "\u{1F4C1}" };
+  var ICONW = { browser: "\u{1F310} ", notepad: "\u{1F4DD} ", mail: "\u{1F4E7} ", chat: "\u{1F4AC} ", explorer: "\u{1F5C4}\uFE0F " };
+  var ext = (n) => (n.split(".").pop() || "").toLowerCase();
+  var render = (root2, s, act2) => {
+    const desktop = h(
+      "div",
+      { class: "desk" },
+      h("div", { class: "banner" }, "PRETEND COMPUTER \u2014 this desktop, the shared drive and the browser are a simulation for the tutorial. Only the Ballast page inside the browser window is the real application."),
+      h(
+        "div",
+        { class: "icons" },
+        h("button", { class: "dicon", ondblclick: () => act2("open-explorer") }, "\u{1F5C4}\uFE0F", h("span", {}, "Shared drive")),
+        h("button", { class: "dicon", ondblclick: () => act2("open-browser") }, "\u{1F310}", h("span", {}, "Browser")),
+        h("button", { class: "dicon", ondblclick: () => act2("open-mail") }, "\u{1F4E7}", h("span", {}, "Mail"), s.mail.some((m) => m.fresh) ? h("span", { class: "badge" }, s.mail.filter((m) => m.fresh).length) : null),
+        h("button", { class: "dicon", ondblclick: () => act2("open-chat") }, "\u{1F4AC}", h("span", {}, "Messages"), s.chat.some((m) => m.fresh) ? h("span", { class: "badge" }, s.chat.filter((m) => m.fresh).length) : null),
+        s.files.filter((f) => f.note).map((f) => h("button", { class: "dicon", ondblclick: () => act2("open-file", f.id) }, "\u{1F4DD}", h("span", {}, f.name)))
+      ),
+      ...s.windows.filter((w) => !w.min).sort((a, b) => a.z - b.z).map((w) => win(w, s, act2)),
+      s.toast ? h("div", { class: "toast" }, s.toast) : null,
+      h(
+        "div",
+        { class: "taskbar" },
+        h("button", { class: "start", onclick: () => act2("open-explorer") }, "\u229E"),
+        s.windows.map((w) => h("button", { class: "task", onclick: () => act2("focus", w.id) }, ICONW[w.kind] || "\u{1F5C4}\uFE0F ", w.title)),
+        h("span", { class: "clock" }, s.clock)
+      )
+    );
+    mount(root2, desktop);
+  };
+  var win = (w, s, act2) => {
+    const bar = h(
+      "div",
+      { class: "titlebar", onpointerdown: (e) => {
+        if (e.target.closest("button")) return;
+        act2("focus", w.id);
+        const ox = e.clientX - w.x, oy = e.clientY - w.y;
+        const mv = (ev) => act2("move", w.id, Math.max(0, ev.clientX - ox), Math.max(0, ev.clientY - oy));
+        const up = () => {
+          window.removeEventListener("pointermove", mv);
+          window.removeEventListener("pointerup", up);
+        };
+        window.addEventListener("pointermove", mv);
+        window.addEventListener("pointerup", up);
+      } },
+      h("span", {}, ICONW[w.kind] || "\u{1F5C4}\uFE0F ", w.title),
+      h("span", { class: "winbtns" }, h("button", { onclick: () => act2("minimize", w.id) }, "\u2013"), h("button", { onclick: () => act2("close", w.id) }, "\u2715"))
+    );
+    const body = w.kind === "explorer" ? explorer(s, act2) : w.kind === "notepad" ? h("pre", { class: "note" }, w.text) : w.kind === "mail" ? mail(s, act2) : w.kind === "chat" ? chat(s, act2) : browser(w, s, act2);
+    return h("div", { class: "win " + w.kind, style: { left: w.x + "px", top: w.y + "px", width: w.w + "px", height: w.h + "px", zIndex: w.z }, onclick: () => act2("focus", w.id) }, bar, body);
+  };
+  var explorer = (s, act2) => {
+    const files = s.files.filter((f) => f.folder === s.cwd).sort((a, b) => b.at - a.at);
+    return h(
+      "div",
+      { class: "explorer" },
+      h("div", { class: "addr" }, "\u{1F5C4}\uFE0F ", h("span", { class: "crumb" }, "\\\\WNR-TRAINING\\Training"), " \u203A ", h("span", { class: "crumb" }, s.cwd)),
+      h(
+        "div",
+        { class: "panes" },
+        h(
+          "div",
+          { class: "tree" },
+          h("div", { class: "treehead" }, "This PC"),
+          h("div", { class: "treeitem" }, "\u{1F4BB} Desktop"),
+          h("div", { class: "treehead" }, "Network"),
+          h("div", { class: "treeitem" }, "\u{1F5C4}\uFE0F WNR-TRAINING"),
+          FOLDERS.map((f) => {
+            const n = s.files.filter((x) => x.folder === f && x.fresh).length;
+            return h("div", { class: "treeitem sub" + (s.cwd === f ? " on" : ""), onclick: () => act2("cd", f) }, "\u{1F4C1} ", f, n ? h("span", { class: "badge" }, n) : null);
+          })
+        ),
+        h(
+          "div",
+          { class: "pane" },
+          h("div", { class: "cols" }, h("span", {}, "Name"), h("span", {}, "From"), h("span", {}, "Modified")),
+          s.cwd === "Inbox" && !s.files.some((f) => f.name === "ballast.html") ? null : null,
+          files.length ? files.map((f) => h("div", { class: "file" + (s.sel === f.id ? " sel" : "") + (f.fresh ? " fresh" : ""), onclick: (e) => act2(e.detail >= 2 ? "open-file" : "select", f.id) }, h("span", {}, ICON[ext(f.name)] || "\u{1F4C4}", " ", f.name), h("span", { class: "small" }, f.from), h("span", { class: "small" }, new Date(f.at).toLocaleTimeString()))) : h("div", { class: "empty" }, "This folder is empty.")
+        )
+      ),
+      h("div", { class: "status" }, `${files.length} item(s)`, s.sel ? h("button", { class: "openwith", onclick: () => act2("open-file", s.sel) }, /\.html$/.test(s.files.find((f) => f.id === s.sel)?.name || "") || s.files.find((f) => f.id === s.sel)?.note ? "Open" : "Open with Ballast") : null)
+    );
+  };
+  var frames = /* @__PURE__ */ new Map();
+  var layer = () => document.getElementById("frames") || document.body.appendChild(h("div", { id: "frames" }));
+  var frameFor = (w) => {
+    if (!frames.has(w.id)) {
+      const f = h("iframe", { class: "app", src: w.src, title: "Ballast", allow: "camera; fullscreen" });
+      layer().append(f);
+      frames.set(w.id, f);
+    }
+    return frames.get(w.id);
+  };
+  var dropFrame = (wid) => {
+    frames.get(wid)?.remove();
+    frames.delete(wid);
+  };
+  var placeFrames = (s) => {
+    for (const [wid, f] of frames) {
+      const w = s.windows.find((x) => x.id === wid);
+      const slot = document.querySelector(`[data-slot="${wid}"]`);
+      if (!w || w.min || !slot) {
+        f.style.display = "none";
+        continue;
+      }
+      const r = slot.getBoundingClientRect();
+      Object.assign(f.style, { display: "block", left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px", zIndex: w.z });
+    }
+  };
+  var mail = (s, act2) => h(
+    "div",
+    { class: "mail" },
+    h("div", { class: "maillist" }, s.mail.length ? s.mail.map((m) => h("div", { class: "msg" + (m.fresh ? " fresh" : ""), onclick: () => act2("read-mail", m.id) }, h("b", {}, m.from), h("div", {}, m.subject), h("div", { class: "small" }, new Date(m.at).toLocaleTimeString()))) : h("div", { class: "empty" }, "No mail.")),
+    h("div", { class: "mailbody" }, (() => {
+      const m = s.mail.find((x) => x.id === s.readMail) || s.mail.at(-1);
+      if (!m) return null;
+      return [h("h3", {}, m.subject), h("div", { class: "small" }, `From: ${m.from}`), h("p", {}, m.body), m.attachment ? h("div", { class: "attach" }, "\u{1F4CE} ", m.attachment.name, " ", h("button", { class: "openwith", onclick: () => act2("open-text", m.attachment.text, m.attachment.name) }, "Open with Ballast")) : null];
+    })())
+  );
+  var chat = (s, act2) => h("div", { class: "chat" }, s.chat.length ? s.chat.map((m) => h("div", { class: "bubble" + (m.fresh ? " fresh" : "") }, h("b", {}, m.from), h("pre", {}, m.text), h("button", { class: "openwith", onclick: () => act2("open-text", m.text, `message from ${m.from}`) }, "Open this message with Ballast"))) : h("div", { class: "empty" }, "No messages."));
+  var browser = (w, s, act2) => h(
+    "div",
+    { class: "browser" },
+    h("div", { class: "tabs" }, h("span", { class: "tab on" }, "\u{1FAA8} Ballast"), h("button", { class: "newtab", title: "New tab", onclick: () => act2("new-tab") }, "+")),
+    h("div", { class: "urlbar" }, h("span", {}, "\u{1F512}"), h("input", { readonly: true, value: w.url || "https://cror.ca/ballast/" })),
+    (frameFor(w), h("div", { class: "appslot", "data-slot": w.id }))
+  );
+
+  // tutorial/src/script.js
+  var have = (st2, folder, re) => st2.files.some((f) => f.folder === folder && re.test(f.name));
+  var exported = (st2, re) => have(st2, "Outbox", re);
+  var info = (phase, title, text2, extra = {}) => ({ phase, title, text: text2, info: true, done: () => true, ...extra });
+  var PHASES = ["superintendent", "rtc", "crew"];
+  var steps = [
+    // ---------- superintendent
+    { phase: "superintendent", title: "Welcome", text: 'You are about to run a training program end to end: first as the superintendent, then as an RTC, then as crew. The desktop, the shared drive, the mail and the browser are pretend; Ballast, inside the browser, is real.\n\nBallast is a serverless HTML file. You can run it from cror.ca/ballast, or download a copy of your own (Ctrl+S, "Webpage, HTML only") and run it from a file \u2014 a shared drive, a USB stick, your desktop. The recommended way is your own copy: a fixed file IT can hash once, that needs no internet and will be the same file in thirty years. One thing to know: a browser keeps keys per address, so the cror.ca page and the file are two separate registrations \u2014 pick one and stay with it.\n\nOpen either one to go on: the Browser on the desktop (cror.ca), or ballast.html in the Ballast folder of the shared drive (a saved copy).', done: (st2) => st2.windows.some((w) => w.kind === "browser") },
+    info("superintendent", "The railroad metaphor", [
+      "Ballast borrows its words from the CROR. The superintendent is the program director: approves tests, reads class profiles, settles appeals. The RTC (rail traffic controller) is the teacher: mints crew, issues tests, marks, files class profiles. Crew are the students. A test is issued to a class the way a clearance is issued to a train \u2014 one file, a clearance for each person, repeated back before it takes effect \u2014 and a finished attempt is a release. The marks come back as a cancellation. The RTC's working file is a sheet; the superintendent's is a book.",
+      "It is admittedly a bit silly, and it may go away later. Until then, the mapping is the only thing you need to hold in your head."
+    ].join("\n\n")),
+    { phase: "superintendent", title: "Why Ballast", text: 'Free. Simple. Serverless. Permissionless. No external dependencies. Runnable in 30 years \u2014 it should outlast some rails.\n\nOne HTML file; the browser you already have does the cryptography; the files are the network. The long form is on the desktop: open "Why Ballast.txt".', done: (st2) => st2.windows.some((w) => w.kind === "notepad") },
+    { phase: "superintendent", title: "What an armored text file is", done: (st2) => st2.windows.some((w) => w.kind === "notepad" && /Armored/.test(w.title)), text: 'Ballast runs on armored text files \u2014 eight kinds, nothing else. Think of a GBO: a numbered page of plain text, transmitted by whatever means is at hand and repeated back to prove it was copied. An armored file is the same thing for a computer: a BEGIN line, readable headers, a body of letters and digits, an END line, and a sha256 as the repeat-back.\n\nThe long form, with an example, is on the desktop: open "Armored text.txt".' },
+    { phase: "superintendent", title: "Register", text: "Everyone starts the same way. Register with a name, a PIN (any 6 digits) and, if you like, a photo. Ballast keeps your keys in this browser.", hint: ["form.card button[type=submit]", "Fill in name and PIN, then Register."], done: (st2) => st2.ballast.pub && st2.ballast.role !== void 0 && st2.ballast.screen && st2.ballast.role === "none" },
+    { phase: "superintendent", title: "The first superintendent mints themself", text: 'Roles are granted by signature. Nobody is above the first superintendent, so they mint their own. Open "Nobody to mint me" and start as superintendent.', hint: ["details summary", "Open this and click Start as superintendent."], done: (st2) => st2.ballast.role === "superintendent" },
+    { phase: "superintendent", title: "Start your book", text: "Your book holds the RTCs you mint, the tests you approve, and every class profile. It lives in a file under your passphrase. Start one.", hint: ["button.primary", "Start a book."], done: (st2) => st2.ballast.screen === "book" },
+    { phase: "superintendent", title: "Three RTCs want minting \u2014 three ways", text: "Three instructors have registered, and their registrations reached you three different ways, because armored text goes anywhere text goes. Denise emailed hers as an attachment (Mail, on the desktop). Ray's attachment got blocked, so he pasted the whole block into a chat message (Messages). Tom dropped his in the shared folder, Inbox. Open all three with Ballast \u2014 the attachment, the message body with Ray's note still around it, and the file. Ballast finds the block wherever it is.", arrive: "rtcRegistrations", explorer: "Inbox", done: (st2) => st2.pendingSeen >= 3 },
+    { phase: "superintendent", title: "Mint them", text: "On the RTCs tab, mint each one. Each minted profile is a file you would send back to that instructor; here it lands in Outbox.", hint: [".tabs button:nth-child(3)", "The RTCs tab. Mint all three."], done: (st2) => st2.files.filter((f) => f.folder === "Outbox" && /^profile-RTC-/.test(f.name)).length >= 3 },
+    { phase: "superintendent", title: "Tests arrive", text: "Two test sources arrived in Tests. Open them with Ballast; they go into your inventory. Then approve them \u2014 an approval is your signature over the source, and it travels with the test when an RTC issues it. It also lets every release under that test carry a copy sealed to you.", arrive: "testSources", explorer: "Tests", hint: [".tabs button:nth-child(2)", "Test inventory: drop the sources here and approve."], done: (st2) => st2.files.filter((f) => f.folder === "Outbox" && /^approval-/.test(f.name)).length >= 2 },
+    info("superintendent", "Write one yourself", "You can also write a test on the book. The source is plain text: a title, settings, and items separated by --- lines. Paste the example, validate it, add it. (Optional \u2014 Next when you like.)", { hint: ['textarea[placeholder^="# Title"]', "Paste a source, Validate, Add to inventory."] }),
+    { phase: "superintendent", title: "Class profiles come in", text: "The three RTCs ran Test 1 with their classes and filed class profiles: grades, strengths, weaknesses, and each RTC's appraisal of every crew member. Open them from Class profiles.", arrive: "classProfiles", explorer: "Class profiles", done: (st2) => st2.reportsSeen >= 3 },
+    info("superintendent", "Read the appraisals", "On Reports, open each class profile. Compare Okafor's appraisals with Kowalczyk's and Ferland's. One of them rates people on their jokes and their noses. This is why the superintendent reads appraisals next to the numbers \u2014 the numbers came from a test nobody could tamper with; the words came from a person.", { hint: [".tabs button:nth-child(1)", "Reports: click a title to open the class profile."] }),
+    { phase: "superintendent", title: "An appeal", text: "Gordon Whitfield, in Kowalczyk's class, says his marks do not compare: his cancellation names his release, but the grade is lower than his answers deserve. He has sent you his release file \u2014 it is in Inbox. Every release under a test you approved carries a copy sealed to you. Open it with Ballast: the book re-scores it from the approved source and compares, item by item, with what Kowalczyk reported for that release hash.", arrive: "appeal", explorer: "Inbox", done: (st2) => !!st2.appealSeen },
+    info("superintendent", "Can an RTC fail someone they dislike?", [
+      "Look at Audits at the bottom of Reports: the re-score DIFFERS from what Kowalczyk reported. Two multiple-choice items he reported as wrong were right.",
+      "This is what can be proven. The crew member signs the release with their own key, so the RTC cannot alter the answers. The cancellation is signed by the RTC and names the release hash, so the RTC cannot later deny what they marked. The class profile names the same hash and the per-item marks. And the audit copy lets you re-score the objective items yourself, with no help from the RTC.",
+      "What cannot be proven by a machine is the mark on a short answer \u2014 that is judgement, and the remedy is the same as it always was: you read the answer. Everything else is arithmetic that anyone holding the file can repeat."
+    ].join("\n\n")),
+    { phase: "superintendent", title: "Save the book, then step down", text: "Save your book (any passphrase). Then you will be demoted: the real superintendent, Marguerite Boudreau, has minted your registration as an RTC. Her profile for you is in Inbox \u2014 open it with Ballast and accept the new role.", arrive: "demoteToRtc", explorer: "Inbox", done: (st2) => st2.ballast.role === "rtc" },
+    // ---------- rtc
+    { phase: "rtc", title: "You are an RTC", text: 'Start a sheet \u2014 your desk, under a passphrase. Then make a class: Crew tab, New class, call it "Block C".', hint: ["button.primary", "Start a sheet."], done: (st2) => st2.ballast.screen === "desk" },
+    { phase: "rtc", title: "Registrations from crew", text: "Four crew members registered and sent their registrations to you. Open them from Inbox, then mint each one on the Crew tab and put them in your class.", arrive: "crewRegistrations", explorer: "Inbox", done: (st2) => st2.files.filter((f) => f.folder === "Outbox" && /^profile-crew-\d/.test(f.name)).length >= 4 },
+    { phase: "rtc", title: "A test from the superintendent", text: "Test 2 arrived in Tests with its approval. Open both with Ballast. On Tests, set the window \u2014 when the clearance opens and closes; outside it the file will not decrypt \u2014 choose your class and Issue. One file goes to the whole class, with a clearance for each person. It lands in Outbox.", arrive: "testForClass", explorer: "Tests", done: (st2) => exported(st2, /\.test\.txt$/) },
+    { phase: "rtc", title: "Releases come back", text: "Your four crew wrote the test and released. Their releases are in Releases. Open them with Ballast \u2014 one at a time here, but in real life you would select them all and drag the lot onto the desk at once, or drop one bundle file. Then on Releases click Score. Each row shows the release hash and whether the crew member's signature checks.", arrive: "releases", explorer: "Releases", done: (st2) => st2.releasesSeen >= 4 },
+    info("rtc", "Mark, rate, appraise", "One item is a short answer: open review for each person and mark it. On the Crew tab, give each person a rating and write an appraisal. Write what you actually observed; the superintendent will read it beside the numbers.", { hint: [".tabs button:nth-child(1)", "Crew tab: rating and appraisal per person."] }),
+    { phase: "rtc", title: "Cancel and file the class profile", text: `On Releases: Cancel all (export) writes every person's marks \u2014 signed by you, naming their release hash \u2014 into a folder you pick in a real browser, or as one file each plus one bundle of them all; here they land in Outbox. Then "Class profile to \u2026" files the report with the superintendent \u2014 drop her profile from Inbox first if the button is missing. Save your sheet.`, arrive: "supProfile", explorer: "Inbox", done: (st2) => exported(st2, /^class-profile-/) },
+    { phase: "rtc", title: "Step down again", text: "Denise Okafor, one of the RTCs, has minted your registration as crew. Her profile for you is in Inbox. Open it and accept.", arrive: "demoteToCrew", explorer: "Inbox", done: (st2) => st2.ballast.role === "crew" },
+    // ---------- crew
+    info("crew", "What protects the test \u2014 and what cannot", [
+      'First the honest part: once a question is on your screen it is cleartext for you. No software can stop a person from reading what it shows them, remembering it, or photographing it. Ballast does not pretend otherwise, and neither should anyone selling you a "secure" test.',
+      "What it does do: the test file holds every item encrypted under its own key, and only your clearance \u2014 your key plus your PIN, inside the window \u2014 opens them, one at a time. The correct answers are never in the file. Fullscreen with the keyboard locked; copy, cut, print and save refused; leaving the tab, the window or fullscreen is recorded as a break and shown to the RTC; a second tab is a break; your PIN is drawn across every item, so a photo carries your name."
+    ].join("\n\n")),
+    { phase: "crew", title: "You are crew", text: "Test 1 has been issued to you. It is in Inbox. Open it with Ballast, read the clearance and its window, repeat the four characters, and go fullscreen. One item at a time. Release the track when you are done.", arrive: "testForUser", explorer: "Inbox", done: (st2) => exported(st2, /^release-/) },
+    info("crew", "Your release hash", "Ballast shows the SHA-256 of the file you just released, and keeps it on your home screen. That number is your receipt. The release is signed by your key, so nobody can change your answers; the cancellation you get back must name this hash."),
+    { phase: "crew", title: "Your marks", text: "Denise scored your release and cancelled the clearance. The cancellation is in Inbox: open it to see your grade, your areas, and the rules to read.", arrive: "cancelForUser", explorer: "Inbox", done: (st2) => ["marks", "cancel"].includes(st2.ballast.screen) },
+    info("crew", "Does it compare?", 'At the top of your marks: the release you sent, the release these marks are for, whether they compare, and who signed the marks \u2014 your RTC, the same key that minted you. Open "Marks per item" to see each mark against your answers. If the hashes ever differ, or the signature is bad, you take both files to the superintendent, who re-scores your release from its audit copy.'),
+    info("crew", "Done", "That is the whole program: a superintendent who approves tests, reads appraisals and settles appeals; RTCs who mint crew and file class profiles; crew who write under a clearance, keep their hash, and get signed marks back. Everything that moved was a text file you could have emailed. Forget me in Ballast's top bar clears this pretend profile.", { done: () => false })
+  ];
+
+  // samples/cast.json
+  var cast_default = {
+    superintendent: {
+      role: "superintendent",
+      name: "Marguerite Boudreau",
+      pin: "900011",
+      pub: "BLqqIDE35xx-AXmeh9aG-c_lOBnSWOmI4bQZJx1EWJ5wpHgItKurvf7U8MrROZvx_bRRchkSNQi3jzz-zVQ4GvM",
+      sig: "BGXsErFGrMMNk2It99LIDz2ouCUHpmsZg__7hwuZLYZSw6UjgBBsgB5bQQsN1cDjEa4gKOkEILX-P82v_zKdUSY",
+      photo: "",
+      minted: {
+        role: "superintendent",
+        start: "2024-03-01",
+        by: {
+          name: "Marguerite Boudreau",
+          pin: "900011",
+          sig: "BGXsErFGrMMNk2It99LIDz2ouCUHpmsZg__7hwuZLYZSw6UjgBBsgB5bQQsN1cDjEa4gKOkEILX-P82v_zKdUSY",
+          role: "superintendent"
+        },
+        signature: "w2jBSsIiOSqA1xEGjVebrFmMUym3UcQ5HMUOJP3w1m4eDfVZHYhklYgcmo1jZNGO3IzkssO5jCY5kqYV4BhEFw"
+      },
+      keys: {
+        priv: {
+          key_ops: [
+            "deriveBits"
+          ],
+          ext: true,
+          kty: "EC",
+          x: "uqogMTfnHH4BeZ6H1ob5z-U4GdJY6YjhtBknHURYnnA",
+          y: "pHgItKurvf7U8MrROZvx_bRRchkSNQi3jzz-zVQ4GvM",
+          crv: "P-256",
+          d: "oJ4YxxWdCWCCcjpEZqH8nuB4TcOz3qmkJotfClH8SJQ"
+        },
+        sign: {
+          key_ops: [
+            "sign"
+          ],
+          ext: true,
+          kty: "EC",
+          x: "ZewSsUasww2TYi330sgPPai4JQemaxmD__uHC5kthlI",
+          y: "w6UjgBBsgB5bQQsN1cDjEa4gKOkEILX-P82v_zKdUSY",
+          crv: "P-256",
+          d: "yk1dzzcVyg8CneP-Z2_f07Zyt9onA0SlgfANXQn9V0Y"
+        }
+      }
+    },
+    rtcs: [
+      {
+        role: "rtc",
+        name: "Denise Okafor",
+        pin: "710021",
+        pub: "BBksW8HsH8WkXwKcXyX2kqtz3-76r4bQgZI-P6erp1s4JSwNkF_PrwQGdP0ylhi8WRXyZFqdInkccicE1rfTfu0",
+        sig: "BOJPCaOwiYpy_8ejom8O6LDxVy8dezjfyvFFndBbFWaXNar_JtMbHSUgnPCPwAJz8nNhCbzNiGP8Zind3BFvGP4",
+        photo: "",
+        minted: {
+          role: "rtc",
+          start: "2024-09-03",
+          by: {
+            name: "Marguerite Boudreau",
+            pin: "900011",
+            sig: "BGXsErFGrMMNk2It99LIDz2ouCUHpmsZg__7hwuZLYZSw6UjgBBsgB5bQQsN1cDjEa4gKOkEILX-P82v_zKdUSY",
+            role: "superintendent"
+          },
+          signature: "2JtaA27zm5hz8xT6eo4f59cPqxIEcuCN11Do3BSMFThJknRsd1Ble9mFd6D4SLuP2OPAYvJQE2RUeoC1XviQ6w"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "GSxbwewfxaRfApxfJfaSq3Pf7vqvhtCBkj4_p6unWzg",
+            y: "JSwNkF_PrwQGdP0ylhi8WRXyZFqdInkccicE1rfTfu0",
+            crv: "P-256",
+            d: "24qqqAjzgYy2fpGkf52_4Itv-ntCGvrRnX-3l4RsSBE"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "4k8Jo7CJinL_x6Oibw7osPFXLx17ON_K8UWd0FsVZpc",
+            y: "Nar_JtMbHSUgnPCPwAJz8nNhCbzNiGP8Zind3BFvGP4",
+            crv: "P-256",
+            d: "RVCFpk1DLDqCYV0T4ou0kLWNnbst5AnlPMBE2a_9LZ4"
+          }
+        },
+        style: "fair"
+      },
+      {
+        role: "rtc",
+        name: "Ray Kowalczyk",
+        pin: "710034",
+        pub: "BBQh1ubKDHgcNC6WYLHPKR5G64lx8bkAhiLFayZxnfNsUTJSdHaclJy97Ca1nSK5W04vxkX8TZO9y3HgMu8VY2U",
+        sig: "BLCOszAga4hnTsudER7fiHaa8nM7gHtAcbhndcegLkehMB6uUt-kSEP4CbMXmvdLzEjkCo1hyKOUIpSoV5P0feU",
+        photo: "",
+        minted: {
+          role: "rtc",
+          start: "2023-01-16",
+          by: {
+            name: "Marguerite Boudreau",
+            pin: "900011",
+            sig: "BGXsErFGrMMNk2It99LIDz2ouCUHpmsZg__7hwuZLYZSw6UjgBBsgB5bQQsN1cDjEa4gKOkEILX-P82v_zKdUSY",
+            role: "superintendent"
+          },
+          signature: "IIW-PHUhc3meRshRoX6nvG3QxFG8YE36DVsE6HIaotLjneOo-AHBKDRj7YGU_MVuI1Qvz77SDsMQyHokn-oc-w"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "FCHW5soMeBw0LpZgsc8pHkbriXHxuQCGIsVrJnGd82w",
+            y: "UTJSdHaclJy97Ca1nSK5W04vxkX8TZO9y3HgMu8VY2U",
+            crv: "P-256",
+            d: "azKYTuv3kvXMqUL4gyPq67vHJ6oCHxEJt9U7MfcL41o"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "sI6zMCBriGdOy50RHt-IdpryczuAe0BxuGd1x6AuR6E",
+            y: "MB6uUt-kSEP4CbMXmvdLzEjkCo1hyKOUIpSoV5P0feU",
+            crv: "P-256",
+            d: "69T55tFDagHv5VK4Jsoaik0Am4q8Z7kXJb21eivK-1c"
+          }
+        },
+        style: "nose"
+      },
+      {
+        role: "rtc",
+        name: "Tom Ferland",
+        pin: "710047",
+        pub: "BElmqBjQUQaMUErnDMkXrnvZz_vXebUURf9qXmlhINwPjkPcqsQf0yaABsWSKULIA_LC09GWNJQYBpn36yO17t0",
+        sig: "BKLeQJijYrxHORJ9cxJ8JU7RPSpbDEDFpHMcxQAaNBXJtjnA472BEuvPeIxSKvyG6fHoP4X8twV7t50isccBCzc",
+        photo: "",
+        minted: {
+          role: "rtc",
+          start: "2025-04-22",
+          by: {
+            name: "Marguerite Boudreau",
+            pin: "900011",
+            sig: "BGXsErFGrMMNk2It99LIDz2ouCUHpmsZg__7hwuZLYZSw6UjgBBsgB5bQQsN1cDjEa4gKOkEILX-P82v_zKdUSY",
+            role: "superintendent"
+          },
+          signature: "akZQzlJQxzRT6HasnpjpFvxTl8MBDxL4rUI7iiZbrEGr1TcnoEyt5UCTAiWS71QNCxyYvcToIFjfEcDSd6RN8g"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "SWaoGNBRBoxQSucMyReue9nP-9d5tRRF_2peaWEg3A8",
+            y: "jkPcqsQf0yaABsWSKULIA_LC09GWNJQYBpn36yO17t0",
+            crv: "P-256",
+            d: "zUWd7Ct9cBOos-fdkJ6S4FieP4Z6_2UljTQIXg0mevU"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "ot5AmKNivEc5En1zEnwlTtE9KlsMQMWkcxzFABo0Fck",
+            y: "tjnA472BEuvPeIxSKvyG6fHoP4X8twV7t50isccBCzc",
+            crv: "P-256",
+            d: "h1IaiZ2OSwmDC0SZuQqqYYfCJbDLz_m1o61-8SpPMU0"
+          }
+        },
+        style: "lazy"
+      }
+    ],
+    crew: [
+      {
+        role: "crew",
+        name: "Alice Marchand",
+        pin: "123456",
+        pub: "BEtehBQ045zlKQSObkzdb8qLc835vKb-jc3JlLmtDlitcki50NTXDV4SF-EgJC5tgVRPYOFT-RnMFppSjmuy04o",
+        sig: "BJTGz46epVlINpQdWfl15TGeLTQXO6OLkV6k7AOEzdxxhOgmjSIldSIg9yTGeDVLbA4Ns1p5qva6c26rYvfCC0Y",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Denise Okafor",
+            pin: "710021",
+            sig: "BOJPCaOwiYpy_8ejom8O6LDxVy8dezjfyvFFndBbFWaXNar_JtMbHSUgnPCPwAJz8nNhCbzNiGP8Zind3BFvGP4",
+            role: "rtc"
+          },
+          signature: "8rJiKjgMbd7bNaaFEnF5R6N4_dbeSly_q8BsbJ4YQytva155Ll1GdkDWKAUuB_al-fd4CImzXBuZ8RG2CZTSBg"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "S16EFDTjnOUpBI5uTN1vyotzzfm8pv6NzcmUua0OWK0",
+            y: "cki50NTXDV4SF-EgJC5tgVRPYOFT-RnMFppSjmuy04o",
+            crv: "P-256",
+            d: "6EWw65lEPSHGvvz1QszzS4Q2G1PQ3XDAlGEqa4GwfKM"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "lMbPjp6lWUg2lB1Z-XXlMZ4tNBc7o4uRXqTsA4TN3HE",
+            y: "hOgmjSIldSIg9yTGeDVLbA4Ns1p5qva6c26rYvfCC0Y",
+            crv: "P-256",
+            d: "LjLF2jlGg86R7E_an75zCVtzKQJlm5sHAGUW4PZR5t8"
+          }
+        },
+        rtc: 0,
+        skill: 0.94,
+        rating: 4,
+        note: "Steady on the point, calls every signal by name without prompting. Weak on 27 exceptions \u2014 assigned reading."
+      },
+      {
+        role: "crew",
+        name: "Ben Okoye",
+        pin: "123457",
+        pub: "BCQigN6ybp2cESg5sOKNxeYwdzXaxskpRbTVOcKfl-teFdO5VVBIoTwxobnpcvoVX711fHk8Zqg9gtj6c93UJkM",
+        sig: "BHQsQLw-xsSpE0odptL7ofoucOPDbLd-Rp825uzOZMgT3-SEpY5j6p2gccFFPvbkJDaSUzI5g_dhGz_4xZofNPw",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Denise Okafor",
+            pin: "710021",
+            sig: "BOJPCaOwiYpy_8ejom8O6LDxVy8dezjfyvFFndBbFWaXNar_JtMbHSUgnPCPwAJz8nNhCbzNiGP8Zind3BFvGP4",
+            role: "rtc"
+          },
+          signature: "LkKAxVtjJEmJxhDOKfDjnYhB-0OH_v63JKKIOc-njOs_Y_P8gnWV4FcVzafiiM1URR8l7nJ-GlfHWKL-gtn-eQ"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "JCKA3rJunZwRKDmw4o3F5jB3NdrGySlFtNU5wp-X614",
+            y: "FdO5VVBIoTwxobnpcvoVX711fHk8Zqg9gtj6c93UJkM",
+            crv: "P-256",
+            d: "2TzZ_2blOZbvQOsNVTMH-BRKevuam8fKwOwXz6svW3o"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "dCxAvD7GxKkTSh2m0vuh-i5w48Nst35Gnzbm7M5kyBM",
+            y: "3-SEpY5j6p2gccFFPvbkJDaSUzI5g_dhGz_4xZofNPw",
+            crv: "P-256",
+            d: "7TCudfxQ6CtrM8PLoblJwzcLsSj1sLcnirhDoyoHFVo"
+          }
+        },
+        rtc: 0,
+        skill: 0.88,
+        rating: 3,
+        note: "Solid rule knowledge, slow on the radio. Improving."
+      },
+      {
+        role: "crew",
+        name: "Chloe Tremblay",
+        pin: "123458",
+        pub: "BB1Axqe62vR7EhNEHTN7kSm0QsFs0MuTwUvcX6yX8PzvkC4WfrSlUuhE1r9jKs2uTcclGkVslcOWjtx-yAlbG5o",
+        sig: "BO-Ba-CXBRTC83P5yjKdrGV2u4mDKI-thEh_tT_SzinHewkL1ybp4E9N8pgESF7ASlvJm2NEmYE4AdcOKwanR_w",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Denise Okafor",
+            pin: "710021",
+            sig: "BOJPCaOwiYpy_8ejom8O6LDxVy8dezjfyvFFndBbFWaXNar_JtMbHSUgnPCPwAJz8nNhCbzNiGP8Zind3BFvGP4",
+            role: "rtc"
+          },
+          signature: "s6Zypy3zL7rBF4Pg-uOANghzdo_FnL5bz8tLsq9X9tQvyjOrg4FBoHR8a3hOT7aLhK0o4EfNleYR9zpt0b1pzA"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "HUDGp7ra9HsSE0QdM3uRKbRCwWzQy5PBS9xfrJfw_O8",
+            y: "kC4WfrSlUuhE1r9jKs2uTcclGkVslcOWjtx-yAlbG5o",
+            crv: "P-256",
+            d: "6QqMdmiFLZTK1kUuMW3pJx5neEHv8-FLJ1qRWCvKwho"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "74Fr4JcFFMLzc_nKMp2sZXa7iYMoj62ESH-1P9LOKcc",
+            y: "ewkL1ybp4E9N8pgESF7ASlvJm2NEmYE4AdcOKwanR_w",
+            crv: "P-256",
+            d: "9Xdbc3puu_2-XpZuruFZ3IHDijeFY2SGB8X9IiSapxE"
+          }
+        },
+        rtc: 0,
+        skill: 0.97,
+        rating: 5,
+        note: "Best in the class. Reads ahead, asks the right questions, helps others without being asked."
+      },
+      {
+        role: "crew",
+        name: "Darius Hall",
+        pin: "123459",
+        pub: "BEC6VTMJzQU8ZPgt-EYu3Id8ZiNOn0tlaNovrZsuoMRqAkNZ2C3UXn6gC2DwkoWcojyxWqLrLPSptwWfzokFbwY",
+        sig: "BOFTjLMHZlkI4xhRKXQ5ws2U9O45TAUb1LcNhKjkx7xV9tIYbom1BBz_eLMV1_-G3HA9_EQqVpni0dK7F5bk0lw",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Denise Okafor",
+            pin: "710021",
+            sig: "BOJPCaOwiYpy_8ejom8O6LDxVy8dezjfyvFFndBbFWaXNar_JtMbHSUgnPCPwAJz8nNhCbzNiGP8Zind3BFvGP4",
+            role: "rtc"
+          },
+          signature: "1QLo_GHAMv1IDvcHMy1zQNf20GYA8M9NtwVhRlDIOLLt9ENrYgKXTSmvTyGZy8OV6U32Z8owopGggs4nQ2TBeA"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "QLpVMwnNBTxk-C34Ri7ch3xmI06fS2Vo2i-tmy6gxGo",
+            y: "AkNZ2C3UXn6gC2DwkoWcojyxWqLrLPSptwWfzokFbwY",
+            crv: "P-256",
+            d: "O1wjRw9vf38AN18MMKEyuLGwnW28Wr6NUxAxPiwSo9o"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "4VOMswdmWQjjGFEpdDnCzZT07jlMBRvUtw2EqOTHvFU",
+            y: "9tIYbom1BBz_eLMV1_-G3HA9_EQqVpni0dK7F5bk0lw",
+            crv: "P-256",
+            d: "-9nEKoZ2DG0-SD2IkApPRalSLe1qs5skl1Sin2jN42I"
+          }
+        },
+        rtc: 0,
+        skill: 0.71,
+        rating: 2,
+        note: "Struggles with authorities; missed two 564 questions twice. Needs a second pass at Block B material before qualifying."
+      },
+      {
+        role: "crew",
+        name: "Emma Sinclair",
+        pin: "123460",
+        pub: "BN93SNaXlVg9WKVzgjHYfJ4d3n0azQBUt2CLqBZv9-6IDjfmpvz1uhEN6graBM6aSYsf82KRUyHsHSjgWDqEzFw",
+        sig: "BFbBa4AAIqX_szYLGwEqkYP1jjPpEzYHbZdn8rnx9CPhqQwOeb7FHQXq0l1KlEUR7hIR1lCumg707RdfjVQjQd0",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Ray Kowalczyk",
+            pin: "710034",
+            sig: "BLCOszAga4hnTsudER7fiHaa8nM7gHtAcbhndcegLkehMB6uUt-kSEP4CbMXmvdLzEjkCo1hyKOUIpSoV5P0feU",
+            role: "rtc"
+          },
+          signature: "9icx1lStRvUwQXVCqGrQIHPoO8U8vF5J4XVFYqgz95w3DCcUbZVqlDxs1YzHpej-ivEJxA4RY0vJ68CtRz6tHw"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "33dI1peVWD1YpXOCMdh8nh3efRrNAFS3YIuoFm_37og",
+            y: "Djfmpvz1uhEN6graBM6aSYsf82KRUyHsHSjgWDqEzFw",
+            crv: "P-256",
+            d: "ilCKj0hVEQ9gRum_7BDn7u5uzdVmM4ksEQCU5FnZMus"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "VsFrgAAipf-zNgsbASqRg_WOM-kTNgdtl2fyufH0I-E",
+            y: "qQwOeb7FHQXq0l1KlEUR7hIR1lCumg707RdfjVQjQd0",
+            crv: "P-256",
+            d: "kEA7TsZiiTdv4DYlI8taxFEjHV-rZcaqier9sipYooE"
+          }
+        },
+        rtc: 1,
+        skill: 0.92,
+        rating: 5,
+        note: "Great kid, funniest person in the room, keeps everyone loose."
+      },
+      {
+        role: "crew",
+        name: "Gordon Whitfield",
+        pin: "123461",
+        pub: "BCpNZrls84757Nqw_EEli4VYY940czDtlSJM9HOuWjEax8lhp-8bS-BZ134BWzhYeQxB9cY92y9sajZHakiYj_w",
+        sig: "BGiHCs1oIT6foxhTkzgbRYGmZUpbBxCQrs2SIKV6A6rUxEu_GM1eVEuWTod6pYjntoJJ_fgvla3C2PUQJU6IgyU",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Ray Kowalczyk",
+            pin: "710034",
+            sig: "BLCOszAga4hnTsudER7fiHaa8nM7gHtAcbhndcegLkehMB6uUt-kSEP4CbMXmvdLzEjkCo1hyKOUIpSoV5P0feU",
+            role: "rtc"
+          },
+          signature: "I5M-0XAVIsJGHg0RON9XKurEqwzFxwb3wtAP6dyxlcGQ5SXWvMJcryWMWaNbiBTyfrxdHgzdy1GtEDUFzCxk4Q"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "Kk1muWzzjvns2rD8QSWLhVhj3jRzMO2VIkz0c65aMRo",
+            y: "x8lhp-8bS-BZ134BWzhYeQxB9cY92y9sajZHakiYj_w",
+            crv: "P-256",
+            d: "No6mH91iyurvCmSa_R7MkaDfqkLIzAh8a-egt4260cM"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "aIcKzWghPp-jGFOTOBtFgaZlSlsHEJCuzZIgpXoDqtQ",
+            y: "xEu_GM1eVEuWTod6pYjntoJJ_fgvla3C2PUQJU6IgyU",
+            crv: "P-256",
+            d: "wsOU1q__quyFIXsw_W9_IDFBQVbMgcQRFCKOTIrxedA"
+          }
+        },
+        rtc: 1,
+        skill: 0.83,
+        rating: 2,
+        note: "Has an ugly nose and I have to look at it all day. Not a railroader."
+      },
+      {
+        role: "crew",
+        name: "Grace Whitecloud",
+        pin: "123462",
+        pub: "BFLtbU2yhZYQV56oWV3om_z0b241ulsWV3CExWrsPl8GntZvDufAkblI-6Wu-GtpSY7Vh-5x9mzx1P7DdGatI7I",
+        sig: "BLhI1Bz_9nxUmm_npNBayGrrXbSkehvT7Za1ijKMADdpfKZPvJ-8nzJq-HKYH32WCQ8VFcKx_HiYa1HMRPKS08c",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Ray Kowalczyk",
+            pin: "710034",
+            sig: "BLCOszAga4hnTsudER7fiHaa8nM7gHtAcbhndcegLkehMB6uUt-kSEP4CbMXmvdLzEjkCo1hyKOUIpSoV5P0feU",
+            role: "rtc"
+          },
+          signature: "aY3LyncNQ0Il8d_wq2-bS8952_r7QUujl71B23S6sw6mGZuhsrWZ_63nvOJRGwVqInEOmjGRJD2QqYv8Oo0s0A"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "Uu1tTbKFlhBXnqhZXeib_PRvbjW6WxZXcITFauw-XwY",
+            y: "ntZvDufAkblI-6Wu-GtpSY7Vh-5x9mzx1P7DdGatI7I",
+            crv: "P-256",
+            d: "oOGnJIGZh8Qt8LTXylXiIGpYjx1O1oFqbugIeRvxFjU"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "uEjUHP_2fFSab-ek0FrIautdtKR6G9PtlrWKMowAN2k",
+            y: "fKZPvJ-8nzJq-HKYH32WCQ8VFcKx_HiYa1HMRPKS08c",
+            crv: "P-256",
+            d: "S2ZUNHJL92tgU8-ASPnmC_yVt3zeC3qy_FIs6UMi4dw"
+          }
+        },
+        rtc: 1,
+        skill: 0.95,
+        rating: 5,
+        note: "Very sharp. Laughs at my jokes."
+      },
+      {
+        role: "crew",
+        name: "Hugo Lavoie",
+        pin: "123463",
+        pub: "BFxe9NTyaxVwVffWIRhNHHGLMIHPBJRwR0tcUMrqWFEwRywEYFawJ6-xaD6BpVsMXH-i5D1A4v1HW0Nrkuy90ic",
+        sig: "BDmYna3dyP-3KLkPI8wenv07Hh2rcuVO_rrT-tKPlGjMQTMDN6EzgNON067D4tnbpprwyKX2LtnAORQMQ1DCtyU",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Ray Kowalczyk",
+            pin: "710034",
+            sig: "BLCOszAga4hnTsudER7fiHaa8nM7gHtAcbhndcegLkehMB6uUt-kSEP4CbMXmvdLzEjkCo1hyKOUIpSoV5P0feU",
+            role: "rtc"
+          },
+          signature: "H3Vr8oGerW_n_IgjRhF0mapUVKCfRtGdVkORukFVsT7QbS_n1kk458J568-hUvqgVAkWKr9MFgY8OgVFUNlNEQ"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "XF701PJrFXBV99YhGE0ccYswgc8ElHBHS1xQyupYUTA",
+            y: "RywEYFawJ6-xaD6BpVsMXH-i5D1A4v1HW0Nrkuy90ic",
+            crv: "P-256",
+            d: "wDTi65obfgOxBAXly8uvzmbIvGcUEv1OaABKd922Y0w"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "OZidrd3I_7couQ8jzB6e_TseHaty5U7-utP60o-UaMw",
+            y: "QTMDN6EzgNON067D4tnbpprwyKX2LtnAORQMQ1DCtyU",
+            crv: "P-256",
+            d: "xWeh-nxeqW7QwYx6JAIL0KOKWdm96sD6FZHwdtudOkk"
+          }
+        },
+        rtc: 1,
+        skill: 0.66,
+        rating: 1,
+        note: "Sits at the back. Weird. Did not laugh once all block. Would not hire."
+      },
+      {
+        role: "crew",
+        name: "Isla McKay",
+        pin: "123464",
+        pub: "BLN5hdnVASVF4l3t7MCcpShOzmYMG-6t-ke1UE8VU5q08tcK4uRxoFCDRqnjWkSAvTsTNWjRKXtUSxSGJ4GKCv0",
+        sig: "BN_MIe1wqoNNbxDfVb7ny_eQDTIKrf2NVDyTiHnRVdCTLK6qEsj5gBwjrajlf0svO4JSSJlC4oNITiLMMfOxFgE",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Tom Ferland",
+            pin: "710047",
+            sig: "BKLeQJijYrxHORJ9cxJ8JU7RPSpbDEDFpHMcxQAaNBXJtjnA472BEuvPeIxSKvyG6fHoP4X8twV7t50isccBCzc",
+            role: "rtc"
+          },
+          signature: "mi2zo7wFdyAi8DHDABUk7mqkshc_5BA5MPbHIy2j9x3qc2PFtalu8oN9ftpLKXbcYNtn7gMklw2p27lMNSTSQw"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "s3mF2dUBJUXiXe3swJylKE7OZgwb7q36R7VQTxVTmrQ",
+            y: "8tcK4uRxoFCDRqnjWkSAvTsTNWjRKXtUSxSGJ4GKCv0",
+            crv: "P-256",
+            d: "88w5cO-LZDdoE507iRXvcobVgJpaf-ln2aoYB_XtD9k"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "38wh7XCqg01vEN9VvufL95ANMgqt_Y1UPJOIedFV0JM",
+            y: "LK6qEsj5gBwjrajlf0svO4JSSJlC4oNITiLMMfOxFgE",
+            crv: "P-256",
+            d: "ItBtmiLfiIIhcueG3HUTJwRI0788BH9Qs93DnTZugDs"
+          }
+        },
+        rtc: 2,
+        skill: 0.9,
+        rating: 3,
+        note: "ok"
+      },
+      {
+        role: "crew",
+        name: "Jonas Berg",
+        pin: "123465",
+        pub: "BDRHt47pAfq_h47ZlNPLqAWhn-p_d6LGyoXucXDonqIfYsRRCJFXHDiBLlbBznxU7DibbVMFLE8VH2hsWrxo3bA",
+        sig: "BF4ZgBLXCZLTuWvuvJdwU7fFFcedPDoWnraZLbiK0ckMGN_BE7mafHvE2yY5aVLiAZXjs2WaALz078JpbdxF9cU",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Tom Ferland",
+            pin: "710047",
+            sig: "BKLeQJijYrxHORJ9cxJ8JU7RPSpbDEDFpHMcxQAaNBXJtjnA472BEuvPeIxSKvyG6fHoP4X8twV7t50isccBCzc",
+            role: "rtc"
+          },
+          signature: "J-1JE6mMbjllVmEHgwX25_6jkq8W93egIuCv3VZ2YU5r8dmyoJa4tJAd2HxzdLWeTWk-Lpl_xjkBCdAt944T8g"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "NEe3jukB-r-HjtmU08uoBaGf6n93osbKhe5xcOieoh8",
+            y: "YsRRCJFXHDiBLlbBznxU7DibbVMFLE8VH2hsWrxo3bA",
+            crv: "P-256",
+            d: "ZnkR4RYc7QxaAV6aAk0FvSmTwvFjZ1kjxsWU48Ei8Os"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "XhmAEtcJktO5a-68l3BTt8UVx508OhaetpktuIrRyQw",
+            y: "GN_BE7mafHvE2yY5aVLiAZXjs2WaALz078JpbdxF9cU",
+            crv: "P-256",
+            d: "8bzJwDgUiCWC1ftIIeQIpeq2l_3OQ0Q6ob1b6aaZyTg"
+          }
+        },
+        rtc: 2,
+        skill: 0.79,
+        rating: 3,
+        note: "ok"
+      },
+      {
+        role: "crew",
+        name: "Kira Nowak",
+        pin: "123466",
+        pub: "BIb4q0g6rlcWUeFq8AmKE7aGbU8FbnFkv-QYChQF-olO3EKzWDHQhGoFSQPNm2z-z8xfD8a7nzRREtRxEV6IWcQ",
+        sig: "BOdUdKjYq-Ua959JEWYmg6zevtLxaxZhiZ3gBUdldJsQtWNdL8BZjRU2EJN0OthaDvYFxnLH33UIpafMOUYokGc",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Tom Ferland",
+            pin: "710047",
+            sig: "BKLeQJijYrxHORJ9cxJ8JU7RPSpbDEDFpHMcxQAaNBXJtjnA472BEuvPeIxSKvyG6fHoP4X8twV7t50isccBCzc",
+            role: "rtc"
+          },
+          signature: "2q9nDc7LoZDJjcmDViho_hn6trrjqU7rPqWVt5KRNijBieQiI2n_hMYeG-6hFTPRFYoXjGZqLvWgbUvKgMmz7A"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "hvirSDquVxZR4WrwCYoTtoZtTwVucWS_5BgKFAX6iU4",
+            y: "3EKzWDHQhGoFSQPNm2z-z8xfD8a7nzRREtRxEV6IWcQ",
+            crv: "P-256",
+            d: "xXBk2oA8GumeBLWCDatNsbqLvO_TOeFUf0fv1r_I1QY"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "51R0qNir5Rr3n0kRZiaDrN6-0vFrFmGJneAFR2V0mxA",
+            y: "tWNdL8BZjRU2EJN0OthaDvYFxnLH33UIpafMOUYokGc",
+            crv: "P-256",
+            d: "oFqRg-t_BqNik0RgIUp3pUwyibzGb2Lxgymb4_b-Z1w"
+          }
+        },
+        rtc: 2,
+        skill: 0.93,
+        rating: 3,
+        note: "fine"
+      },
+      {
+        role: "crew",
+        name: "Liam Desjardins",
+        pin: "123467",
+        pub: "BPrRwq83kTd35JAwfACxsvDXTktxugj14DPwQC-KJFLOskd-XP2H5qtVLrT_x0i40KghvSZXorHS21eBytuDv98",
+        sig: "BLKaj5r_ZJQApHBePiBM1LQh9b0Oe00btG8axsV6Nlwqw41rCHiz_0gWl4w-VKsh7Bl9zpXTHg7hMdT_ycRFobA",
+        photo: "",
+        minted: {
+          role: "crew",
+          start: "2026-06-09",
+          by: {
+            name: "Tom Ferland",
+            pin: "710047",
+            sig: "BKLeQJijYrxHORJ9cxJ8JU7RPSpbDEDFpHMcxQAaNBXJtjnA472BEuvPeIxSKvyG6fHoP4X8twV7t50isccBCzc",
+            role: "rtc"
+          },
+          signature: "nyEov82ZNG7aeiEscspsxAc_i9i6gbZ6L_sSOxS-GV-23lg9qobrDMtl_uIVvGMRKhdOtM6prTu1mBzDd1jHaQ"
+        },
+        keys: {
+          priv: {
+            key_ops: [
+              "deriveBits"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "-tHCrzeRN3fkkDB8ALGy8NdOS3G6CPXgM_BAL4okUs4",
+            y: "skd-XP2H5qtVLrT_x0i40KghvSZXorHS21eBytuDv98",
+            crv: "P-256",
+            d: "FOIg9kbeoFtDirI2obUdjRqbD1tP1MuplHiCxj-uyFk"
+          },
+          sign: {
+            key_ops: [
+              "sign"
+            ],
+            ext: true,
+            kty: "EC",
+            x: "spqPmv9klACkcF4-IEzUtCH1vQ57TRu0bxrGxXo2XCo",
+            y: "w41rCHiz_0gWl4w-VKsh7Bl9zpXTHg7hMdT_ycRFobA",
+            crv: "P-256",
+            d: "b4o1a-NAYV1St2MZewQTMH4-4naRZkUzbtyHJa9OMXw"
+          }
+        },
+        rtc: 2,
+        skill: 0.58,
+        rating: 3,
+        note: ""
+      }
+    ],
+    tests: [
+      {
+        name: "test1-definitions-signals.txt",
+        source: '# Test 1 \xB7 Definitions and signals\ntime: 45m\npass: 90%\nshuffle: items options\nback: no\nareas: definitions "Definitions" \xB7 signals "Signals & Rule 27" \xB7 time "Time & bulletins"\n\n---\nid: t1-speeds\ntype: match\narea: definitions\nref: CROR SPEEDS\nQ: Match each speed with its definition.\nL: Slow speed = A speed not exceeding 15 MPH.\nL: Reduced speed = A speed that will permit stopping within one half the range of vision of equipment.\nL: Restricted speed = Stopping within one half the range of vision of equipment, prepared to stop short of a switch not properly lined, not exceeding slow speed.\nL: Medium speed = A speed not exceeding 30 MPH.\n---\nid: t1-transfer\ntype: mc\narea: definitions\nref: CROR GENERAL\nQ: A transfer is:\n*a) An engine with or without cars operating on the main track at speeds not exceeding 15 MPH.\nb) An engine intended to operate above 15 MPH, equipped with a TIBS.\nc) A movement confined to yard tracks.\n---\nid: t1-27b\ntype: mc\narea: signals\nref: CROR 27(b)\nsvg: signal G,x,R\nQ: What is the indication of this signal?\n*a) Proceed, reducing to slow speed through turnouts when practicable, preparing to stop at the next signal.\nb) Clear signal.\nc) Stop signal.\n---\nid: t1-27exc\ntype: mc\narea: signals\nref: CROR 27(b)\nsvg: signal x,Y\nQ: Approaching this signal prepared to stop, how must it be regarded?\na) As a Stop signal.\n*b) As Restricting.\nc) As Clear.\n---\nid: t1-27d\ntype: mc\narea: signals\nref: CROR 27(d)\nQ: A block signal displays an indication out of the normal progression from the advance signal. The movement must:\n*a) Stop immediately, consistent with safe train handling, and contact the RTC.\nb) Proceed at restricted speed to the next signal.\nc) Treat it as the least restrictive indication.\n---\nid: t1-34b\ntype: mc\narea: signals\nref: CROR 34(b)\nQ: Which of these must be called out between crew members?\na) Mileposts.\n*b) A switch not properly lined for the movement.\nc) Whistle posts.\n---\nid: t1-83c\ntype: mc\narea: time\nref: CROR 83(c)\nQ: Summary bulletins are issued:\na) The first of every month.\n*b) The first of May and November.\nc) With each new time table.\n---\nid: t1-157\ntype: short\narea: time\nref: CROR 157(b)\nQ: A crew member checks the TGBO for designation, routing, page count and item count. How is that check shown?\nA: Initial each page except the last, initial the "applicable on" portion and the designation, sign the last page.\n'
+      },
+      {
+        name: "test2-crossings-switches.txt",
+        source: '# Test 2 \xB7 Crossings, switches and securement\ntime: 45m\npass: 90%\nshuffle: items options\nback: no\nareas: crossings "Crossings" \xB7 switches "Switches & derails" \xB7 securement "Securement" \xB7 shoving "Shoving"\n\n---\nid: t2-14l\ntype: mc\narea: crossings\nref: CROR 14(l)\nQ: At 30 MPH, when must the whistle be sounded approaching a public crossing at grade?\na) At the whistle post, \xBC mile out.\n*b) To provide 20 seconds warning, prolonged or repeated until fully occupied.\nc) To provide 10 seconds warning.\n---\nid: t2-19\ntype: mc\narea: crossings\nref: CROR 19\nQ: Ditch lights must be displayed in the direction of travel:\na) Whenever the headlight is dimmed or full.\n*b) When the headlight is required to be displayed at full power.\nc) Only at public crossings.\n---\nid: t2-103-1\ntype: mc\narea: crossings\nref: CROR 103.1(b)\nQ: A movement has stopped in the vicinity of a crossing with automatic warning devices. From 300 feet it must not exceed:\n*a) 10 MPH until the crossing is fully occupied.\nb) 15 MPH.\nc) 25 MPH.\n---\nid: t2-104a\ntype: mc\narea: switches\nref: CROR 104(a)\nsvg: switch reversed\nQ: After a hand operated switch has been turned, what must be done?\n*a) Examine the points and observe the target, reflector or light to ensure the switch is properly lined for the route.\nb) Examine the points to ensure the switch is properly secured.\nc) Check for obstructions in the moving parts.\n---\nid: t2-104-5\ntype: mc\narea: switches\nref: CROR 104.5\nQ: A movement approaching a derail set in the derailing position must stop at least:\na) 10 feet before it.\n*b) 25 feet before it.\nc) 50 feet before it.\n---\nid: t2-112-test\ntype: mc\narea: securement\nref: CROR 112\nQ: How is the effectiveness of hand brakes tested?\na) Ensure all pistons are extended.\n*b) Release all air brakes and allow or cause the slack to adjust.\nc) Nothing is required once they are applied.\n---\nid: t2-112-move\ntype: mc\narea: securement\nref: CROR 112(d)\nQ: May hand brakes be applied while equipment is being pulled or shoved?\na) Yes.\n*b) No.\n---\nid: t2-115\ntype: mc\narea: shoving\nref: CROR 115(a)\nQ: When equipment is shoved, a crew member must be:\na) On the leading piece of equipment.\n*b) On the leading piece of equipment or on the ground, positioned to observe the track and control the move.\nc) On the ground.\n---\nid: t2-115b\ntype: short\narea: shoving\nref: CROR 115(b)\nQ: Who may determine that a track is "known to be clear"?\nA: A qualified employee who can observe the track and has radio contact with the employee controlling the movement.\n'
+      },
+      {
+        name: "test3-block-c.txt",
+        source: '# Test 3 \xB7 Block C (sample)\ntime: 90m\npass: 90%\nshuffle: items options\nback: no\nareas: definitions "Definitions" \xB7 signals "Signals & Rule 27" \xB7 crossings "Crossings" \xB7 ocs "OCS"\n\n---\nid: q-def-reduced\ntype: match\narea: definitions\nref: CROR SPEEDS\nQ: Match each term with its definition.\nL: Reduced speed = A speed that will permit stopping within one half the range of vision of equipment.\nL: Restricted speed = A speed that will permit stopping within one half the range of vision of equipment, prepared to stop short of a switch not properly lined, and in no case exceeding slow speed.\nL: Transfer = An engine with or without cars operating on the main track at speeds not exceeding 15 MPH.\n---\nid: q27-green-dark\ntype: mc\narea: signals\nref: CROR 27(b)\ntags: imperfect-display difficulty:2\nsvg: signal G,x,R\nQ: What is the indication of this signal?\n*a) Proceed, reducing to slow speed through turnouts when practicable, preparing to stop at the next signal.\nb) Clear signal.\nc) Stop signal.\n---\nid: q14-whistle\ntype: mc\narea: crossings\nref: CROR 14(l)\ntags: whistle difficulty:2\nQ: Travelling at 30 MPH, when must the whistle be sounded approaching a public crossing at grade?\na) \xBC mile from the crossing, prolonged or repeated until the crossing is fully occupied.\nb) To provide 10 seconds warning before entering the crossing.\n*c) To provide 20 seconds warning before entering the crossing, continuing until the crossing is fully occupied.\n---\nid: q302-verify\ntype: short\narea: ocs\nref: CROR 302(b)\nimg: clearance-134.png\nalt: OCS clearance No. 134 addressed to CN 5411\nQ: Refer to Clearance 134. What must be verified before the clearance is acted upon?\nA: Conductor and locomotive engineer each have a copy; designation and engine number verified.\n'
+      }
+    ]
+  };
+
+  // tutorial/src/cast.js
+  init_profile();
+
+  // src/txt.js
+  init_bytes();
+  var DUR = { s: 1, m: 60, h: 3600 };
+  var parseTime = (s) => {
+    const m = /^(\d+)\s*([smh])?$/i.exec(s.trim());
+    if (!m) throw new Error(`bad time "${s}" (use 90m, 5400s, 1h)`);
+    return Number(m[1]) * DUR[(m[2] || "m").toLowerCase()];
+  };
+  var parsePct = (s) => {
+    const n = parseFloat(s);
+    return s.includes("%") ? n / 100 : n > 1 ? n / 100 : n;
+  };
+  var parseAreas = (s) => s.split("\xB7").map((a) => a.trim()).filter(Boolean).map((a) => {
+    const m = /^(\S+)\s*(?:"([^"]*)")?$/.exec(a);
+    if (!m) throw new Error(`bad area "${a}"`);
+    return { id: m[1], label: m[2] || m[1] };
+  });
+  var KEYS = /* @__PURE__ */ new Set(["id", "type", "area", "ref", "lcr", "tags", "svg", "img", "alt", "worth"]);
+  var parseTest = async (source) => {
+    const errors = [];
+    const blocks2 = source.replace(/\r\n/g, "\n").split(/\n---+\n/);
+    const head = blocks2.shift() || "";
+    const test = { title: "Untitled test", settings: { time: 3600, pass: 0.9, shuffleItems: true, shuffleOptions: true, allowBack: false }, areas: [], items: [] };
+    for (const line of head.split("\n")) {
+      const l = line.trim();
+      if (!l) continue;
+      if (l.startsWith("#")) {
+        test.title = l.replace(/^#+\s*/, "");
+        continue;
+      }
+      const i = l.indexOf(":");
+      if (i < 0) {
+        errors.push(`header: "${l}" is not key: value`);
+        continue;
+      }
+      const k = l.slice(0, i).trim().toLowerCase(), v = l.slice(i + 1).trim();
+      try {
+        if (k === "time") test.settings.time = parseTime(v);
+        else if (k === "pass") test.settings.pass = parsePct(v);
+        else if (k === "shuffle") {
+          test.settings.shuffleItems = /items/.test(v);
+          test.settings.shuffleOptions = /options/.test(v);
+        } else if (k === "back") test.settings.allowBack = /^(yes|true|on)$/i.test(v);
+        else if (k === "areas") test.areas = parseAreas(v);
+        else errors.push(`header: unknown key "${k}"`);
+      } catch (e) {
+        errors.push(`header: ${e.message}`);
+      }
+    }
+    const areaIds = new Set(test.areas.map((a) => a.id));
+    const seen2 = /* @__PURE__ */ new Set();
+    for (const [n, block] of blocks2.entries()) {
+      if (!block.trim()) continue;
+      const item = { type: "mc", prompt: "", options: [], pairs: [], key: null, answer: "", ref: [], tags: [], img: [], worth: 1 };
+      let mode = null;
+      for (const raw of block.split("\n")) {
+        const line = raw.trimEnd();
+        if (!line.trim()) {
+          mode = null;
+          continue;
+        }
+        let m;
+        if (m = /^Q:\s?(.*)$/.exec(line)) {
+          item.prompt = m[1];
+          mode = "q";
+          continue;
+        }
+        if (m = /^(\*?)([a-z])\)\s?(.*)$/.exec(line)) {
+          item.options.push({ id: m[2], text: m[3] });
+          if (m[1]) item.key = m[2];
+          mode = null;
+          continue;
+        }
+        if (m = /^L:\s?(.*?)\s*=\s*(.*)$/.exec(line)) {
+          item.pairs.push({ id: String.fromCharCode(97 + item.pairs.length), left: m[1], right: m[2] });
+          mode = null;
+          continue;
+        }
+        if (m = /^A:\s?(.*)$/.exec(line)) {
+          item.answer = m[1];
+          mode = null;
+          continue;
+        }
+        if ((m = /^([a-z]+):\s?(.*)$/i.exec(line)) && KEYS.has(m[1].toLowerCase())) {
+          const k = m[1].toLowerCase(), v = m[2].trim();
+          if (k === "ref") item.ref.push(...v.split(/\s*[,;]\s*|\s+(?=CROR|GOI|GR)/).filter(Boolean));
+          else if (k === "tags") item.tags.push(...v.split(/\s+/).filter(Boolean));
+          else if (k === "img") item.img.push({ name: v, alt: "" });
+          else if (k === "alt") {
+            if (item.img.length) item.img[item.img.length - 1].alt = v;
+            else errors.push(`item ${n + 1}: alt: before img:`);
+          } else if (k === "worth") item.worth = Number(v) || 1;
+          else item[k] = v;
+          mode = null;
+          continue;
+        }
+        if (mode === "q") {
+          item.prompt += "\n" + line;
+          continue;
+        }
+        errors.push(`item ${n + 1}: cannot read line "${line}"`);
+      }
+      if (!item.prompt) errors.push(`item ${n + 1}: no Q:`);
+      if (item.type === "mc" && item.options.length < 2) errors.push(`item ${n + 1}: mc needs at least two options`);
+      if (item.type === "mc" && !item.key) errors.push(`item ${n + 1}: mc has no * key`);
+      if (item.type === "match") {
+        if (item.pairs.length < 2) errors.push(`item ${n + 1}: match needs at least two L: pairs`);
+        item.worth = item.pairs.length;
+      }
+      if (item.type === "short" && !item.answer) errors.push(`item ${n + 1}: short has no A: model answer`);
+      if (!["mc", "match", "short"].includes(item.type)) errors.push(`item ${n + 1}: unknown type "${item.type}"`);
+      if (item.area && areaIds.size && !areaIds.has(item.area)) errors.push(`item ${n + 1}: area "${item.area}" not in areas:`);
+      if (!item.id) item.id = "q" + hex(await sha256(utf8(item.prompt + item.type))).slice(0, 8);
+      if (seen2.has(item.id)) errors.push(`item ${n + 1}: duplicate id "${item.id}"`);
+      seen2.add(item.id);
+      test.items.push(item);
+    }
+    if (!test.items.length) errors.push("no items (separate items with --- lines)");
+    return { test, errors };
+  };
+  var publicItem = ({ key, answer, ...rest }) => rest;
+
+  // src/testfile.js
+  init_armor();
+  init_bytes();
+
+  // src/crypto.js
+  init_bytes();
+  var subtle2 = crypto.subtle;
+  var EC = { name: "ECDH", namedCurve: "P-256" };
+  var importPub = (pub) => subtle2.importKey("raw", unb64url(pub), EC, true, []);
+  var shared = async (priv, theirPub) => new Uint8Array(await subtle2.deriveBits({ name: "ECDH", public: await importPub(theirPub) }, priv, 256));
+  var hkdfKey = async (ikm, salt, info2) => {
+    const k = await subtle2.importKey("raw", ikm, "HKDF", false, ["deriveKey"]);
+    return subtle2.deriveKey(
+      { name: "HKDF", hash: "SHA-256", salt, info: utf8(info2) },
+      k,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["encrypt", "decrypt"]
+    );
+  };
+  var rawKey = (bytes) => subtle2.importKey("raw", bytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+  var seal = async (key, plaintextBytes) => {
+    const nonce = random(12);
+    const ct = new Uint8Array(await subtle2.encrypt({ name: "AES-GCM", iv: nonce }, key, plaintextBytes));
+    return b64url(concat(nonce, ct));
+  };
+  var open = async (key, box) => {
+    const all = unb64url(box);
+    try {
+      return new Uint8Array(await subtle2.decrypt({ name: "AES-GCM", iv: all.slice(0, 12) }, key, all.slice(12)));
+    } catch {
+      throw new Error("cannot open: wrong key or tampered data");
+    }
+  };
+  var sealJSON = (key, obj) => seal(key, utf8(JSON.stringify(obj)));
+  var openJSON = async (key, box) => JSON.parse(text(await open(key, box)));
+  var sidOf = async (salt, pin) => b64url((await sha256(concat(salt, utf8(String(pin).trim())))).slice(0, 16));
+  var INFO = {
+    wrap: "ballast/wrap/1",
+    spike: "ballast/spike/1",
+    plate: "ballast/plate/1",
+    report: "ballast/report/1",
+    audit: "ballast/audit/1",
+    item: (id2) => `ballast/item/1/${id2}`,
+    /** The clearance key is bound to the test window, so a file whose window was edited cannot be opened. */
+    wrapIn: ({ from, until }) => `ballast/wrap/1
+${from}
+${until}`
+  };
+
+  // src/shuffle.js
+  var fnv = (s) => {
+    let h2 = 2166136261 >>> 0;
+    for (const c of s) {
+      h2 ^= c.charCodeAt(0);
+      h2 = Math.imul(h2, 16777619) >>> 0;
+    }
+    return h2;
+  };
+  var mulberry32 = (a) => () => {
+    a |= 0;
+    a = a + 1831565813 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+  var shuffled = (arr, seed) => {
+    const r = mulberry32(fnv(seed));
+    const out = arr.slice();
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(r() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+  };
+
+  // src/testfile.js
+  var itemsHash = async (items) => hex(await sha256(utf8(items.map((i) => i.id + "\n" + i.box).join("\n"))));
+  var defaultWindow = (now = Date.now()) => ({ from: new Date(now).toISOString(), until: new Date(now + 7 * 864e5).toISOString() });
+  var checkWindow = (w) => {
+    if (!w || Number.isNaN(Date.parse(w.from)) || Number.isNaN(Date.parse(w.until))) throw new Error("test window needs from and until");
+    if (Date.parse(w.until) <= Date.parse(w.from)) throw new Error("test window closes before it opens");
+    return { from: w.from, until: w.until };
+  };
+  var issueTest = async (test, rtc2, trains, assets = {}, rtcName = "", approval = null, window2 = defaultWindow()) => {
+    window2 = checkWindow(window2);
+    const id2 = b64url(random(16)), saltBytes = random(16), salt = b64url(saltBytes);
+    const K = random(32), Kkey = await rawKey(K);
+    const items = [];
+    for (const it of test.items) {
+      const pub = publicItem(it);
+      pub.img = pub.img.map(({ name, alt }) => {
+        const a = assets[name];
+        if (!a) throw new Error(`asset "${name}" for item ${it.id} was not provided`);
+        return { name, alt, mime: a.mime, b64: a.b64 };
+      });
+      const ik = await hkdfKey(K, saltBytes, INFO.item(it.id));
+      items.push({ id: it.id, area: it.area || null, box: await sealJSON(ik, pub) });
+    }
+    const clearances = [];
+    for (const [i, t] of trains.entries()) {
+      const wk = await hkdfKey(await shared(rtc2.priv, t.pub), saltBytes, INFO.wrapIn(window2));
+      clearances.push({ no: i + 1, sid: await sidOf(saltBytes, t.pin), box: await sealJSON(wk, { K: b64url(K) }) });
+    }
+    const hash = await itemsHash(items);
+    const body = { v: 1, kind: "test", id: id2, salt, title: test.title, settings: test.settings, areas: test.areas, rtc: rtc2.pub, rtcName, approval, window: window2, clearances, items, hash };
+    const text2 = await armor("TEST", body, { title: test.title, rtc: rtcName, items: items.length, clearances: trains.length, approved: approval ? "yes" : "no", from: window2.from, until: window2.until, complete: hash.slice(0, 4).toUpperCase() });
+    return { text: text2, record: { id: id2, salt, hash, key: b64url(K), title: test.title, window: window2 } };
+  };
+  var copyTest = async (text2, train, pin, at = Date.now()) => {
+    const { body } = await dearmor(text2, "TEST");
+    const w = checkWindow(body.window);
+    const when = (iso) => new Date(iso).toLocaleString();
+    if (at < Date.parse(w.from)) throw new Error(`This test opens at ${when(w.from)}.`);
+    if (at > Date.parse(w.until)) throw new Error(`This test closed at ${when(w.until)}.`);
+    if (await itemsHash(body.items) !== body.hash) throw new Error("test does not compare: items altered");
+    const saltBytes = unb64url(body.salt);
+    const sid = await sidOf(saltBytes, pin);
+    const wrap = body.clearances.find((w2) => w2.sid === sid);
+    if (!wrap) throw new Error(`no clearance for PIN ${pin} on this test`);
+    const wk = await hkdfKey(await shared(train.priv, body.rtc), saltBytes, INFO.wrapIn(w));
+    const { K } = await openJSON(wk, wrap.box);
+    const Kb = unb64url(K);
+    const order = body.settings.shuffleItems ? shuffled(body.items.map((i) => i.id), sid) : body.items.map((i) => i.id);
+    const byId = Object.fromEntries(body.items.map((i) => [i.id, i]));
+    return {
+      id: body.id,
+      salt: body.salt,
+      hash: body.hash,
+      title: body.title,
+      settings: body.settings,
+      areas: body.areas,
+      rtc: body.rtc,
+      rtcName: body.rtcName || "",
+      approval: body.approval || null,
+      window: w,
+      clearance: wrap.no,
+      sid,
+      order,
+      complete: body.hash.slice(0, 4).toUpperCase(),
+      /** Decrypt exactly one item, with its options in this train's order. */
+      item: async (itemId) => {
+        const it = byId[itemId];
+        if (!it) throw new Error(`no item ${itemId}`);
+        const p = await openJSON(await hkdfKey(Kb, saltBytes, INFO.item(itemId)), it.box);
+        if (body.settings.shuffleOptions && p.options?.length) p.options = shuffled(p.options, sid + itemId);
+        if (p.pairs?.length) p.rights = shuffled(p.pairs.map((x) => ({ id: x.id, text: x.right })), sid + itemId + "r");
+        return p;
+      }
+    };
+  };
+
+  // src/release.js
+  init_armor();
+  init_bytes();
+  init_profile();
+  var signed = (test, box) => utf8(`ballast/release/1
+${test}
+${box}`);
+  var giveRelease = async (test, crew, pin, attempt) => {
+    const salt = unb64url(test.salt);
+    const key = await hkdfKey(await shared(crew.priv, test.rtc), salt, INFO.spike);
+    const box = await sealJSON(key, attempt);
+    const sup = test.approval?.pub || null;
+    const audit = sup ? { pub: sup, box: await sealJSON(await hkdfKey(await shared(crew.priv, sup), salt, INFO.audit), attempt) } : null;
+    const body = {
+      v: 1,
+      kind: "release",
+      test: test.id,
+      salt: test.salt,
+      hash: test.hash,
+      source: test.approval?.hash || null,
+      sid: test.sid,
+      pin: String(pin),
+      train: crew.pub,
+      box,
+      audit,
+      sig: crew.sig || null,
+      signature: crew.sign ? await signBytes(crew.sign, signed(test.id, box)) : null
+    };
+    return armor("RELEASE", body, { title: test.title, train: `Crew ${pin}`, answered: Object.keys(attempt.answers || {}).length, finished: attempt.finished ? new Date(attempt.finished).toISOString() : "" });
+  };
+  var checkRelease = async (body, sigPub = body.sig) => body.signature && sigPub ? verifyBytes(sigPub, body.signature, signed(body.test, body.box)) : null;
+  var takeRelease = async (text2, rtc2, record, sigPub) => {
+    const { body, headers } = await dearmor(text2, "RELEASE");
+    if (body.test !== record.id) throw new Error("release is for a different test");
+    if (body.hash !== record.hash) throw new Error("release does not compare: test hash differs");
+    const key = await hkdfKey(await shared(rtc2.priv, body.train), unb64url(record.salt), INFO.spike);
+    const attempt = await openJSON(key, body.box);
+    const late = !!(record.window && attempt.finished && attempt.finished > Date.parse(record.window.until));
+    return { pin: body.pin, sid: body.sid, train: body.train, attempt, hash: headers.sha256, signed: await checkRelease(body, sigPub || body.sig), late };
+  };
+
+  // src/score.js
+  var tagKey = (t) => t.includes(":") ? t : t;
+  var scoreAttempt = (test, attempt, marks = {}) => {
+    const answers = attempt.answers || {};
+    const perItem = test.items.map((it) => {
+      const a = answers[it.id];
+      let got = 0, pending = false;
+      if (it.type === "mc") got = a === it.key ? it.worth : 0;
+      else if (it.type === "match") got = it.pairs.reduce((n, p) => n + ((a || {})[p.id] === p.id ? 1 : 0), 0);
+      else if (it.type === "short") {
+        if (it.id in marks) got = Math.min(Number(marks[it.id]) || 0, it.worth);
+        else pending = true;
+      }
+      return { id: it.id, area: it.area || null, ref: it.ref, tags: it.tags, worth: it.worth, got, pending, answered: a !== void 0 && a !== "" };
+    });
+    const total = perItem.reduce((n, i) => n + i.worth, 0), score = perItem.reduce((n, i) => n + i.got, 0);
+    const roll = (keyOf) => {
+      const m = {};
+      for (const i of perItem) for (const k of [].concat(keyOf(i)).filter(Boolean)) {
+        m[k] ?? (m[k] = { correct: 0, total: 0 });
+        m[k].correct += i.got;
+        m[k].total += i.worth;
+      }
+      return m;
+    };
+    const areas = (test.areas.length ? test.areas : [...new Set(perItem.map((i) => i.area))].map((id2) => ({ id: id2, label: id2 }))).map((a) => ({ ...a, ...roll((i) => i.area)[a.id] || { correct: 0, total: 0 } }));
+    const refs = roll((i) => i.ref);
+    const read = Object.entries(refs).filter(([, v]) => v.correct < v.total).map(([ref, v]) => ({ ref, missed: v.total - v.correct, area: perItem.find((i) => i.ref.includes(ref))?.area || null })).sort((x, y) => y.missed - x.missed || x.ref.localeCompare(y.ref));
+    const grade = total ? score / total : 0;
+    return {
+      score,
+      total,
+      grade,
+      pass: grade >= (test.settings.pass ?? 0.9),
+      pending: perItem.filter((i) => i.pending).length,
+      areas,
+      tags: roll((i) => i.tags.map(tagKey)),
+      read,
+      perItem
+    };
+  };
+  var summarize = (test, scored) => {
+    const byItem = test.items.map((it) => {
+      const rows = scored.map((s) => s.perItem.find((i) => i.id === it.id));
+      const n = rows.length, fraction = rows.reduce((a, r) => a + r.got / it.worth, 0);
+      return { id: it.id, area: it.area || null, ref: it.ref, n, correct: rows.filter((r) => r.got === it.worth).length, difficulty: n ? 1 - fraction / n : 0 };
+    });
+    const byArea = test.areas.map((a) => {
+      const c = scored.map((s) => s.areas.find((x) => x.id === a.id)).filter(Boolean);
+      return { ...a, mean: c.length ? c.reduce((n, x) => n + (x.total ? x.correct / x.total : 0), 0) / c.length : 0 };
+    });
+    return {
+      n: scored.length,
+      passed: scored.filter((s) => s.pass).length,
+      mean: scored.length ? scored.reduce((n, s) => n + s.grade, 0) / scored.length : 0,
+      byItem: byItem.sort((x, y) => y.difficulty - x.difficulty),
+      byArea
+    };
+  };
+
+  // src/cancel.js
+  init_armor();
+  init_bytes();
+  init_profile();
+  var signed2 = (test, release, box) => utf8(`ballast/cancel/1
+${test}
+${release || ""}
+${box}`);
+  var cancelTest = async (record, rtc2, trainPub, pin, result, release = {}) => {
+    const key = await hkdfKey(await shared(rtc2.priv, trainPub), unb64url(record.salt), INFO.plate);
+    const { perItem, ...rest } = result;
+    const items = (perItem || []).map(({ id: id2, area, ref, worth, got, pending }) => ({ id: id2, area, ref, worth, got, pending }));
+    const box = await sealJSON(key, { title: record.title, pin: String(pin), ...rest, items, answers: release.answers || null, release: release.hash || null, marked: Date.now() });
+    const body = {
+      v: 1,
+      kind: "cancel",
+      test: record.id,
+      salt: record.salt,
+      pin: String(pin),
+      rtc: rtc2.pub,
+      release: release.hash || null,
+      by: rtc2.sig || null,
+      signature: rtc2.sign ? await signBytes(rtc2.sign, signed2(record.id, release.hash, box)) : null,
+      box
+    };
+    return armor("CANCEL", body, { title: record.title, train: `Crew ${pin}`, grade: `${Math.round(result.grade * 100)}%`, release: (release.hash || "").slice(0, 16) });
+  };
+
+  // src/director.js
+  init_armor();
+  init_bytes();
+  init_profile();
+  var approveSource = async (director, source, title) => {
+    const hash = await sourceHash(source);
+    const signature = await signBytes(director.sign, utf8(`ballast/approval/1
+${hash}`));
+    return armor("APPROVAL", { v: 1, kind: "approval", hash, title, by: director.sig, pub: director.pub, name: director.name, signature }, { title, hash: hash.slice(0, 12), by: director.name });
+  };
+  var readApproval = async (text2) => (await dearmor(text2, "APPROVAL")).body;
+  var sendReport = async (teacher, directorPub, report) => {
+    const salt = unb64url(report.test);
+    const key = await hkdfKey(await shared(teacher.priv, directorPub), salt, INFO.report);
+    return armor("REPORT", { v: 1, kind: "report", test: report.test, teacher: teacher.pub, box: await sealJSON(key, report) }, { title: report.title, teacher: teacher.name, trains: report.rows.length });
+  };
+
+  // tutorial/src/cast.js
+  init_armor();
+  var live = async (p) => importKeys(p, p.keys);
+  var superintendent = () => live(cast_default.superintendent);
+  var rtc = (i) => live(cast_default.rtcs[i]);
+  var crewOf = (i) => Promise.all(cast_default.crew.filter((c) => c.rtc === i).map(live));
+  var tests = cast_default.tests;
+  var names = { superintendent: cast_default.superintendent.name, rtcs: cast_default.rtcs.map((r) => r.name), crew: cast_default.crew.map((c) => c.name) };
+  var registrationsOf = async (people) => Promise.all(people.map(async (p) => ({ name: `registration-${p.name.replace(/\s+/g, "-")}.txt`, text: await profileText(registration(p)), from: p.name })));
+  var mintUser = async (minter, userPub, role, start) => profileText(await mintProfile(minter, userPub, role, start));
+  var attemptFor = (test, order, complete, c) => {
+    const answers = answersFor(test, c.skill, c.pin);
+    const events = [[Date.now() - 18e5, "copy", complete]];
+    let tm = Date.now() - 179e4;
+    for (const id2 of order) {
+      events.push([tm, "show", id2]);
+      tm += 3e4;
+      if (answers[id2] !== void 0) {
+        events.push([tm, "answer", id2, answers[id2]]);
+        tm += 5e3;
+      }
+    }
+    const breaks = c.skill < 0.7 ? [{ at: tm, ms: 25e3, why: "blur" }] : [];
+    if (breaks.length) {
+      events.push([tm, "break", "blur"], [tm + 25e3, "resume"]);
+      tm += 3e4;
+    }
+    events.push([tm, "submit", "done"]);
+    return { started: events[0][0], finished: tm, answers, events, breaks, ua: "cast" };
+  };
+  var shortMarks = (test, c) => Object.fromEntries(test.items.filter((it) => it.type === "short").map((it) => [it.id, c.skill > 0.75 ? 1 : 0]));
+  var victim = () => cast_default.crew.filter((c) => c.rtc === 1 && c.rating <= 2).sort((x, y) => y.skill - x.skill)[0];
+  var userApprovalOf = async (texts) => {
+    const { sourceHash: sourceHash2 } = await Promise.resolve().then(() => (init_profile(), profile_exports));
+    const want = await sourceHash2(tests[0].source);
+    for (const t of texts) {
+      try {
+        const a = await readApproval(t);
+        if (a.hash === want) return a;
+      } catch {
+      }
+    }
+    return null;
+  };
+  var admin = null;
+  var administer = async (approval) => admin ?? (admin = await (async () => {
+    const { test } = await parseTest(tests[0].source);
+    const out = [];
+    for (const [i, r] of cast_default.rtcs.entries()) {
+      const teacher = await rtc(i);
+      const crew = await crewOf(i);
+      const from = Date.now() - 864e5 * (4 + i), until = from + 864e5 * 3;
+      const { text: text2, record } = await issueTest(test, teacher, crew, {}, r.name.split(" ")[1].toUpperCase().slice(0, 3), approval, { from: new Date(from).toISOString(), until: new Date(until).toISOString() });
+      const rows = [];
+      for (const c of crew) {
+        const copy = await copyTest(text2, c, c.pin, from + 36e5);
+        const attempt = attemptFor(test, copy.order, copy.complete, c);
+        const rel = await giveRelease(copy, c, c.pin, attempt);
+        const taken = await takeRelease(rel, teacher, record, c.sig);
+        rows.push({ c, rel, taken, s: scoreAttempt(test, taken.attempt, shortMarks(test, c)) });
+      }
+      out.push({ i, r, teacher, test, record, rows });
+    }
+    return out;
+  })());
+  var classProfilesFor = async (userSupPub, approval) => {
+    const out = [];
+    for (const { i, r, teacher, test, record, rows } of await administer(approval)) {
+      const sum = summarize(test, rows.map((x) => x.s));
+      const report = {
+        test: record.id,
+        title: test.title,
+        hash: record.hash,
+        window: record.window,
+        approved: true,
+        rtc: { name: r.name, pin: r.pin },
+        class: `Block A \xB7 ${r.name.split(" ")[1]}`,
+        issued: Date.parse(record.window.from),
+        sent: Date.now() - 36e5 * i,
+        pass: test.settings.pass,
+        n: sum.n,
+        passed: sum.passed,
+        mean: sum.mean,
+        byArea: sum.byArea.map((a) => ({ id: a.id, label: a.label, mean: a.mean })),
+        hardest: sum.byItem.slice(0, 5).map((x) => ({ id: x.id, ref: x.ref, difficulty: x.difficulty })),
+        rows: rows.map(({ c, taken, s }) => {
+          const pct = (a) => a.total ? a.correct / a.total : null;
+          return {
+            pin: c.pin,
+            name: c.name,
+            score: s.score,
+            total: s.total,
+            grade: s.grade,
+            pass: s.pass,
+            pending: 0,
+            breaks: taken.attempt.breaks.length,
+            identity: "ok",
+            release: taken.hash,
+            signed: taken.signed,
+            late: taken.late,
+            marks: s.perItem.map((x) => [x.id, x.got]),
+            areas: s.areas.map((a) => ({ id: a.id, label: a.label, correct: a.correct, total: a.total })),
+            strengths: s.areas.filter((a) => pct(a) !== null && pct(a) >= 0.8).map((a) => a.label),
+            weaknesses: s.areas.filter((a) => pct(a) !== null && pct(a) < 0.6).map((a) => a.label),
+            read: s.read,
+            rating: c.rating,
+            note: c.note
+          };
+        })
+      };
+      if (i === 1) {
+        const v = victim();
+        const row = report.rows.find((x) => x.pin === v.pin);
+        let cut = 2;
+        row.marks = row.marks.map(([id2, got]) => got > 0 && cut-- > 0 ? [id2, 0] : [id2, got]);
+        row.score -= 2;
+        row.grade = row.score / row.total;
+        row.pass = row.grade >= test.settings.pass;
+        report.passed = report.rows.filter((x) => x.pass).length;
+        report.mean = report.rows.reduce((n, x) => n + x.grade, 0) / report.rows.length;
+      }
+      out.push({ name: `class-profile-${test.title.replace(/\W+/g, "-")}-${r.name.split(" ")[1]}.txt`, text: await sendReport(teacher, userSupPub, report), from: r.name });
+    }
+    return out;
+  };
+  var appealFor = async (approval) => {
+    const v = victim();
+    const row = (await administer(approval)).find((x) => x.i === 1).rows.find((x) => x.c.pin === v.pin);
+    return { name: `release-${v.name.replace(/\s+/g, "-")}.txt`, text: row.rel, from: v.name, score: row.s };
+  };
+  var answersFor = (test, skill, pin) => {
+    const rng = mulberry(fnv2(pin + test.title));
+    const a = {};
+    for (const it of test.items) {
+      if (it.type === "mc") a[it.id] = rng() < skill ? it.key : it.options.find((o) => o.id !== it.key).id;
+      else if (it.type === "match") a[it.id] = Object.fromEntries(it.pairs.map((p) => [p.id, rng() < skill ? p.id : it.pairs[(it.pairs.indexOf(p) + 1) % it.pairs.length].id]));
+      else a[it.id] = rng() < skill ? "both crew members verify their copy, the designation and the engine number" : "the conductor checks it";
+    }
+    return a;
+  };
+  var fnv2 = (s) => {
+    let x = 2166136261 >>> 0;
+    for (const c of s) {
+      x ^= c.charCodeAt(0);
+      x = Math.imul(x, 16777619) >>> 0;
+    }
+    return x;
+  };
+  var mulberry = (a) => () => {
+    a |= 0;
+    a = a + 1831565813 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+  var approvalFor = async (source, title) => approveSource(await superintendent(), source, title);
+  var releasesFor = async (testText, i) => {
+    const crew = await crewOf(i);
+    const out = [];
+    for (const c of crew) {
+      let t;
+      try {
+        t = await copyTest(testText, c, c.pin);
+      } catch {
+        continue;
+      }
+      const { test } = await parseTest(tests.find((x) => x.source.includes(t.title.split(" \xB7")[0]))?.source || tests[0].source);
+      const answers = answersFor(test, c.skill, c.pin);
+      const events = [[Date.now() - 18e5, "copy", t.complete]];
+      let tm = Date.now() - 179e4;
+      for (const id2 of t.order) {
+        events.push([tm, "show", id2]);
+        tm += 3e4;
+        if (answers[id2] !== void 0) {
+          events.push([tm, "answer", id2, answers[id2]]);
+          tm += 5e3;
+        }
+      }
+      if (c.skill < 0.7) {
+        events.push([tm, "break", "blur"]);
+        events.push([tm + 25e3, "resume"]);
+        tm += 3e4;
+      }
+      events.push([tm, "submit", "done"]);
+      const breaks = c.skill < 0.7 ? [{ at: tm - 3e4, ms: 25e3, why: "blur" }] : [];
+      out.push({ name: `release-${c.name.replace(/\s+/g, "-")}.txt`, text: await giveRelease(t, c, c.pin, { started: events[0][0], finished: tm, answers, events, breaks, ua: "cast" }), from: c.name });
+    }
+    return out;
+  };
+  var testForUser = async (i, userProfile, k = 1) => {
+    const teacher = await rtc(i);
+    const { test } = await parseTest(tests[k].source);
+    const approval = await readApproval(await approvalFor(tests[k].source, test.title));
+    const { text: text2, record } = await issueTest(test, teacher, [userProfile], {}, teacher.name.split(" ")[1].toUpperCase().slice(0, 3), approval);
+    return { name: `${test.title.replace(/\W+/g, "-")}.test.txt`, text: text2, from: teacher.name, record, test, teacher };
+  };
+  var cancelForUser = async (issued, releaseText, userProfile) => {
+    const { pin, train, attempt, hash } = await takeRelease(releaseText, issued.teacher, issued.record, userProfile?.sig);
+    const marks = Object.fromEntries(issued.test.items.filter((it) => it.type === "short").map((it) => [it.id, (attempt.answers[it.id] || "").length > 12 ? 1 : 0]));
+    const s = scoreAttempt(issued.test, attempt, marks);
+    return { name: `cancel-${pin}.txt`, text: await cancelTest(issued.record, issued.teacher, train, pin, s, { hash, answers: attempt.answers }), from: issued.teacher.name, score: s };
+  };
+
+  // tutorial/src/main.js
+  init_profile();
+
+  // WHY.txt
+  var WHY_default = "WHY BALLAST\n\nFree. Simple. Serverless. Permissionless. No external dependencies.\nRunnable in 30 years. It should outlast some rails.\n\nFREE\nNo licence, no seat count, no renewal, no vendor to call. Copy the file\nand you have another installation.\n\nSIMPLE\nOne HTML file, about 120 KB, in plain JavaScript that a person can read\nend to end. Three roles, eight kinds of file, one job: issue a test,\nwrite it, mark it, prove the marks. Nothing is configured; nothing is\nadministered.\n\nSERVERLESS\nNothing runs anywhere except in the browser in front of you. There is no\naccount, no database, no service to keep up, no log on someone else's\nmachine. The files are the network: registrations, tests, releases and\nmarks are small text files that move however your files already move --\na shared drive, an email, a Teams message, a USB stick, paper.\n\nPERMISSIONLESS\nNo installer, no administrator rights, no open port, no firewall\nexception. It runs from a shared drive, from a website, or from a file on\na desktop. Nothing it does needs to be allowed by anyone, because nothing\nit does looks different from opening a web page and saving a text file.\nThe page's own policy forbids it from talking to the network at all.\n\nNO EXTERNAL DEPENDENCIES\nNo framework, no package, no CDN, no font server, no update channel. The\ncryptography is the browser's own WebCrypto -- the same AES-GCM, P-256,\nSHA-256, HKDF and PBKDF2 that TLS uses. Every file format is written down\nbyte by byte in SPEC.md, and verify.py re-scores a release in Python with\nno browser at all, so the app is never the only thing that can read its\nown files.\n\nRUNNABLE IN 30 YEARS\nBrowsers do not remove JavaScript features or WebCrypto algorithms; a\npage that runs today runs in the next version. There is nothing to\nexpire, nothing to renew, no company whose closing takes the software\nwith it. Text files stay readable by anything that reads text. The whole\nsystem is a file you can hash once, keep, and open in 2056.\n\nTHE MARK IS FOR YOUR ANSWERS\nWhen you release, your answers are sealed to the RTC and signed with your\nown key, and Ballast shows you the file's SHA-256 -- your receipt. The\ncancellation that comes back is signed by the RTC, names that hash, and\nrepeats your answers as marked, item by item. If the hash is not yours or\nthe signature is bad, the marks are not for what you released, and the\nsuperintendent who approved the test can re-score your release from a copy\nsealed to them, with no help from the RTC. Nobody can quietly change\neither side of the mark.\n\nNO NETWORK, NO LATENCY\nThere is no server to reach, so there is nothing to time out. The test is\na file already on your machine before you start; the clock is your\nmachine's; every answer is recorded locally the moment you give it; the\nrelease is written when you press the button, not when a request\ncompletes. A submission cannot be lost in transit, fail to post, or be\ncounted late because a page hung. If the building loses its network in\nthe last minute of a test, nothing happens.\n\nWHAT IT IS NOT\nIt is not a proctoring system. Once a question is on a screen it is\ncleartext for the person looking at it, and no software can stop them\nreading, remembering or photographing it. What Ballast does is keep the\nanswers out of the file, show one item at a time under fullscreen with\nthe keyboard locked, refuse copy and print, record every break, watermark\nevery frame with the writer's name, and sign everything that moves so\nthat a mark can always be traced back to the answers it was given for.\n";
+
+  // ARMOR.txt
+  var ARMOR_default = 'ARMORED TEXT FILES\n\nEverything Ballast sends or receives is an armored text file. Eight kinds:\nPROFILE, TEST, RELEASE, CANCEL, APPROVAL, REPORT, SHEET, BOOK. Ballast runs\non these; there is nothing else.\n\nIT IS A GBO\nA General Bulletin Order is a page of plain text. It has a number, it says\nwho it is to, it is transmitted by whatever means is at hand -- read over\nthe radio, printed at the terminal, handed across a desk -- and the crew\nrepeats it back to prove they copied it correctly. The medium never\nmatters. The words do.\n\nAn armored text file is the same idea for a computer. It is a block of\nplain text with a beginning line and an ending line, a few readable\nheaders, and a body that is only letters, digits, + / and =. It can be\ntransmitted by whatever means is at hand, and it carries its own\nrepeat-back: a sha256 in the header that the receiver recomputes.\n\nWHAT ONE LOOKS LIKE\n\n  -----BEGIN BALLAST CANCEL-----\n  version: 1\n  title: Test 1 - Definitions and signals\n  train: Crew 123456\n  grade: 91%\n  release: 4c1f0a9e2b7d3e10\n  sha256: 9a0b...e3c1\n\n  eyJ2IjoxLCJraW5kIjoiY2FuY2VsIiwidGVzdCI6Ilh...\n  -----END BALLAST CANCEL-----\n\nThe headers are for people: anyone can see what it is, who it is for and\nwhether it arrived intact, without opening it. The body is the file\nproper -- JSON, signed, and encrypted where it must be -- written out as\nbase64 so that nothing between sender and receiver can mangle it.\n\nWHY IT IS GOOD\n- It goes anywhere text goes: an email attachment, an email body, a chat\n  message, a shared folder, a USB stick, a printout, a photograph of a\n  printout. Ballast finds the block inside whatever surrounds it, so a\n  file pasted into the middle of an email still opens.\n- It survives everything that breaks binary files: mail gateways, line\n  ending changes, copy and paste, "smart" quotes, being typed back in.\n- It is inert. A text file cannot run, and Ballast never executes what it\n  reads; the text is parsed as data and drawn as text.\n- It is auditable. IT can read every header of every file with any text\n  editor, and hash the file, without being able to read the test inside.\n- It is durable. Text is the one format that will still open in 2056.\n\nWHAT THE ENVELOPE DOES NOT DO\nThe envelope does not keep secrets; the body does. A TEST body holds\nevery item encrypted under its own key; a RELEASE is sealed to one RTC\nand signed by one crew member; a CANCEL is sealed to one crew member and\nsigned by the RTC. Copy an armored file to a hundred people and only the\nones it was sealed to can open it, and the sha256 tells everyone else\nthat it was not touched.\n';
+
+  // tutorial/src/main.js
+  var APP = new URLSearchParams(location.search).get("app") || "../ballast/index.html";
+  var root = document.getElementById("desk");
+  var coachEl = document.getElementById("coach");
+  var st = { ...initial({ "Why Ballast.txt": WHY_default, "Armored text.txt": ARMOR_default }), ballast: { screen: "", role: void 0, pub: null, pin: null, minted: false }, step: 0, pendingSeen: 0, reportsSeen: 0, releasesSeen: 0, arrived: {}, issued: null, userReg: null };
+  var set = (next2) => {
+    st = next2;
+    render2();
+  };
+  var frame = () => document.querySelector("iframe.app");
+  var tell = (msg) => frame()?.contentWindow?.postMessage({ ballast: 1, ...msg }, "*");
+  var arrivals = {
+    rtcRegistrations: async () => {
+      const [d, r, t] = await registrationsOf(await Promise.all([0, 1, 2].map(rtc)));
+      return [
+        ["mail", { from: d.from, subject: "Registration for the fall program", body: "Hi \u2014 my registration is attached. Looking forward to it. \u2014 Denise", attachment: { name: d.name, text: d.text }, fresh: true }],
+        ["chat", { from: r.from, text: `Hey, pasting my registration in here, the attachment got blocked by the mail filter:
+
+${r.text}
+Ray`, fresh: true }],
+        ["Inbox", t]
+      ];
+    },
+    testSources: async () => tests.slice(0, 2).map((t) => ["Tests", { name: t.name, text: t.source, from: "Operating Practices" }]),
+    classProfiles: async () => (await classProfilesFor(st.ballast.pub, await userApproval())).map((f) => ["Class profiles", f]),
+    appeal: async () => [["Inbox", await appealFor(await userApproval())]],
+    demoteToRtc: async () => [["Inbox", { name: "profile-RTC-you.txt", text: await mintUser(await superintendent(), userPublic(), "rtc"), from: names.superintendent }]],
+    crewRegistrations: async () => (await registrationsOf(await crewOf(0))).map((f) => ["Inbox", f]),
+    testForClass: async () => {
+      const t = tests[1];
+      return [["Tests", { name: t.name, text: t.source, from: names.superintendent }], ["Tests", { name: `approval-${t.name.replace(/\.txt$/, "")}.txt`, text: await approvalFor(t.source, t.source.split("\n")[0].replace(/^#\s*/, "")), from: names.superintendent }]];
+    },
+    releases: async () => {
+      const tf = st.files.find((f) => f.folder === "Outbox" && /\.test\.txt$/.test(f.name));
+      return tf ? (await releasesFor(tf.text, 0)).map((f) => ["Releases", f]) : [];
+    },
+    supProfile: async () => [["Inbox", { name: "profile-superintendent-Boudreau.txt", text: await profileText(await superintendent()), from: names.superintendent }]],
+    demoteToCrew: async () => [["Inbox", { name: "profile-crew-you.txt", text: await mintUser(await rtc(0), userPublic(), "crew"), from: names.rtcs[0] }]],
+    testForUser: async () => {
+      const issued = await testForUser(0, userPublic(), 0);
+      st.issued = issued;
+      return [["Inbox", { name: issued.name, text: issued.text, from: issued.from }]];
+    },
+    cancelForUser: async () => {
+      const rel = st.files.find((f) => f.folder === "Outbox" && /^release-/.test(f.name));
+      if (!rel || !st.issued) return [];
+      const c = await cancelForUser(st.issued, rel.text, userPublic());
+      return [["Inbox", c]];
+    }
+  };
+  var userApproval = async () => {
+    const a = await userApprovalOf(st.files.filter((f) => f.folder === "Outbox" && /^approval-/.test(f.name)).map((f) => f.text));
+    if (!a) throw new Error("approve Test 1 first (Test inventory \u2192 Approve)");
+    return a;
+  };
+  var userPublic = () => {
+    const reg = st.files.find((f) => f.folder === "Outbox" && /^profile-/.test(f.name) && f.user);
+    return reg?.parsed || st.userReg;
+  };
+  var arrive = async (key) => {
+    if (!key || st.arrived[key] || !arrivals[key]) return;
+    st = { ...st, arrived: { ...st.arrived, [key]: true } };
+    const items = await arrivals[key]().catch((e) => {
+      console.error(e);
+      set(toast(st, `Could not stage ${key}: ${e.message}`));
+      return [];
+    });
+    let s = st;
+    for (const [folder, f] of items) s = folder === "mail" ? addMail(s, f) : folder === "chat" ? addChat(s, f) : addFile(s, folder, f.name, f.text, f.from);
+    set(items.length ? toast(s, `${items.length} file(s) arrived in ${items[0][0]}`) : s);
+  };
+  var act = async (kind, ...a) => {
+    if (kind === "open-explorer") return set(openWindow(st, "explorer", "WNR-TRAINING \u2014 Training"));
+    if (kind === "open-mail") return set(openWindow(st, "mail", "Mail \u2014 Inbox"));
+    if (kind === "open-chat") return set(openWindow(st, "chat", "Messages"));
+    if (kind === "read-mail") return set({ ...st, readMail: a[0], mail: st.mail.map((m) => m.id === a[0] ? { ...m, fresh: false } : m) });
+    if (kind === "open-text") return openWithBallast(st, a[0], a[1]);
+    if (kind === "open-browser") return set(openWindow(st, "browser", "Ballast \u2014 cror.ca", { src: APP + "?embedded=1", url: "https://cror.ca/ballast/" }));
+    if (kind === "focus") {
+      const top = st.windows.reduce((t, w) => w.z > (t?.z ?? -1) ? w : t, null);
+      return top?.id === a[0] && !top.min ? void 0 : set(focus(st, a[0]));
+    }
+    if (kind === "move") return set(move(st, a[0], a[1], a[2]));
+    if (kind === "close") return set(close(st, a[0]));
+    if (kind === "minimize") return set(minimize(st, a[0]));
+    if (kind === "cd") return set(cd(st, a[0]));
+    if (kind === "select") return set({ ...st, sel: a[0] });
+    if (kind === "new-tab") return set(toast(st, "In a real browser a new tab would be recorded as a break on the attempt. This pretend one does nothing."));
+    if (kind === "open-file") {
+      const f = st.files.find((x) => x.id === a[0]);
+      if (!f) return;
+      let s = seen(st, f.id);
+      if (f.note) {
+        const n = s.windows.find((w) => w.kind === "notepad");
+        return set(n ? focus({ ...s, windows: s.windows.map((w) => w.id === n.id ? { ...w, title: f.name, text: f.text } : w) }, n.id) : openWindow(s, "notepad", f.name, { text: f.text }));
+      }
+      if (/\.html$/.test(f.name)) {
+        const url = "file://///WNR-TRAINING/Training/Ballast/ballast.html";
+        const b = s.windows.find((w) => w.kind === "browser");
+        s = b ? focus(setUrl(s, b.id, url, "Ballast \u2014 ballast.html"), b.id) : openWindow(s, "browser", "Ballast \u2014 ballast.html", { src: APP + "?embedded=1", url });
+        return set(toast(s, "Opened ballast.html from the shared drive. (In this tutorial the file:// copy and cror.ca are the same page; in real life each keeps its own keys \u2014 pick one and stay with it.)"));
+      }
+      openWithBallast(s, f.text, f.name, f.folder);
+    }
+  };
+  var openWithBallast = (s, text2, name, folder = "") => {
+    if (!s.windows.some((w) => w.kind === "browser")) s = openWindow(s, "browser", "Ballast \u2014 cror.ca", { src: APP + "?embedded=1", url: "https://cror.ca/ballast/" });
+    s = { ...s, chat: s.chat.map((m) => m.text === text2 ? { ...m, fresh: false } : m) };
+    set(s);
+    const bid = s.windows.find((w) => w.kind === "browser").id;
+    setTimeout(() => set(focus(st, bid)), 0);
+    setTimeout(() => tell({ type: "open", text: text2, name }), 150);
+    const reg = /^registration-/.test(name) || /BEGIN BALLAST PROFILE/.test(text2) && /role: none/.test(text2);
+    if (reg) set({ ...st, pendingSeen: st.pendingSeen + 1 });
+    if (/^class-profile-/.test(name)) set({ ...st, reportsSeen: st.reportsSeen + 1 });
+    if (/^release-/.test(name)) set({ ...st, releasesSeen: st.releasesSeen + 1, appealSeen: st.appealSeen || folder === "Inbox" });
+  };
+  window.addEventListener("message", async (e) => {
+    const m = e.data;
+    if (!m || m.ballast !== 1) return;
+    if (m.type === "ready") tell({ type: "state?" });
+    if (m.type === "state") {
+      set({ ...st, ballast: { screen: m.screen, role: m.role, pub: m.pub, pin: m.pin, minted: m.minted }, userReg: m.profile && m.role === "none" ? m.profile : st.userReg });
+      coach();
+    }
+    if (m.type === "file") {
+      let s = addFile(st, "Outbox", m.name, m.text, "you");
+      s = { ...s, toast: `${m.name} saved to Outbox` };
+      if (/^profile-/.test(m.name) && !st.userReg) {
+        try {
+          const { dearmor: dearmor2 } = await Promise.resolve().then(() => (init_armor(), armor_exports));
+          const { body } = await dearmor2(m.text, "PROFILE");
+          s = { ...s, userReg: body };
+        } catch {
+        }
+      }
+      set(s);
+    }
+  });
+  var current = () => steps[st.step];
+  var coach = () => {
+    const s = current();
+    if (!s) return;
+    if (s.hint) tell({ type: "hint", selector: s.hint[0], text: s.hint[1] });
+    else tell({ type: "hint" });
+    if (s.done(st) && !st.stepDone) {
+      st = { ...st, stepDone: true, ...s.onDone ? s.onDone(st) : {} };
+      render2();
+      if (!s.info) setTimeout(() => {
+        if (current() === s) next();
+      }, 1500);
+    }
+  };
+  var next = async () => {
+    const n = st.step + 1;
+    if (n >= steps.length) return;
+    set({ ...st, step: n, stepDone: false });
+    const s = steps[n];
+    if (s.explorer) set(cd(openWindow(st, "explorer", "WNR-TRAINING \u2014 Training"), s.explorer));
+    await arrive(s.arrive);
+    coach();
+  };
+  var renderCoach = () => {
+    const s = current();
+    const done = s.done(st) || st.stepDone;
+    const phaseIx = PHASES.indexOf(s.phase);
+    mount(
+      coachEl,
+      h("div", { class: "phase" }, `Phase ${phaseIx + 1} of 3 \u2014 ${s.phase === "rtc" ? "RTC" : s.phase}`),
+      h("h2", {}, s.title),
+      h("div", { class: "progress" }, h("div", { style: { width: Math.round(100 * st.step / (steps.length - 1)) + "%" } })),
+      s.text.split("\n\n").map((t) => h("p", {}, t)),
+      s.arrive && !st.arrived[s.arrive] ? h("p", { class: "waiting" }, "staging files\u2026") : null,
+      st.step >= steps.length - 1 ? h("p", { class: "done" }, "The end.") : done ? h("p", { class: "done" }, s.info ? "Next when you are ready." : "Done \u2014 moving on.") : h("p", { class: "waiting" }, "Waiting for you to do that\u2026"),
+      h("div", { class: "btns" }, h("button", { class: "primary", disabled: !done || st.step >= steps.length - 1, onclick: next }, "Next"), h("button", { onclick: next, disabled: st.step >= steps.length - 1 }, "Skip"), h("button", { onclick: () => {
+        tell({ type: "hint" });
+      } }, "Hide hint")),
+      h("p", { class: "small", style: { marginTop: "14px", color: "#92400e" } }, 'Files that "arrive" are generated on your computer by fictional people whose keys ship with this tutorial. Nothing is sent anywhere.')
+    );
+  };
+  var render2 = () => {
+    render(root, st, act);
+    placeFrames(st);
+    renderCoach();
+  };
+  setInterval(() => {
+    const now = /* @__PURE__ */ new Date();
+    const c = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (c !== st.clock) set({ ...st, clock: c });
+    const s = current();
+    if (s && !st.stepDone && s.done(st)) coach();
+  }, 1e3);
+  render2();
+  arrive(steps[0].arrive);
+})();
+</script>
+</body>
+</html>
