@@ -8,9 +8,9 @@ import { parseTest } from '../src/txt.js';
 import { PRACTICE } from '../src/practice.js';
 
 test('profiles travel as text with the photo inside; signatures verify', async () => {
-  const s = await makeProfile('crew', 'Alice', '123456', '/9j/fakejpeg');
+  const s = await makeProfile('none', 'Alice', '123456', '/9j/fakejpeg');
   const t = await profileText(s); assert.match(t, /BEGIN BALLAST PROFILE/);
-  const p = await readProfile(t); assert.equal(p.role, 'crew'); assert.equal(p.photo, '/9j/fakejpeg'); assert.equal(p.pub, s.pub);
+  const p = await readProfile(t); assert.equal(p.role, 'none'); assert.equal(p.photo, '/9j/fakejpeg'); assert.equal(p.pub, s.pub);
   const sig = await signBytes(s.sign, utf8('hello')); assert.ok(await verifyBytes(s.sig, sig, utf8('hello'))); assert.ok(!(await verifyBytes(s.sig, sig, utf8('hellp'))));
   await assert.rejects(makeProfile('crew', 'x', '12'), /PIN/);
 });
@@ -20,7 +20,7 @@ test('director approves a source and reads a report; book round-trips', async ()
   const src = '# T\n---\ntype: mc\nQ: q\n*a) y\nb) n\n';
   const ap = await readApproval(await approveSource(d, src, 'T'));
   assert.ok(await checkApproval(ap, src)); assert.ok(!(await checkApproval(ap, src + ' ')));
-  const rep = { tgbo: 'AAAAAAAAAAAAAAAAAAAAAA', title: 'T', rows: [{ pin: '1', grade: 0.9 }] };
+  const rep = { test: 'AAAAAAAAAAAAAAAAAAAAAA', title: 'T', rows: [{ pin: '1', grade: 0.9 }] };
   const rt = await sendReport(tch, d.pub, rep);
   const got = await takeReport(rt, d); assert.deepEqual(got.report, rep); assert.equal(got.teacher, tch.pub);
   const book = await newBook(d); book.reports.push(got);

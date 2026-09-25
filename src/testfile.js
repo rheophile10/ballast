@@ -1,4 +1,4 @@
-// The TGBO: one test file addressed to every train on the sheet. See SPEC.md §5.
+// The test file: one file for the class, with a clearance for every crew member. See SPEC.md §5.
 import { armor, dearmor } from './armor.js';
 import { b64url, unb64url, hex, random, sha256, utf8 } from './bytes.js';
 import { INFO, hkdfKey, openJSON, rawKey, sealJSON, shared, sidOf } from './crypto.js';
@@ -9,9 +9,9 @@ const itemsHash = async (items) => hex(await sha256(utf8(items.map((i) => i.id +
 
 /**
  * RTC side. `rtc` = {priv, pub}; `trains` = [{pin, pub}]; `assets` = {name: {mime, b64}}.
- * Returns the armored TGBO and what the sheet must remember (id, salt, key, hash).
+ * Returns the armored test and what the sheet must remember (id, salt, key, hash).
  */
-export const issueTGBO = async (test, rtc, trains, assets = {}, rtcName = '', approval = null) => {
+export const issueTest = async (test, rtc, trains, assets = {}, rtcName = '', approval = null) => {
   const id = b64url(random(16)), saltBytes = random(16), salt = b64url(saltBytes);
   const K = random(32), Kkey = await rawKey(K);
   const items = [];
@@ -30,19 +30,19 @@ export const issueTGBO = async (test, rtc, trains, assets = {}, rtcName = '', ap
     clearances.push({ no: i + 1, sid: await sidOf(saltBytes, t.pin), box: await sealJSON(wk, { K: b64url(K) }) });
   }
   const hash = await itemsHash(items);
-  const body = { v: 1, kind: 'tgbo', id, salt, title: test.title, settings: test.settings, areas: test.areas, rtc: rtc.pub, rtcName, approval, clearances, items, hash };
-  const text = await armor('TGBO', body, { title: test.title, rtc: rtcName, items: items.length, clearances: trains.length, approved: approval ? 'yes' : 'no', complete: hash.slice(0, 4).toUpperCase() });
+  const body = { v: 1, kind: 'test', id, salt, title: test.title, settings: test.settings, areas: test.areas, rtc: rtc.pub, rtcName, approval, clearances, items, hash };
+  const text = await armor('TEST', body, { title: test.title, rtc: rtcName, items: items.length, clearances: trains.length, approved: approval ? 'yes' : 'no', complete: hash.slice(0, 4).toUpperCase() });
   return { text, record: { id, salt, hash, key: b64url(K), title: test.title } };
 };
 
-/** Train side: open a TGBO with my keypair and PIN. Returns a reader that decrypts one item at a time. */
-export const copyTGBO = async (text, train, pin) => {
-  const { body } = await dearmor(text, 'TGBO');
-  if (await itemsHash(body.items) !== body.hash) throw new Error('TGBO does not compare: items altered');
+/** Crew side: open a test with my keypair and PIN. Returns a reader that decrypts one item at a time. */
+export const copyTest = async (text, train, pin) => {
+  const { body } = await dearmor(text, 'TEST');
+  if (await itemsHash(body.items) !== body.hash) throw new Error('test does not compare: items altered');
   const saltBytes = unb64url(body.salt);
   const sid = await sidOf(saltBytes, pin);
   const wrap = body.clearances.find((w) => w.sid === sid);
-  if (!wrap) throw new Error(`no clearance for CN ${pin} on this TGBO`);
+  if (!wrap) throw new Error(`no clearance for CN ${pin} on this test`);
   const wk = await hkdfKey(await shared(train.priv, body.rtc), saltBytes, INFO.wrap);
   const { K } = await openJSON(wk, wrap.box);
   const Kb = unb64url(K);
@@ -63,8 +63,8 @@ export const copyTGBO = async (text, train, pin) => {
 };
 
 /** RTC side: reopen any item from the sheet's record (for review and playback). */
-export const openItem = async (record, tgboBody, itemId) => {
+export const openItem = async (record, testBody, itemId) => {
   const saltBytes = unb64url(record.salt);
-  const it = tgboBody.items.find((i) => i.id === itemId);
+  const it = testBody.items.find((i) => i.id === itemId);
   return openJSON(await hkdfKey(unb64url(record.key), saltBytes, INFO.item(itemId)), it.box);
 };

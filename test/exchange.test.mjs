@@ -4,41 +4,41 @@ import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import { makeProfile } from '../src/profile.js';
 import { parseTest } from '../src/txt.js';
-import { copyTGBO, issueTGBO, openItem } from '../src/tgbo.js';
+import { copyTest, issueTest, openItem } from '../src/testfile.js';
 import { giveRelease, takeRelease } from '../src/release.js';
 import { scoreAttempt, summarize } from '../src/score.js';
-import { cancelTGBO, readCancel } from '../src/cancel.js';
+import { cancelTest, readCancel } from '../src/cancel.js';
 import { newSheet, openSheet, saveSheet } from '../src/sheet.js';
 import { dearmor } from '../src/armor.js';
 
 const src = await readFile(new URL('../examples/test3.txt', import.meta.url), 'utf8');
 const png1x1 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
-test('TGBO → copy → release → score → cancel', async () => {
+test('test → copy → release → score → cancel', async () => {
   const { test: t, errors } = await parseTest(src); assert.deepEqual(errors, []);
   const sheet = await newSheet(await makeProfile('rtc', 'RTC ABC', '777777', '', true));
   const alice = await makeProfile('crew', 'Alice', '123456'), bob = await makeProfile('crew', 'Bob', '654321'), eve = await makeProfile('crew', 'Eve', '111111');
   sheet.trains.push({ pin: alice.pin, pub: alice.pub, name: 'Alice' }, { pin: bob.pin, pub: bob.pub, name: 'Bob' });
 
-  const { text: tgbo, record } = await issueTGBO(t, sheet.rtc, sheet.trains, { 'clearance-134.png': { mime: 'image/png', b64: png1x1 } });
-  sheet.tgbos.push(record);
-  assert.match(tgbo, /^-----BEGIN BALLAST TGBO-----\nversion: 1\ntitle: Test 3/);
+  const { text: tgbo, record } = await issueTest(t, sheet.rtc, sheet.trains, { 'clearance-134.png': { mime: 'image/png', b64: png1x1 } });
+  sheet.tests.push(record);
+  assert.match(tgbo, /^-----BEGIN BALLAST TEST-----\nversion: 1\ntitle: Test 3/);
   const raw = (await dearmor(tgbo)).body;
   assert.equal(raw.clearances.length, 2); assert.equal(raw.clearances[0].no, 1); assert.equal(raw.items.length, 4);
   assert.ok(!JSON.stringify(raw).includes('20 seconds warning'), 'no plaintext question leaks'); // key text of q14
   assert.ok(!JSON.stringify(raw).includes('engine number verified'), 'no answer leaks');
 
   // Alice copies it; Eve, not on the sheet, cannot; Bob cannot use Alice's PIN.
-  const a = await copyTGBO(tgbo, alice, alice.pin);
+  const a = await copyTest(tgbo, alice, alice.pin);
   assert.equal(a.clearance, 1);
   assert.equal(a.complete, record.hash.slice(0, 4).toUpperCase());
-  await assert.rejects(copyTGBO(tgbo, eve, eve.pin), /no clearance/);
-  await assert.rejects(copyTGBO(tgbo, bob, alice.pin), /cannot open/);
+  await assert.rejects(copyTest(tgbo, eve, eve.pin), /no clearance/);
+  await assert.rejects(copyTest(tgbo, bob, alice.pin), /cannot open/);
   // One item at a time; options shuffled per train; the img rides inside the item; no key anywhere.
   const q = await a.item('q27-green-dark');
   assert.equal(q.key, undefined); assert.equal(q.svg, 'signal G,x,R'); assert.equal(q.options.length, 3);
-  const b = await copyTGBO(tgbo, bob, bob.pin);
-  assert.notDeepEqual(a.order, b.order, 'trains see different item orders');
+  const b = await copyTest(tgbo, bob, bob.pin);
+  assert.notDeepEqual(a.order, b.order, 'crew see different item orders');
   const s = await a.item('q302-verify'); assert.equal(s.answer, undefined); assert.equal(s.img[0].b64, png1x1);
   const m = await a.item('q-def-reduced'); assert.equal(m.rights.length, 3); assert.equal(m.pairs[0].right, undefined || m.pairs[0].right); // rights are separate
 
@@ -65,7 +65,7 @@ test('TGBO → copy → release → score → cancel', async () => {
   const sum = summarize(t, [r]); assert.equal(sum.byItem[0].id, 'q14-whistle'); assert.equal(sum.n, 1);
 
   // Cancel: Alice reads her marks and read-list; nothing else.
-  const can = await cancelTGBO(record, sheet.rtc, alice.pub, alice.pin, r);
+  const can = await cancelTest(record, sheet.rtc, alice.pub, alice.pin, r);
   const seen = await readCancel(can, alice);
   assert.equal(seen.grade, r.grade); assert.equal(seen.perItem, undefined); assert.equal(seen.read[0].ref, 'CROR 14(l)');
   await assert.rejects(readCancel(can, bob), /cannot open/);
@@ -75,6 +75,6 @@ test('TGBO → copy → release → score → cancel', async () => {
   await assert.rejects(openSheet(saved, 'wrong'), /wrong passphrase/);
   const back = await openSheet(saved, 'correct horse');
   assert.equal(back.rtc.pub, sheet.rtc.pub); assert.equal(back.trains.length, 2);
-  const again = await takeRelease(rel, back.rtc, back.tgbos[0]); assert.equal(again.pin, '123456');
-  const item = await openItem(back.tgbos[0], raw, 'q14-whistle'); assert.match(item.prompt, /30 MPH/);
+  const again = await takeRelease(rel, back.rtc, back.tests[0]); assert.equal(again.pin, '123456');
+  const item = await openItem(back.tests[0], raw, 'q14-whistle'); assert.match(item.prompt, /30 MPH/);
 });

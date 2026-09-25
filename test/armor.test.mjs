@@ -13,5 +13,5 @@ test('armor round-trips and survives being pasted into an email', async () => {
   const lines = a.split('\n'); const bi = lines.findIndex((l, i) => i > 0 && lines[i - 1] === '');
   lines[bi] = lines[bi].slice(0, 4) === 'AAAA' ? 'BBBB' + lines[bi].slice(4) : 'AAAA' + lines[bi].slice(4);
   await assert.rejects(dearmor(lines.join('\n')), /sha256 mismatch|cannot|not a Ballast/);
-  await assert.rejects(dearmor(a, 'TGBO'), /expected a TGBO/);
+  await assert.rejects(dearmor(a, 'TEST'), /expected a TEST/);
 });

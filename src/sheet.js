@@ -5,7 +5,7 @@ import { openJSON, passKey, sealJSON } from './crypto.js';
 import { exportKeys, importKeys, makeProfile } from './profile.js';
 
 /** A sheet (teacher) or a book (director) is the same shape under a different armor kind. */
-export const newSheet = async (profile) => ({ rtc: profile, trains: [], tgbos: [], releases: [], marks: {}, approvals: [], reports: [], sources: [] });
+export const newSheet = async (profile) => ({ rtc: profile, trains: [], tests: [], releases: [], marks: {}, approvals: [], reports: [], sources: [], pending: [] });
 export const newBook = newSheet;
 
 export const saveSheet = async (sheet, passphrase, kind = 'SHEET') => {
@@ -14,7 +14,7 @@ export const saveSheet = async (sheet, passphrase, kind = 'SHEET') => {
   const { priv, sign, ...pub } = sheet.rtc;
   const plain = { ...sheet, rtc: { ...pub, keys: await exportKeys(sheet.rtc) } };
   const body = { v: 1, kind: kind.toLowerCase(), kdf: { salt: b64url(salt), iter }, box: await sealJSON(key, plain) };
-  return armor(kind, body, { name: sheet.rtc.name, role: sheet.rtc.role, trains: sheet.trains.length, tgbos: sheet.tgbos.length });
+  return armor(kind, body, { name: sheet.rtc.name, role: sheet.rtc.role, trains: sheet.trains.length, tests: sheet.tests.length });
 };
 export const saveBook = (book, passphrase) => saveSheet(book, passphrase, 'BOOK');
 

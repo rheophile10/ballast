@@ -1,8 +1,8 @@
-// The crew's side: register, practice, copy a TGBO, work it, release, read a cancellation.
+// The crew's side: practice, copy a test, work it, release, read a cancellation.
 import { h, mount, download, fmtTime, hhmm } from './h.js';
 import * as store from './store.js';
 import { profileText } from '../profile.js';
-import { copyTGBO } from '../tgbo.js';
+import { copyTest } from '../testfile.js';
 import { giveRelease } from '../release.js';
 import { readCancel } from '../cancel.js';
 import { parseTest, publicItem } from '../txt.js';
@@ -12,39 +12,36 @@ import { fold, toRelease } from './attempt.js';
 import { drawItem, imagesFor, forget } from './draw.js';
 import { svgFor } from '../svg.js';
 import { shuffled } from '../shuffle.js';
-import { renderRegister, profileCard, avatar } from './profile-ui.js';
+import { profileCard, avatar } from './profile-ui.js';
 
 const now = () => Date.now();
 export const me = async () => (await store.get('profile')) || null;
 
 // ---------- home: a checklist
-export const renderHome = async (root, go) => {
+export const renderHome = async (root, go, dropBox) => {
   const p = await me(); const log = (await store.get('crewlog')) || {};
-  const step = (n, label, done, detail, action) => h('li', { class: done ? 'done' : (!p && n > 1) ? 'later' : 'next' }, h('b', {}, `${n}. ${label}`), detail ? h('div', { class: 'small' }, detail) : null, action);
+  const step = (n, label, done, detail) => h('li', { class: done ? 'done' : 'next' }, h('b', {}, `${n}. ${label}`), detail ? h('div', { class: 'small' }, detail) : null);
   mount(root,
     h('h1', {}, 'Crew'),
-    p ? profileCard(p, await profileText(p)) : null,
+    profileCard(p, await profileText(p)),
     h('ol', { class: 'steps' },
-      step(1, 'Register', !!p, p ? `${p.name}, CN ${p.pin}` : 'Name, PIN, photo. Your browser keeps your keys.', p ? null : h('button', { class: 'primary', onclick: () => go({ screen: 'register' }) }, 'Register')),
-      step(2, 'Send your profile to the RTC', !!log.sent, 'Download the profile text and attach it, or paste it into a message.', p && !log.sent ? h('button', { onclick: async () => { await store.set('crewlog', { ...log, sent: now() }); go({ screen: 'home' }); } }, 'I have sent it') : null),
-      step(3, 'Copy the TGBO the RTC sends you', !!log.copied, log.copied ? `${log.copied.title} at ${log.copied.when}` : 'Drop or paste the TGBO below.', null),
-      step(4, 'Release', !!log.released, log.released ? `${log.released.title} at ${log.released.when}` : 'Fullscreen, one item at a time, then Release track.', null),
-      step(5, 'Read your cancellation', !!log.cancelled, log.cancelled ? `${log.cancelled.grade}% on ${log.cancelled.title}` : 'Drop the cancellation the RTC sends back to see your marks and what to read.', null)),
+      step(1, 'Copy the test the RTC sends you', !!log.copied, log.copied ? `${log.copied.title} at ${log.copied.when}` : 'Drop or paste the test below.'),
+      step(2, 'Release', !!log.released, log.released ? `${log.released.title} at ${log.released.when}` : 'Fullscreen, one item at a time, then Release track.'),
+      step(3, 'Read your cancellation', !!log.cancelled, log.cancelled ? `${log.cancelled.grade}% on ${log.cancelled.title}` : 'Drop the cancellation the RTC sends back to see your marks and what to read.')),
+    dropBox('Drop or paste a test, or a cancellation'),
     h('h2', {}, 'Practice'), h('p', { class: 'small' }, 'The same drill — repeat, fullscreen, one item at a time — on a built-in test that marks itself. Not for record.'),
     h('button', { onclick: () => go({ screen: 'practice' }) }, 'Start practice'));
 };
 
-export const renderRegisterCrew = (root, go) => renderRegister(root, 'crew', 'crew', async (p) => { await store.set('profile', p); go({ screen: 'registered' }); });
-export const renderRegistered = async (root, go) => { const p = await me(); const t = await profileText(p); mount(root, h('h1', {}, 'Registered'), profileCard(p, t), h('p', {}, 'Send this to your RTC. If attachments are blocked, paste the text into the message.'), h('textarea', { readonly: true, rows: 6, value: t }), h('button', { onclick: () => go({ screen: 'home' }) }, 'Done')); };
 
-// ---------- copy a TGBO (or start the practice)
+// ---------- copy a test (or start the practice)
 const clearanceSvg = (tgbo, p) => svgFor(`form clearance kind="Clearance" no=${tgbo.clearance} to="CN ${p.pin}" proceed="item 1 → item ${tgbo.order.length}" until="repeated back" call="before ${fmtTime(tgbo.settings.time)}" complete="${hhmm()}" rtc="${tgbo.rtcName || ''}"`);
 export const renderCopy = async (root, { text, practice }, go) => {
   const p = await me();
-  if (!p) return mount(root, h('h1', {}, 'Not registered'), h('p', {}, 'Register first; a TGBO is addressed to your key.'), h('button', { onclick: () => go({ screen: 'register' }) }, 'Register'));
+  if (!p) return mount(root, h('h1', {}, 'Not registered'), h('p', {}, 'Register first; a test is addressed to your key.'));
   let tgbo;
-  try { tgbo = practice ? await practiceTGBO(p) : await copyTGBO(text, p, p.pin); }
-  catch (e) { return mount(root, h('h1', {}, 'Cannot copy this TGBO'), h('p', { class: 'bad' }, e.message), h('button', { onclick: () => go({ screen: 'home' }) }, 'Back')); }
+  try { tgbo = practice ? await practiceTest(p) : await copyTest(text, p, p.pin); }
+  catch (e) { return mount(root, h('h1', {}, 'Cannot copy this test'), h('p', { class: 'bad' }, e.message), h('button', { onclick: () => go({ screen: 'home' }) }, 'Back')); }
   const saved = practice ? null : await store.get('attempt:' + tgbo.id);
   const repeat = h('input', { placeholder: 'Repeat (4 characters)', maxlength: 4, autocomplete: 'off', style: { textTransform: 'uppercase', maxWidth: '240px' } });
   const status = h('p', { class: 'status' });
@@ -67,8 +64,8 @@ export const renderCopy = async (root, { text, practice }, go) => {
       h('p', { class: 'small' }, 'From here on: one item at a time, fullscreen, no copying. Leaving fullscreen or the tab is recorded.')));
 };
 
-/** The practice test, built locally: same reader shape as a real TGBO, no crypto, answers kept for self-marking. */
-const practiceTGBO = async (p) => {
+/** The practice test, built locally: same reader shape as a real test file, no crypto, answers kept for self-marking. */
+const practiceTest = async (p) => {
   const { test } = await parseTest(PRACTICE);
   const sid = 'practice:' + p.pin;
   const order = shuffled(test.items.map((i) => i.id), sid);

@@ -1,7 +1,7 @@
 // ASCII armor: the envelope every Ballast file travels in. See SPEC.md §1.
 import { b64, unb64, hex, sha256, utf8, text } from './bytes.js';
 
-const KINDS = ['PROFILE', 'TGBO', 'RELEASE', 'CANCEL', 'SHEET', 'BOOK', 'APPROVAL', 'REPORT'];
+const KINDS = ['PROFILE', 'TEST', 'RELEASE', 'CANCEL', 'SHEET', 'BOOK', 'APPROVAL', 'REPORT'];
 const wrap76 = (s) => s.replace(/(.{76})/g, '$1\n').trim();
 
 /** @param {string} kind @param {object} body @param {Record<string,string|number>} [headers] */

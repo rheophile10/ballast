@@ -1,8 +1,8 @@
 # Ballast
 
 A test that stays on the rails. One `index.html`, no server, no network, WebCrypto only.
-The instructor is the **RTC**; students are **trains**; the test is a **TGBO**; the
-attempt is a **track release**; the marks come back as a **cancellation**. Rule 136
+The instructor is the **RTC**; students are **crew**; each has a **clearance** on the test;
+the attempt is a **track release**; the marks come back as a **cancellation**. Rule 136
 applies: copy, repeat, complete.
 
 ```

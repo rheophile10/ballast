@@ -9,7 +9,7 @@ export const avatar = (p, size = 64) => p?.photo
 const toJpeg = (draw) => new Promise((res) => { const c = h('canvas', { width: 240, height: 240 }); const x = c.getContext('2d'); x.fillStyle = '#ddd'; x.fillRect(0, 0, 240, 240); draw(x); c.toBlob(async (b) => res(btoa(String.fromCharCode(...new Uint8Array(await b.arrayBuffer())))), 'image/jpeg', 0.8); });
 
 /** Render the registration form for `role`; calls done(profile, text). `extractable` for RTC/superintendent (their keys live in their file). */
-export const renderRegister = (root, role, label, done, { extractable = false } = {}) => {
+export const renderRegister = (root, done) => {
   let photo = '', stream = null;
   const video = h('video', { autoplay: true, playsinline: true, muted: true, style: { display: 'none', width: '240px', borderRadius: '8px' } });
   const preview = h('div', { class: 'row' });
@@ -23,19 +23,19 @@ export const renderRegister = (root, role, label, done, { extractable = false } 
   const pin = h('input', { placeholder: 'PIN', inputmode: 'numeric', required: true });
   const submit = async (e) => {
     e.preventDefault();
-    try { const p = await makeProfile(role, name.value, pin.value, photo, extractable); stopCam(); done(p, await profileText(p)); }
+    try { const p = await makeProfile('none', name.value, pin.value, photo, true); stopCam(); done(p, await profileText(p)); }
     catch (err) { status.textContent = err.message; }
   };
-  mount(root, h('h1', {}, `Register as ${label}`),
+  mount(root, h('h1', {}, 'Register'),
     h('form', { onsubmit: submit, class: 'card' },
       h('label', {}, 'Name ', name), h('label', {}, 'PIN (your employee number) ', pin),
       h('div', { class: 'row' }, h('button', { type: 'button', onclick: webcam }, 'Use webcam'), h('button', { type: 'button', onclick: snap }, 'Take photo'), h('label', { class: 'btn' }, 'Upload photo', h('input', { type: 'file', accept: 'image/*', onchange: upload, style: { display: 'none' } }))),
       video, preview, status,
       h('button', { type: 'submit', class: 'primary' }, 'Register')),
-    h('p', { class: 'small' }, 'Your browser makes and keeps your keys. Your profile — name, PIN, photo, public keys — is a text file you send to the people who need it.'));
+    h('p', { class: 'small' }, 'Your browser makes and keeps your keys. Your registration — name, PIN, photo, public keys — is a text file you send to your RTC, who sends back your profile with your role.'));
 };
 
 export const profileCard = (p, text, extra = []) => h('div', { class: 'card row' }, avatar(p, 72),
-  h('div', {}, h('b', {}, p.name), ` · ${p.role === 'crew' ? 'CN ' : ''}${p.pin} · ${p.role}`, h('div', { class: 'row' },
+  h('div', {}, h('b', {}, p.name), ` · ${p.role === 'crew' ? 'CN ' : ''}${p.pin} · ${p.role === 'none' ? 'not yet minted' : p.role}`, p.minted ? h('div', { class: 'small' }, `${p.role} since ${p.minted.start}, minted by ${p.minted.by.name}`) : null, h('div', { class: 'row' },
     text ? h('button', { onclick: () => download(`profile-${p.pin}.txt`, text) }, 'Download profile') : null,
     text ? h('button', { onclick: () => navigator.clipboard?.writeText(text) }, 'Copy profile text') : null, ...extra)));

@@ -5,6 +5,11 @@ class and mark what comes back, with no server, no accounts, and no network acce
 Students ("crew") open the same file, as does the program director ("superintendent"),
 who approves tests and reads reports. Nothing is installed.
 
+**Roles are granted, not chosen.** Everyone registers the same way; a role only exists as a
+signature from someone entitled to grant it (superintendent → RTC → crew, dated), and the
+page will not show a role's functions until a properly minted profile for this browser's
+keys has been dropped in. A forged or altered profile is refused on read.
+
 **Data egress: none, enforced by the browser.** The page carries this Content-Security-Policy:
 
     default-src 'none'; script-src 'sha256-…'; style-src 'sha256-…'; img-src blob: data:; connect-src 'none'; form-action 'none'; base-uri 'none'
@@ -20,9 +25,8 @@ the build is `build.mjs` (concatenation), and the shipped `index.html` is commit
 the build reproduces it byte for byte. Its SHA-256 is printed by the build and recorded in
 the release notes — hash the file you were given and compare.
 
-**What it stores on the machine.** In the browser profile only: the student's private key
-(non-extractable — the browser will not export it to a script or a person) and the log of an
-attempt in progress, so a crash does not lose the test. Never the decrypted test, never an
+**What it stores on the machine.** In the browser profile only: the person's private keys and
+the log of an attempt in progress, so a crash does not lose the test. Never the decrypted test, never an
 answer key. The instructor's file (`.bed`) is encrypted under their passphrase; it is the
 only place answers and the instructor's private key exist.
 

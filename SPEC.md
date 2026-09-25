@@ -16,7 +16,7 @@ sha256: <hex of body bytes>
 -----END BALLAST <KIND>-----
 ```
 
-KIND is one of `PROFILE`, `TGBO`, `RELEASE`, `CANCEL`, `SHEET`, `BOOK`, `APPROVAL`, `REPORT`.
+KIND is one of `PROFILE`, `TEST`, `RELEASE`, `CANCEL`, `SHEET`, `BOOK`, `APPROVAL`, `REPORT`.
 Every Ballast file is one of these; nothing is ever a binary file. The body is UTF-8 JSON. A reader
 strips all whitespace from the base64, decodes, checks `sha256`, then parses.
 The file extension is never consulted.
@@ -44,7 +44,18 @@ Every party (crew, RTC, superintendent) has an ECDH P-256 pair (to seal) and an 
 P-256 pair (to sign). Crew keep theirs non-extractable in the browser; RTCs and
 superintendents keep theirs inside their SHEET / BOOK. The public halves, name, PIN, role
 and a 240 px JPEG photo travel as a `PROFILE`:
-`{ "v":1, "kind":"profile", "role":"crew"|"rtc"|"superintendent", "name", "pin", "photo": "<base64 jpeg>", "pub": "<ECDH raw>", "sig": "<ECDSA raw>" }`. The **shared secret** between an
+`{ "v":1, "kind":"profile", "role":"none"|"crew"|"rtc"|"superintendent", "name", "pin", "photo": "<base64 jpeg>", "pub": "<ECDH raw>", "sig": "<ECDSA raw>", "minted"? }`.
+
+**Roles are minted.** A fresh registration has `role: "none"`. A role is granted by someone
+entitled to grant it — superintendents mint RTCs, RTCs mint crew, the first superintendent
+mints themself (root) — who signs it and dates it:
+`"minted": { "role", "start": "YYYY-MM-DD", "by": { "name", "pin", "sig", "role" }, "signature" }`
+where `signature` is ECDSA-SHA256 by `by.sig` over
+`"ballast/mint/1\n<role>\n<start>\n<pin>\n<pub>\n<sig>\n<by.sig>"`.
+A reader refuses any profile whose role is not `none` and whose mint does not verify, whose
+minter's role is not the one entitled to grant it, or whose superintendent mint is not self-signed.
+The minted profile goes back to its owner, who drops it into the browser that holds the keys;
+only then does the page show that role's home. The **shared secret** between an
 instructor and a student, `ECDH(a_priv, b_pub) = ECDH(b_priv, a_pub)`, is unique to the
 pair, so a box under a key derived from it is both confidential to the pair and
 authenticated as coming from the other party.
@@ -59,15 +70,15 @@ sig key>, "name", "signature": ECDSA-SHA256 over "ballast/approval/1\n<hash>" }`
 anyone with the superintendent's `sig` key can check it. An RTC drops it on the desk; a TGBO
 built from a byte-identical source carries it in `approval`.
 
-`REPORT`: `{ "tgbo", "teacher": <RTC pub>, "box" }` — the class summary (rows per crew member
+`REPORT`: `{ "test", "teacher": <RTC pub>, "box" }` — the class summary (rows per crew member
 with grade, pass, areas, read-list, breaks, identity; class means; hardest items) sealed
-under `HKDF(shared(rtc, superintendent), salt = tgbo id, "ballast/report/1")`. No questions,
+under `HKDF(shared(rtc, superintendent), salt = test id, "ballast/report/1")`. No questions,
 no answers.
 
-## 5. TIE — the test, one file for the class
+## 5. TEST — one file for the class
 
 ```json
-{ "v": 1, "kind": "tie",
+{ "v": 1, "kind": "test",
   "id": "<base64url 16 B random>",
   "salt": "<base64url 16 B random>",
   "title": "Test 3 · Block C",
@@ -92,10 +103,10 @@ no answers.
   by `sid`; both sides can reproduce it. Answers are recorded by item id and option id,
   never by position.
 
-## 6. SPIKE — one student's attempt
+## 6. RELEASE — one crew member's attempt
 
 ```json
-{ "v": 1, "kind": "spike", "tie": "<tie id>", "hash": "<tie hash>", "sid": "...",
+{ "v": 1, "kind": "release", "test": "<test id>", "hash": "<test hash>", "sid": "...",
   "pin": "123456", "student": "<pub base64url>",
   "box": "<attempt encrypted under HKDF(shared, salt, 'ballast/spike/1')>" }
 ```
@@ -108,10 +119,10 @@ match → `{left id: right id}`; short → string.
 GCM under the pair key is the signature: only this student could have made it,
 only this instructor can read it.
 
-## 7. PLATE — the result returned to the student
+## 7. CANCEL — the marks returned to the crew member
 
 Encrypted under `HKDF(shared, salt, "ballast/plate/1")`:
-`{ "tie", "title", "pin", "score", "total", "grade", "pass",
+`{ "test", "salt", "title", "pin", "score", "total", "grade", "pass",
 "areas": [{ "id", "label", "correct", "total" }],
 "read": [ { "ref": "CROR 27(b)", "area": "signals", "missed": 2 } ],
 "tags": { "difficulty:2": {"correct","total"} } }`.
@@ -121,7 +132,8 @@ No questions, no answers.
 
 `{ "v":1, "kind":"sheet"|"book", "kdf": {"salt","iter"}, "box": "<AES-GCM under PBKDF2 key>" }`
 containing `{ "rtc": <own profile + "keys": {priv, sign} as JWK>, "trains": [profiles],
-"tgbos": [ { id, salt, hash, key K, title, source, tgbo (the issued text), approved } ],
+"tests": [ { id, salt, hash, key K, title, source, text (the issued file), approved } ],
+"pending": [unminted registrations],
 "releases": [...], "marks": {...}, "assets": {name: {mime, b64}}, "approvals": [...],
 "sources": [...], "reports": [...] }`. The only place answers, K, and private keys exist.
 
