@@ -120,7 +120,7 @@ const jumpTo = async (i) => { if (i <= st.step) { st = { ...st, viewStep: i === 
 const jumpChunk = (ph) => jumpTo(steps.findIndex((x) => x.phase === ph));
 /** The contents, always in view: four chunk tabs to jump between, and the current chunk's sections — past ones to re-read, future ones to skip to. */
 const nav = () => { const cur = steps[st.step].phase; return h('div', { class: 'toc' },
-  h('div', { class: 'chunks' }, PHASES.map((ph) => h('button', { class: 'chunk' + (ph === cur ? ' on' : PHASES.indexOf(ph) < PHASES.indexOf(cur) ? ' done' : ''), onclick: () => jumpChunk(ph), title: `Jump to ${PHASE_TITLES[ph]}` }, PHASE_TABS[ph]))),
+  h('div', { class: 'chunks' }, PHASES.map((ph) => h('button', { class: 'chunk' + (ph === 'general' ? ' wide' : '') + (ph === cur ? ' on' : PHASES.indexOf(ph) < PHASES.indexOf(cur) ? ' done' : ''), onclick: () => jumpChunk(ph), title: `Jump to ${PHASE_TITLES[ph]}` }, PHASE_TABS[ph]))), // Ballast across the top, the three roles underneath
   h('ol', { class: 'sections' }, steps.map((x, i) => ({ x, i })).filter(({ x }) => x.phase === cur).map(({ x, i }) => h('li', { class: i === st.step ? 'cur' : i < st.step ? 'past' : 'todo' }, h('a', { href: '#', onclick: (e) => { e.preventDefault(); jumpTo(i); }, title: i < st.step ? 'Re-read' : i > st.step ? 'Skip to this section' : '' }, x.title)))),
   h('p', { class: 'small tochelp' }, 'Do only the parts you care about: jump to a chunk or skip to a section — the coach stages what each part needs.')); };
 const renderCoach = () => {
