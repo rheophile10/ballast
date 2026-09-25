@@ -16,7 +16,8 @@ sha256: <hex of body bytes>
 -----END BALLAST <KIND>-----
 ```
 
-KIND is one of `TIE`, `SPIKE`, `PLATE`, `BED`. The body is UTF-8 JSON. A reader
+KIND is one of `PROFILE`, `TGBO`, `RELEASE`, `CANCEL`, `SHEET`, `BOOK`, `APPROVAL`, `REPORT`.
+Every Ballast file is one of these; nothing is ever a binary file. The body is UTF-8 JSON. A reader
 strips all whitespace from the base64, decodes, checks `sha256`, then parses.
 The file extension is never consulted.
 
@@ -37,10 +38,13 @@ re-derived from the body; nothing in them is authoritative.
 Binary fields are base64url without padding. A **box** is `nonce ‖ ciphertext‖tag`
 as one base64url string. HKDF salt is always the test's 16-byte `salt`.
 
-## 3. Identity
+## 3. Identity — PROFILE
 
-Every party has one ECDH P-256 keypair. Students keep theirs non-extractable in the
-browser; instructors keep theirs inside their `.bed`. The **shared secret** between an
+Every party (crew, RTC, superintendent) has an ECDH P-256 pair (to seal) and an ECDSA
+P-256 pair (to sign). Crew keep theirs non-extractable in the browser; RTCs and
+superintendents keep theirs inside their SHEET / BOOK. The public halves, name, PIN, role
+and a 240 px JPEG photo travel as a `PROFILE`:
+`{ "v":1, "kind":"profile", "role":"crew"|"rtc"|"superintendent", "name", "pin", "photo": "<base64 jpeg>", "pub": "<ECDH raw>", "sig": "<ECDSA raw>" }`. The **shared secret** between an
 instructor and a student, `ECDH(a_priv, b_pub) = ECDH(b_priv, a_pub)`, is unique to the
 pair, so a box under a key derived from it is both confidential to the pair and
 authenticated as coming from the other party.
@@ -48,11 +52,17 @@ authenticated as coming from the other party.
 `sid = base64url(SHA-256(salt ‖ utf8(pin))[0:16])` identifies a student inside a
 test without exposing the PIN.
 
-## 4. Badge (PNG)
+## 4. APPROVAL and REPORT (superintendent)
 
-A square photo with a QR code (error correction H) in the lower-right quadrant
-encoding `B1|<name>|<pin>|<pub base64url>`. Read from the pixels, never from
-metadata, so it survives re-encoding and screenshots.
+`APPROVAL`: `{ "hash": SHA-256 hex of the test source (CRLF→LF), "title", "by": <superintendent
+sig key>, "name", "signature": ECDSA-SHA256 over "ballast/approval/1\n<hash>" }`. Public;
+anyone with the superintendent's `sig` key can check it. An RTC drops it on the desk; a TGBO
+built from a byte-identical source carries it in `approval`.
+
+`REPORT`: `{ "tgbo", "teacher": <RTC pub>, "box" }` — the class summary (rows per crew member
+with grade, pass, areas, read-list, breaks, identity; class means; hardest items) sealed
+under `HKDF(shared(rtc, superintendent), salt = tgbo id, "ballast/report/1")`. No questions,
+no answers.
 
 ## 5. TIE — the test, one file for the class
 
@@ -64,13 +74,15 @@ metadata, so it survives re-encoding and screenshots.
   "settings": { "time": 5400, "pass": 0.9, "shuffleItems": true,
                 "shuffleOptions": true, "allowBack": false },
   "areas": [ { "id": "signals", "label": "Signals & Rule 27" }, ... ],
-  "instructor": "<pub base64url>",
-  "wraps": [ { "sid": "...", "box": "<K wrapped>" }, ... ],
+  "rtc": "<pub base64url>", "rtcName": "ABC", "approval": <APPROVAL body or null>,
+  "clearances": [ { "no": 1, "sid": "...", "box": "<K wrapped>" }, ... ],
   "items": [ { "id": "q27b", "area": "signals", "box": "<item JSON encrypted>" }, ... ],
   "hash": "<SHA-256 hex over items[].id ‖ items[].box in order>" }
 ```
 
-- `K` is a random 32 B content key. Each wrap: `AES-GCM(HKDF(shared_i, salt, "ballast/wrap/1"), K)`.
+- `K` is a random 32 B content key. Each **clearance** is K sealed to one train:
+  `AES-GCM(HKDF(shared_i, salt, "ballast/wrap/1"), K)`. The TGBO is the content, common to
+  all; the clearance is the per-train authority to occupy it.
 - Each item is encrypted under its own `K_item = HKDF(K, salt, "ballast/item/1/" ‖ id)`,
   so a reader decrypts one item at a time and never holds the whole test in clear.
 - Item plaintext: `{ "id", "type": "mc"|"match"|"short", "prompt", "options": [{"id","text"}],
@@ -105,13 +117,13 @@ Encrypted under `HKDF(shared, salt, "ballast/plate/1")`:
 "tags": { "difficulty:2": {"correct","total"} } }`.
 No questions, no answers.
 
-## 8. BED — the instructor's own file
+## 8. SHEET (RTC) and BOOK (superintendent)
 
-`{ "v":1, "kind":"bed", "kdf": {"salt","iter"}, "box": "<AES-GCM under PBKDF2 key>" }`
-containing `{ "instructor": { "name", "priv" (JWK), "pub" }, "roster": [ { "name",
-"pin", "pub", "photo"? } ], "tests": [ { "title", "source" (txt), "assets": {name:
-{mime,b64}}, "tie": { id, salt, hash, key K } } ], "attempts": [...], "marks": {...} }`.
-The only place answers, K, and the private key exist.
+`{ "v":1, "kind":"sheet"|"book", "kdf": {"salt","iter"}, "box": "<AES-GCM under PBKDF2 key>" }`
+containing `{ "rtc": <own profile + "keys": {priv, sign} as JWK>, "trains": [profiles],
+"tgbos": [ { id, salt, hash, key K, title, source, tgbo (the issued text), approved } ],
+"releases": [...], "marks": {...}, "assets": {name: {mime, b64}}, "approvals": [...],
+"sources": [...], "reports": [...] }`. The only place answers, K, and private keys exist.
 
 ## 9. Scoring
 

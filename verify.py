@@ -98,7 +98,7 @@ if __name__ == '__main__':
     rel = dearmor(open(a.release, encoding='utf-8').read(), 'RELEASE')
     rec = next((t for t in sheet['tgbos'] if t['id'] == rel['tgbo']), None) or sys.exit('release is for a TGBO not on this sheet')
     if rec['hash'] != rel['hash']: sys.exit('release does not compare: TGBO hash differs')
-    priv = priv_from_jwk(sheet['rtc']['priv'])
+    priv = priv_from_jwk(sheet['rtc'].get('keys', sheet['rtc'])['priv'])
     try: attempt = open_box(hkdf(shared(priv, rel['train']), b64url_decode(rec['salt']), 'ballast/spike/1'), rel['box'])
     except Exception: sys.exit('cannot open release: not from that train, or tampered')
     on_sheet = next((t for t in sheet['trains'] if t['pin'] == rel['pin']), None)

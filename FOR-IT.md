@@ -2,7 +2,8 @@
 
 **What it is.** A single HTML file that lets an instructor (the "RTC") issue a test to a
 class and mark what comes back, with no server, no accounts, and no network access.
-Students (the "trains") open the same file. Nothing is installed.
+Students ("crew") open the same file, as does the program director ("superintendent"),
+who approves tests and reads reports. Nothing is installed.
 
 **Data egress: none, enforced by the browser.** The page carries this Content-Security-Policy:
 
@@ -25,8 +26,13 @@ attempt in progress, so a crash does not lose the test. Never the decrypted test
 answer key. The instructor's file (`.bed`) is encrypted under their passphrase; it is the
 only place answers and the instructor's private key exist.
 
-**Permissions requested.** Camera — only when a student clicks "Use webcam" while making
-a badge, released after the shot; photo upload is always offered instead. Fullscreen and
+**Every file is text.** Profiles, tests, attempts, marks, approvals and reports are all
+ASCII-armored JSON with a SHA-256 in the header; a photo travels inside a profile as a
+240 px base64 JPEG. No binary file is ever exchanged or parsed, which removes the usual
+attachment risks.
+
+**Permissions requested.** Camera — only when a person clicks "Use webcam" while
+registering, released after the shot; photo upload is always offered instead. Fullscreen and
 keyboard lock — when a test starts. That is the complete list.
 
 **Personal data.** Name, PIN, photo and public key: in the badge (which the student

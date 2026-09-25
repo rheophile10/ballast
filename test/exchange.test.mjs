@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import { keypair } from '../src/crypto.js';
+import { makeProfile } from '../src/profile.js';
 import { parseTest } from '../src/txt.js';
 import { copyTGBO, issueTGBO, openItem } from '../src/tgbo.js';
 import { giveRelease, takeRelease } from '../src/release.js';
@@ -16,22 +16,23 @@ const png1x1 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAA
 
 test('TGBO → copy → release → score → cancel', async () => {
   const { test: t, errors } = await parseTest(src); assert.deepEqual(errors, []);
-  const sheet = await newSheet('RTC ABC');
-  const alice = { ...(await keypair()), pin: '123456' }, bob = { ...(await keypair()), pin: '654321' }, eve = { ...(await keypair()), pin: '111111' };
+  const sheet = await newSheet(await makeProfile('rtc', 'RTC ABC', '777777', '', true));
+  const alice = await makeProfile('crew', 'Alice', '123456'), bob = await makeProfile('crew', 'Bob', '654321'), eve = await makeProfile('crew', 'Eve', '111111');
   sheet.trains.push({ pin: alice.pin, pub: alice.pub, name: 'Alice' }, { pin: bob.pin, pub: bob.pub, name: 'Bob' });
 
   const { text: tgbo, record } = await issueTGBO(t, sheet.rtc, sheet.trains, { 'clearance-134.png': { mime: 'image/png', b64: png1x1 } });
   sheet.tgbos.push(record);
   assert.match(tgbo, /^-----BEGIN BALLAST TGBO-----\nversion: 1\ntitle: Test 3/);
   const raw = (await dearmor(tgbo)).body;
-  assert.equal(raw.wraps.length, 2); assert.equal(raw.items.length, 4);
+  assert.equal(raw.clearances.length, 2); assert.equal(raw.clearances[0].no, 1); assert.equal(raw.items.length, 4);
   assert.ok(!JSON.stringify(raw).includes('20 seconds warning'), 'no plaintext question leaks'); // key text of q14
   assert.ok(!JSON.stringify(raw).includes('engine number verified'), 'no answer leaks');
 
   // Alice copies it; Eve, not on the sheet, cannot; Bob cannot use Alice's PIN.
   const a = await copyTGBO(tgbo, alice, alice.pin);
+  assert.equal(a.clearance, 1);
   assert.equal(a.complete, record.hash.slice(0, 4).toUpperCase());
-  await assert.rejects(copyTGBO(tgbo, eve, eve.pin), /not addressed/);
+  await assert.rejects(copyTGBO(tgbo, eve, eve.pin), /no clearance/);
   await assert.rejects(copyTGBO(tgbo, bob, alice.pin), /cannot open/);
   // One item at a time; options shuffled per train; the img rides inside the item; no key anywhere.
   const q = await a.item('q27-green-dark');

@@ -11,7 +11,7 @@ const itemsHash = async (items) => hex(await sha256(utf8(items.map((i) => i.id +
  * RTC side. `rtc` = {priv, pub}; `trains` = [{pin, pub}]; `assets` = {name: {mime, b64}}.
  * Returns the armored TGBO and what the sheet must remember (id, salt, key, hash).
  */
-export const issueTGBO = async (test, rtc, trains, assets = {}, rtcName = '') => {
+export const issueTGBO = async (test, rtc, trains, assets = {}, rtcName = '', approval = null) => {
   const id = b64url(random(16)), saltBytes = random(16), salt = b64url(saltBytes);
   const K = random(32), Kkey = await rawKey(K);
   const items = [];
@@ -24,14 +24,14 @@ export const issueTGBO = async (test, rtc, trains, assets = {}, rtcName = '') =>
     const ik = await hkdfKey(K, saltBytes, INFO.item(it.id));
     items.push({ id: it.id, area: it.area || null, box: await sealJSON(ik, pub) });
   }
-  const wraps = [];
-  for (const t of trains) {
+  const clearances = [];
+  for (const [i, t] of trains.entries()) {
     const wk = await hkdfKey(await shared(rtc.priv, t.pub), saltBytes, INFO.wrap);
-    wraps.push({ sid: await sidOf(saltBytes, t.pin), box: await sealJSON(wk, { K: b64url(K) }) });
+    clearances.push({ no: i + 1, sid: await sidOf(saltBytes, t.pin), box: await sealJSON(wk, { K: b64url(K) }) });
   }
   const hash = await itemsHash(items);
-  const body = { v: 1, kind: 'tgbo', id, salt, title: test.title, settings: test.settings, areas: test.areas, rtc: rtc.pub, rtcName, wraps, items, hash };
-  const text = await armor('TGBO', body, { title: test.title, rtc: rtcName, items: items.length, trains: trains.length, complete: hash.slice(0, 4).toUpperCase() });
+  const body = { v: 1, kind: 'tgbo', id, salt, title: test.title, settings: test.settings, areas: test.areas, rtc: rtc.pub, rtcName, approval, clearances, items, hash };
+  const text = await armor('TGBO', body, { title: test.title, rtc: rtcName, items: items.length, clearances: trains.length, approved: approval ? 'yes' : 'no', complete: hash.slice(0, 4).toUpperCase() });
   return { text, record: { id, salt, hash, key: b64url(K), title: test.title } };
 };
 
@@ -41,15 +41,15 @@ export const copyTGBO = async (text, train, pin) => {
   if (await itemsHash(body.items) !== body.hash) throw new Error('TGBO does not compare: items altered');
   const saltBytes = unb64url(body.salt);
   const sid = await sidOf(saltBytes, pin);
-  const wrap = body.wraps.find((w) => w.sid === sid);
-  if (!wrap) throw new Error(`TGBO is not addressed to ${pin}`);
+  const wrap = body.clearances.find((w) => w.sid === sid);
+  if (!wrap) throw new Error(`no clearance for CN ${pin} on this TGBO`);
   const wk = await hkdfKey(await shared(train.priv, body.rtc), saltBytes, INFO.wrap);
   const { K } = await openJSON(wk, wrap.box);
   const Kb = unb64url(K);
   const order = body.settings.shuffleItems ? shuffled(body.items.map((i) => i.id), sid) : body.items.map((i) => i.id);
   const byId = Object.fromEntries(body.items.map((i) => [i.id, i]));
   return {
-    id: body.id, salt: body.salt, hash: body.hash, title: body.title, settings: body.settings, areas: body.areas, rtc: body.rtc, rtcName: body.rtcName || '', sid, order,
+    id: body.id, salt: body.salt, hash: body.hash, title: body.title, settings: body.settings, areas: body.areas, rtc: body.rtc, rtcName: body.rtcName || '', approval: body.approval || null, clearance: wrap.no, sid, order,
     complete: body.hash.slice(0, 4).toUpperCase(),
     /** Decrypt exactly one item, with its options in this train's order. */
     item: async (itemId) => {

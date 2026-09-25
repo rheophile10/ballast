@@ -51,5 +51,5 @@ export const openJSON = async (key, box) => JSON.parse(text(await open(key, box)
 export const sidOf = async (salt, pin) => b64url((await sha256(concat(salt, utf8(String(pin).trim())))).slice(0, 16));
 
 export const INFO = {
-  wrap: 'ballast/wrap/1', spike: 'ballast/spike/1', plate: 'ballast/plate/1', item: (id) => `ballast/item/1/${id}`,
+  wrap: 'ballast/wrap/1', spike: 'ballast/spike/1', plate: 'ballast/plate/1', report: 'ballast/report/1', item: (id) => `ballast/item/1/${id}`,
 };
