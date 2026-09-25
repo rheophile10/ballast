@@ -21,7 +21,7 @@ after(async () => { await browser?.close(); server?.close(); });
 test('the whole tutorial: general, superintendent, RTC, crew — with Notepad authoring, the appeal and the hash comparison', async () => {
   const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } }); const p = await ctx.newPage(); const errors = [];
   p.on('pageerror', (e) => errors.push(e.message)); p.on('dialog', (d) => d.accept(d.type() === 'prompt' ? (/Class name/.test(d.message()) ? 'Block C' : d.defaultValue() || 'pw') : 'pw'));
-  await p.goto(base + '/tutorial/index.html'); await p.waitForSelector('text=Welcome');
+  await p.goto(base + '/tutorial/index.html'); await p.waitForSelector('#coach h2:has-text("Welcome")');
   // the recommended way in: ballast.html on the shared drive, opened from a file:// address
   await p.dblclick('.dicon:has-text("Shared drive")'); await p.click('.file:has-text("ballast.html")'); await p.click('.win.explorer .openwith:has-text("Open")');
   await p.waitForSelector('iframe.app'); assert.match(await p.inputValue('.urlbar input'), /^file:.*ballast\.html$/);
@@ -34,7 +34,7 @@ test('the whole tutorial: general, superintendent, RTC, crew — with Notepad au
   await step('Free, durable'); await next(); await step('railroad metaphor'); await next();
   await step('Armored text files'); await p.dblclick('.dicon:has-text("Armored text")'); await p.waitForSelector('pre.note >> text=IT IS A GBO'); await p.click('.task:has-text("Ballast")');
   await step('How signing'); assert.ok((await p.locator('.nav li.past').count()) >= 3, 'the contents pane marks past sections');
-  await p.click('.nav li.past a >> nth=0'); await p.waitForSelector('#coach .phase:has-text("re-reading")'); await p.click('#coach button:has-text("Back to where I am")'); await next();
+  await p.click('.nav summary'); await p.click('.nav li.past a >> nth=0'); await p.waitForSelector('#coach .phase:has-text("re-reading")'); await p.click('#coach button:has-text("Back to where I am")'); await next();
   // --- superintendent
   await step('Register'); await app.locator('input[placeholder="Name"]').fill('Tutorial Person'); await app.locator('input[placeholder^="PIN"]').fill('555555'); await app.locator('button[type=submit]').click();
   await app.locator('text=waiting for a role').waitFor();

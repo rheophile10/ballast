@@ -115,7 +115,7 @@ const next = async () => {
   const s = steps[n]; if (s.explorer) set(os.cd(os.openWindow(st, 'explorer', 'WNR-TRAINING — Training'), s.explorer));
   await arrive(s.arrive); coach();
 };
-let navOpen = true;
+let navOpen = false; // the contents pane opens on request; the current section comes first
 /** The contents: chunks and their sections; past ones can be re-read, the current one is marked, the rest wait. */
 const nav = () => h('details', { class: 'nav', open: navOpen, ontoggle: (e) => { navOpen = e.target.open; } }, h('summary', {}, 'Contents'),
   PHASES.map((ph) => h('div', { class: 'navchunk' }, h('div', { class: 'navhead' }, PHASE_TITLES[ph]), h('ol', {}, steps.map((x, i) => ({ x, i })).filter(({ x }) => x.phase === ph).map(({ x, i }) => h('li', { class: i === st.step ? 'cur' : i < st.step ? 'past' : 'todo' }, i <= st.step ? h('a', { href: '#', onclick: (e) => { e.preventDefault(); st = { ...st, viewStep: i === st.step ? null : i }; renderCoach(); } }, x.title) : x.title))))));
