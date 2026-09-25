@@ -17,7 +17,7 @@ export const cancelTest = async (record, rtc, trainPub, pin, result, release = {
   const box = await sealJSON(key, { title: record.title, pin: String(pin), ...rest, items, answers: release.answers || null, release: release.hash || null, marked: Date.now() });
   const body = { v: 1, kind: 'cancel', test: record.id, salt: record.salt, pin: String(pin), rtc: rtc.pub, release: release.hash || null, by: rtc.sig || null,
     signature: rtc.sign ? await signBytes(rtc.sign, signed(record.id, release.hash, box)) : null, box };
-  return armor('CANCEL', body, { title: record.title, train: `CN ${pin}`, grade: `${Math.round(result.grade * 100)}%`, release: (release.hash || '').slice(0, 16) });
+  return armor('CANCEL', body, { title: record.title, train: `Crew ${pin}`, grade: `${Math.round(result.grade * 100)}%`, release: (release.hash || '').slice(0, 16) });
 };
 
 /** Crew side. Returns the marks plus provenance: release (hash marked), by (RTC sign key), signed (signature good?). */

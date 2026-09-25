@@ -46,7 +46,7 @@ test('test → copy → release → score → cancel', async () => {
   const attempt = { started: 1000, finished: 5000, answers: { 'q27-green-dark': 'a', 'q14-whistle': 'a', 'q-def-reduced': { a: 'a', b: 'c', c: 'c' }, 'q302-verify': 'both have a copy' },
     events: [[0, 'copy', 'complete', a.complete], [10, 'show', 'q27-green-dark'], [900, 'blur'], [1300, 'focus']], breaks: [{ at: 900, ms: 400, why: 'blur' }] };
   const rel = await giveRelease(a, alice, alice.pin, attempt);
-  assert.match(rel, /^-----BEGIN BALLAST RELEASE-----\nversion: 1\ntitle: Test 3 · Block C \(sample\)\ntrain: CN 123456\n/);
+  assert.match(rel, /^-----BEGIN BALLAST RELEASE-----\nversion: 1\ntitle: Test 3 · Block C \(sample\)\ntrain: Crew 123456\n/);
 
   // RTC takes it; Bob's key cannot forge Alice's release; a tampered release fails.
   const taken = await takeRelease(rel, sheet.rtc, record);

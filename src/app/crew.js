@@ -36,7 +36,7 @@ export const renderHome = async (root, go, dropBox) => {
 
 
 // ---------- copy a test (or start the practice)
-const clearanceSvg = (tgbo, p) => svgFor(`form clearance kind="Clearance" no=${tgbo.clearance} to="CN ${p.pin}" proceed="item 1 → item ${tgbo.order.length}" until="repeated back" call="before ${fmtTime(tgbo.settings.time)}" complete="${hhmm()}" rtc="${tgbo.rtcName || ''}"`);
+const clearanceSvg = (tgbo, p) => svgFor(`form clearance kind="Clearance" no=${tgbo.clearance} to="Crew ${p.pin}" proceed="item 1 → item ${tgbo.order.length}" until="repeated back" call="before ${fmtTime(tgbo.settings.time)}" complete="${hhmm()}" rtc="${tgbo.rtcName || ''}"`);
 export const renderCopy = async (root, { text, practice, source }, go) => {
   const p = await me();
   if (!p) return mount(root, h('h1', {}, 'Not registered'), h('p', {}, 'Register first; a test is addressed to your key.'));
@@ -58,7 +58,7 @@ export const renderCopy = async (root, { text, practice, source }, go) => {
   };
   mount(root, h('h1', {}, tgbo.title), tgbo.approval ? h('p', { class: 'small good' }, `Approved by ${tgbo.approval.name}`) : null,
     h('div', { class: 'card' }, form,
-      h('p', {}, `Clearance No. ${tgbo.clearance} to CN ${p.pin} · ${tgbo.order.length} items · ${fmtTime(tgbo.settings.time)} · pass ${Math.round(tgbo.settings.pass * 100)}%`),
+      h('p', {}, `Clearance No. ${tgbo.clearance} to Crew ${p.pin} · ${tgbo.order.length} items · ${fmtTime(tgbo.settings.time)} · pass ${Math.round(tgbo.settings.pass * 100)}%`),
       tgbo.window ? h('p', { class: 'small' }, `Window: ${new Date(tgbo.window.from).toLocaleString()} → ${new Date(tgbo.window.until).toLocaleString()}. Outside it the clearance does not open, and a late release is flagged to the RTC.`) : null,
       h('p', {}, 'Rule 136 — copy as transmitted, then repeat back:'), h('p', { class: 'complete' }, `Complete ${hhmm()} · RTC ${tgbo.rtcName || ''} · `, h('b', {}, tgbo.complete)),
       saved?.events?.length ? h('p', { class: 'status' }, `An attempt in progress was found (${Object.keys(fold(tgbo.order, saved.events).answers).length} answered). It will resume.`) : null,
@@ -86,7 +86,7 @@ export const renderWork = async (root, { tgbo, p, events, practice }, go) => {
   const timer = h('span', { class: 'timer' }); const status = h('p', { class: 'status' });
   const answerBox = h('textarea', { rows: 4, placeholder: 'Your answer', style: { display: 'none' } });
   let item = null, hits = [], pick = null, images = [];
-  const watermark = `CN ${p.pin} ${p.name} ${hhmm()}`;
+  const watermark = `Crew ${p.pin} ${p.name} ${hhmm()}`;
   const deadline = () => (state().started || now()) + tgbo.settings.time * 1000;
   const tick = () => { const left = Math.max(0, Math.ceil((deadline() - now()) / 1000)); timer.textContent = fmtTime(left); if (left <= 0 && !state().finished) submit('time'); };
   const iv = setInterval(tick, 500);
@@ -131,7 +131,7 @@ export const renderWork = async (root, { tgbo, p, events, practice }, go) => {
     await store.del('attempt:' + tgbo.id); await store.set('crewlog', { ...((await store.get('crewlog')) || {}), released: { title: tgbo.title, when: hhmm(), hash: headers.sha256, test: tgbo.id } });
     go({ screen: 'released', tgbo, text, why, hash: headers.sha256 });
   };
-  mount(root, h('div', { class: 'bar' }, h('span', {}, tgbo.title), timer, h('span', { class: 'row' }, avatar(p, 28), ` CN ${p.pin}`)),
+  mount(root, h('div', { class: 'bar' }, h('span', {}, tgbo.title), timer, h('span', { class: 'row' }, avatar(p, 28), ` Crew ${p.pin}`)),
     h('div', { class: 'work' }, canvas, answerBox, h('div', { class: 'row' }, tgbo.settings.allowBack ? h('button', { onclick: prev }, '← Back') : null, h('button', { onclick: next }, 'Next →'), h('button', { class: 'primary', onclick: () => submit('done') }, 'Release track'), status)), guard);
   canvas.addEventListener('click', click); answerBox.addEventListener('input', () => log('answer', item.id, answerBox.value));
   arm(); tick(); if (!navigator.keyboard?.lock) log('note', 'keyboard-lock-unavailable');

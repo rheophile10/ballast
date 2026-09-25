@@ -72,9 +72,9 @@ test('minting chain, then the exchange', async () => {
   await c.p.click('text=Done'); await c.p.waitForSelector('text=3. Read your cancellation');
 
   // --- RTC scores, marks, cancels, reports, saves
-  await take(r.p, release); await r.p.waitForSelector('text=release CN 123456');
+  await take(r.p, release); await r.p.waitForSelector('text=release Crew 123456');
   await r.p.click('.tabs >> text=Releases'); await r.p.click('button:has-text("Score")'); await r.p.waitForSelector('text=1 released');
-  const row = await r.p.textContent('table tr:nth-child(2)'); assert.match(row, /CN 123456/); assert.match(row, /unmarked/); assert.match(row, /ok/);
+  const row = await r.p.textContent('table tr:nth-child(2)'); assert.match(row, /Crew 123456/); assert.match(row, /unmarked/); assert.match(row, /ok/);
   await r.p.click('button:has-text("review")'); await r.p.waitForSelector('text=Playback'); await r.p.fill('input[type=number]', '1'); await r.p.press('input[type=number]', 'Tab'); await r.p.click('text=← back');
   const plate = await dl(r.p, () => r.p.click('button:has-text("cancel (send marks)")')); assert.match(plate, /BEGIN BALLAST CANCEL/);
   const report = await dl(r.p, () => r.p.click('button:has-text("Class profile to Sup")')); assert.match(report, /BEGIN BALLAST REPORT/);

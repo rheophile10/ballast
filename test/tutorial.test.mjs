@@ -29,9 +29,10 @@ test('the whole tutorial: superintendent, RTC, crew — with the appeal and the 
   const step = (title) => p.waitForSelector(`#coach >> text=${title}`, { timeout: 20000 });
   const next = () => p.click('#coach button.primary');
   await step('Shared drive or cror.ca'); await next();
-  const openFiles = async (re, n) => { await p.waitForSelector(`.file:has-text("${re}")`); for (let i = 0; i < n; i++) { await p.click('.task:has-text("CN-TRAINING")'); await p.locator(`.file:has-text("${re}")`).nth(i).click(); await p.click('.openwith'); await p.waitForTimeout(400); } }; // opening a file brings the browser forward, so refocus the explorer from the taskbar each time
+  const openFiles = async (re, n) => { await p.waitForSelector(`.file:has-text("${re}")`); for (let i = 0; i < n; i++) { await p.click('.task:has-text("WNR-TRAINING")'); await p.locator(`.file:has-text("${re}")`).nth(i).click(); await p.click('.openwith'); await p.waitForTimeout(400); } }; // opening a file brings the browser forward, so refocus the explorer from the taskbar each time
   // --- the three explanations, then registration
-  await step('railroad metaphor'); await next(); await step('Built for function'); await next(); await step('armored text file'); await next(); await step('Low-permission IT'); await next();
+  await step('railroad metaphor'); await next(); await step('Why Ballast'); await p.dblclick('.dicon:has-text("Why Ballast")'); await p.waitForSelector('pre.note >> text=outlast some rails'); await p.click('.task:has-text("Ballast")'); // the note covers the browser
+  await step('armored text file'); await next();
   await step('Register'); await app.locator('input[placeholder="Name"]').fill('Tutorial Person'); await app.locator('input[placeholder^="PIN"]').fill('555555'); await app.locator('button[type=submit]').click();
   await app.locator('text=waiting for a role').waitFor();
   await step('mints themself'); await app.locator('summary').click(); await app.locator('button:has-text("Start as superintendent")').click();
@@ -64,7 +65,7 @@ test('the whole tutorial: superintendent, RTC, crew — with the appeal and the 
   await step('Cancel and file'); await openFiles('profile-superintendent', 1);
   await app.locator('.tabs >> text=Releases').click(); await app.locator('button:has-text("Cancel all")').click(); await p.waitForTimeout(500);
   await app.locator('button:has-text("Class profile to")').click();
-  await step('Step down again'); await openFiles('profile-CN-you', 1);
+  await step('Step down again'); await openFiles('profile-crew-you', 1);
   // --- crew
   await step('What protects the test'); await next();
   await step('You are crew'); await openFiles('.test.txt', 1);

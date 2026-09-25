@@ -62,7 +62,7 @@ const releaseText = await giveRelease(copy, alice, alice.pin, { started: t0, fin
 put('release-Alice-Marchand.txt', releaseText);
 const taken = await takeRelease(releaseText, denise, record, alice.sig);
 const s = scoreAttempt(t1, taken.attempt, Object.fromEntries(t1.items.filter((it) => it.type === 'short').map((it) => [it.id, 1])));
-put('cancel-CN123456.txt', await cancelTest(record, denise, alice.pub, alice.pin, s, { hash: taken.hash, answers: taken.attempt.answers }));
+put('cancel-123456.txt', await cancelTest(record, denise, alice.pub, alice.pin, s, { hash: taken.hash, answers: taken.attempt.answers }));
 const sum = summarize(t1, [s]);
 put('class-profile-Test-1-Okafor.txt', await sendReport(denise, sup.pub, { test: record.id, title: t1.title, hash: record.hash, window, approved: true, rtc: { name: denise.name, pin: denise.pin }, class: 'Block A · Okafor', issued: Date.parse(window.from), sent: Date.parse(window.until), pass: t1.settings.pass, n: 1, passed: sum.passed, mean: sum.mean, byArea: sum.byArea.map((a) => ({ id: a.id, label: a.label, mean: a.mean })), hardest: [],
   rows: [{ pin: alice.pin, name: alice.name, score: s.score, total: s.total, grade: s.grade, pass: s.pass, pending: 0, breaks: 0, identity: 'ok', release: taken.hash, signed: taken.signed, late: taken.late, marks: s.perItem.map((i) => [i.id, i.got]), areas: s.areas.map((a) => ({ id: a.id, label: a.label, correct: a.correct, total: a.total })), strengths: [], weaknesses: [], read: s.read, rating: 4, note: 'Steady on the point.' }] }));

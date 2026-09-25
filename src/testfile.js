@@ -49,7 +49,7 @@ export const copyTest = async (text, train, pin, at = Date.now()) => {
   const saltBytes = unb64url(body.salt);
   const sid = await sidOf(saltBytes, pin);
   const wrap = body.clearances.find((w) => w.sid === sid);
-  if (!wrap) throw new Error(`no clearance for CN ${pin} on this test`);
+  if (!wrap) throw new Error(`no clearance for PIN ${pin} on this test`);
   const wk = await hkdfKey(await shared(train.priv, body.rtc), saltBytes, INFO.wrapIn(w)); // an edited window derives a different key: GCM fails
   const { K } = await openJSON(wk, wrap.box);
   const Kb = unb64url(K);

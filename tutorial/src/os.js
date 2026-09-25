@@ -4,7 +4,7 @@ import { h, mount } from '../../src/app/h.js';
 
 export const FOLDERS = ['Ballast', 'Inbox', 'Registrations', 'Tests', 'Releases', 'Class profiles', 'Outbox'];
 // The shared drive ships with a saved copy of Ballast: the recommended way to run it.
-export const initial = () => ({ windows: [], files: [{ id: 'ballast', folder: 'Ballast', name: 'ballast.html', text: '', from: 'IT (saved from cror.ca/ballast)', at: Date.now() - 86400000 * 30, fresh: false }], cwd: 'Ballast', z: 1, sel: null, toast: null, clock: '' });
+export const initial = (why = '') => ({ windows: [], files: [{ id: 'ballast', folder: 'Ballast', name: 'ballast.html', text: '', from: 'IT (saved from cror.ca/ballast)', at: Date.now() - 86400000 * 30, fresh: false }, { id: 'why', folder: 'Ballast', name: 'Why Ballast.txt', text: why, from: 'IT', at: Date.now() - 86400000 * 30, fresh: false, note: true }], cwd: 'Ballast', z: 1, sel: null, toast: null, clock: '' });
 const id = () => Math.random().toString(36).slice(2, 8);
 
 // ---------- reducers (pure)
@@ -12,7 +12,7 @@ export const openWindow = (s, kind, title, extra = {}) => {
   const existing = s.windows.find((w) => w.kind === kind);
   if (existing) return focus(s, existing.id);
   const n = s.windows.length;
-  const w = { id: id(), kind, title, x: 60 + n * 30, y: 40 + n * 24, w: kind === 'browser' ? 980 : 720, h: kind === 'browser' ? 700 : 460, z: s.z + 1, min: false, ...extra };
+  const w = { id: id(), kind, title, x: 60 + n * 30, y: 40 + n * 24, w: kind === 'browser' ? 980 : kind === 'notepad' ? 640 : 720, h: kind === 'browser' ? 700 : kind === 'notepad' ? 560 : 460, z: s.z + 1, min: false, ...extra };
   return { ...s, windows: [...s.windows, w], z: s.z + 1 };
 };
 export const setUrl = (s, wid, url, title) => ({ ...s, windows: s.windows.map((w) => (w.id === wid ? { ...w, url, title } : w)) });
@@ -33,33 +33,34 @@ export const render = (root, s, act) => {
     h('div', { class: 'banner' }, 'PRETEND COMPUTER — this desktop, the shared drive and the browser are a simulation for the tutorial. Only the Ballast page inside the browser window is the real application.'),
     h('div', { class: 'icons' },
       h('button', { class: 'dicon', ondblclick: () => act('open-explorer') }, '🗄️', h('span', {}, 'Shared drive')),
-      h('button', { class: 'dicon', ondblclick: () => act('open-browser') }, '🌐', h('span', {}, 'Browser'))),
+      h('button', { class: 'dicon', ondblclick: () => act('open-browser') }, '🌐', h('span', {}, 'Browser')),
+      h('button', { class: 'dicon', ondblclick: () => act('open-file', 'why') }, '📝', h('span', {}, 'Why Ballast.txt'))),
     ...s.windows.filter((w) => !w.min).sort((a, b) => a.z - b.z).map((w) => win(w, s, act)),
     s.toast ? h('div', { class: 'toast' }, s.toast) : null,
     h('div', { class: 'taskbar' }, h('button', { class: 'start', onclick: () => act('open-explorer') }, '⊞'),
-      s.windows.map((w) => h('button', { class: 'task', onclick: () => act('focus', w.id) }, w.kind === 'browser' ? '🌐 ' : '🗄️ ', w.title)),
+      s.windows.map((w) => h('button', { class: 'task', onclick: () => act('focus', w.id) }, w.kind === 'browser' ? '🌐 ' : w.kind === 'notepad' ? '📝 ' : '🗄️ ', w.title)),
       h('span', { class: 'clock' }, s.clock)));
   mount(root, desktop);
 };
 
 const win = (w, s, act) => {
   const bar = h('div', { class: 'titlebar', onpointerdown: (e) => { if (e.target.closest('button')) return; act('focus', w.id); const ox = e.clientX - w.x, oy = e.clientY - w.y; const mv = (ev) => act('move', w.id, Math.max(0, ev.clientX - ox), Math.max(0, ev.clientY - oy)); const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); }; window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up); } },
-    h('span', {}, w.kind === 'browser' ? '🌐 ' : '🗄️ ', w.title), h('span', { class: 'winbtns' }, h('button', { onclick: () => act('minimize', w.id) }, '–'), h('button', { onclick: () => act('close', w.id) }, '✕')));
-  const body = w.kind === 'explorer' ? explorer(s, act) : browser(w, s, act);
+    h('span', {}, w.kind === 'browser' ? '🌐 ' : w.kind === 'notepad' ? '📝 ' : '🗄️ ', w.title), h('span', { class: 'winbtns' }, h('button', { onclick: () => act('minimize', w.id) }, '–'), h('button', { onclick: () => act('close', w.id) }, '✕')));
+  const body = w.kind === 'explorer' ? explorer(s, act) : w.kind === 'notepad' ? h('pre', { class: 'note' }, w.text) : browser(w, s, act);
   return h('div', { class: 'win ' + w.kind, style: { left: w.x + 'px', top: w.y + 'px', width: w.w + 'px', height: w.h + 'px', zIndex: w.z }, onclick: () => act('focus', w.id) }, bar, body);
 };
 
 const explorer = (s, act) => {
   const files = s.files.filter((f) => f.folder === s.cwd).sort((a, b) => b.at - a.at);
   return h('div', { class: 'explorer' },
-    h('div', { class: 'addr' }, '🗄️ ', h('span', { class: 'crumb' }, '\\\\CN-TRAINING\\Training'), ' › ', h('span', { class: 'crumb' }, s.cwd)),
+    h('div', { class: 'addr' }, '🗄️ ', h('span', { class: 'crumb' }, '\\\\WNR-TRAINING\\Training'), ' › ', h('span', { class: 'crumb' }, s.cwd)),
     h('div', { class: 'panes' },
-      h('div', { class: 'tree' }, h('div', { class: 'treehead' }, 'This PC'), h('div', { class: 'treeitem' }, '💻 Desktop'), h('div', { class: 'treehead' }, 'Network'), h('div', { class: 'treeitem' }, '🗄️ CN-TRAINING'),
+      h('div', { class: 'tree' }, h('div', { class: 'treehead' }, 'This PC'), h('div', { class: 'treeitem' }, '💻 Desktop'), h('div', { class: 'treehead' }, 'Network'), h('div', { class: 'treeitem' }, '🗄️ WNR-TRAINING'),
         FOLDERS.map((f) => { const n = s.files.filter((x) => x.folder === f && x.fresh).length; return h('div', { class: 'treeitem sub' + (s.cwd === f ? ' on' : ''), onclick: () => act('cd', f) }, '📁 ', f, n ? h('span', { class: 'badge' }, n) : null); })),
       h('div', { class: 'pane' }, h('div', { class: 'cols' }, h('span', {}, 'Name'), h('span', {}, 'From'), h('span', {}, 'Modified')),
         s.cwd === 'Inbox' && !s.files.some((f) => f.name === 'ballast.html') ? null : null,
         files.length ? files.map((f) => h('div', { class: 'file' + (s.sel === f.id ? ' sel' : '') + (f.fresh ? ' fresh' : ''), onclick: (e) => act(e.detail >= 2 ? 'open-file' : 'select', f.id) }, h('span', {}, ICON[ext(f.name)] || '📄', ' ', f.name), h('span', { class: 'small' }, f.from), h('span', { class: 'small' }, new Date(f.at).toLocaleTimeString()))) : h('div', { class: 'empty' }, 'This folder is empty.'))),
-    h('div', { class: 'status' }, `${files.length} item(s)`, s.sel ? h('button', { class: 'openwith', onclick: () => act('open-file', s.sel) }, /\.html$/.test(s.files.find((f) => f.id === s.sel)?.name || '') ? 'Open' : 'Open with Ballast') : null));
+    h('div', { class: 'status' }, `${files.length} item(s)`, s.sel ? h('button', { class: 'openwith', onclick: () => act('open-file', s.sel) }, /\.html$/.test(s.files.find((f) => f.id === s.sel)?.name || '') || s.files.find((f) => f.id === s.sel)?.note ? 'Open' : 'Open with Ballast') : null));
 };
 
 // The iframe must survive re-renders (re-appending an <iframe> reloads it), so frames live in a fixed layer

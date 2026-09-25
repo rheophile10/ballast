@@ -118,5 +118,5 @@ export const cancelForUser = async (issued, releaseText, userProfile) => {
   const { pin, train, attempt, hash } = await takeRelease(releaseText, issued.teacher, issued.record, userProfile?.sig);
   const marks = Object.fromEntries(issued.test.items.filter((it) => it.type === 'short').map((it) => [it.id, (attempt.answers[it.id] || '').length > 12 ? 1 : 0]));
   const s = scoreAttempt(issued.test, attempt, marks);
-  return { name: `cancel-CN${pin}.txt`, text: await cancelTest(issued.record, issued.teacher, train, pin, s, { hash, answers: attempt.answers }), from: issued.teacher.name, score: s };
+  return { name: `cancel-${pin}.txt`, text: await cancelTest(issued.record, issued.teacher, train, pin, s, { hash, answers: attempt.answers }), from: issued.teacher.name, score: s };
 };

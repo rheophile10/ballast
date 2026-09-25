@@ -16,7 +16,7 @@ export const giveRelease = async (test, crew, pin, attempt) => {
   const audit = sup ? { pub: sup, box: await sealJSON(await hkdfKey(await shared(crew.priv, sup), salt, INFO.audit), attempt) } : null;
   const body = { v: 1, kind: 'release', test: test.id, salt: test.salt, hash: test.hash, source: test.approval?.hash || null, sid: test.sid, pin: String(pin), train: crew.pub,
     box, audit, sig: crew.sig || null, signature: crew.sign ? await signBytes(crew.sign, signed(test.id, box)) : null };
-  return armor('RELEASE', body, { title: test.title, train: `CN ${pin}`, answered: Object.keys(attempt.answers || {}).length, finished: attempt.finished ? new Date(attempt.finished).toISOString() : '' });
+  return armor('RELEASE', body, { title: test.title, train: `Crew ${pin}`, answered: Object.keys(attempt.answers || {}).length, finished: attempt.finished ? new Date(attempt.finished).toISOString() : '' });
 };
 
 /** The crew member's signature over the sealed attempt: true, false, or null when the file carries none. */

@@ -4,10 +4,11 @@ import * as os from './os.js';
 import { steps, PHASES } from './script.js';
 import * as cast from './cast.js';
 import { profileText } from '../../src/profile.js';
+import why from '../../WHY.txt';
 
 const APP = new URLSearchParams(location.search).get('app') || '../ballast/index.html';
 const root = document.getElementById('desk'); const coachEl = document.getElementById('coach');
-let st = { ...os.initial(), ballast: { screen: '', role: undefined, pub: null, pin: null, minted: false }, step: 0, pendingSeen: 0, reportsSeen: 0, releasesSeen: 0, arrived: {}, issued: null, userReg: null };
+let st = { ...os.initial(why), ballast: { screen: '', role: undefined, pub: null, pin: null, minted: false }, step: 0, pendingSeen: 0, reportsSeen: 0, releasesSeen: 0, arrived: {}, issued: null, userReg: null };
 const set = (next) => { st = next; render(); };
 const frame = () => document.querySelector('iframe.app');
 const tell = (msg) => frame()?.contentWindow?.postMessage({ ballast: 1, ...msg }, '*');
@@ -23,7 +24,7 @@ const arrivals = {
   testForClass: async () => { const t = cast.tests[1]; return [['Tests', { name: t.name, text: t.source, from: cast.names.superintendent }], ['Tests', { name: `approval-${t.name.replace(/\.txt$/, '')}.txt`, text: await cast.approvalFor(t.source, t.source.split('\n')[0].replace(/^#\s*/, '')), from: cast.names.superintendent }]]; },
   releases: async () => { const tf = st.files.find((f) => f.folder === 'Outbox' && /\.test\.txt$/.test(f.name)); return tf ? (await cast.releasesFor(tf.text, 0)).map((f) => ['Releases', f]) : []; },
   supProfile: async () => [['Inbox', { name: 'profile-superintendent-Boudreau.txt', text: await profileText(await cast.superintendent()), from: cast.names.superintendent }]],
-  demoteToCrew: async () => [['Inbox', { name: 'profile-CN-you.txt', text: await cast.mintUser(await cast.rtc(0), userPublic(), 'crew'), from: cast.names.rtcs[0] }]],
+  demoteToCrew: async () => [['Inbox', { name: 'profile-crew-you.txt', text: await cast.mintUser(await cast.rtc(0), userPublic(), 'crew'), from: cast.names.rtcs[0] }]],
   testForUser: async () => { const issued = await cast.testForUser(0, userPublic(), 0); st.issued = issued; return [['Inbox', { name: issued.name, text: issued.text, from: issued.from }]]; },
   cancelForUser: async () => { const rel = st.files.find((f) => f.folder === 'Outbox' && /^release-/.test(f.name)); if (!rel || !st.issued) return []; const c = await cast.cancelForUser(st.issued, rel.text, userPublic()); return [['Inbox', c]]; },
 };
@@ -42,7 +43,7 @@ const arrive = async (key) => {
 
 // ---------- actions from the desktop
 const act = async (kind, ...a) => {
-  if (kind === 'open-explorer') return set(os.openWindow(st, 'explorer', 'CN-TRAINING — Training'));
+  if (kind === 'open-explorer') return set(os.openWindow(st, 'explorer', 'WNR-TRAINING — Training'));
   if (kind === 'open-browser') return set(os.openWindow(st, 'browser', 'Ballast — cror.ca', { src: APP + '?embedded=1', url: 'https://cror.ca/ballast/' }));
   if (kind === 'focus') { const top = st.windows.reduce((t, w) => (w.z > (t?.z ?? -1) ? w : t), null); return top?.id === a[0] && !top.min ? undefined : set(os.focus(st, a[0])); } // re-rendering on focus would swallow the click that caused it
   if (kind === 'move') return set(os.move(st, a[0], a[1], a[2]));
@@ -54,8 +55,9 @@ const act = async (kind, ...a) => {
   if (kind === 'open-file') {
     const f = st.files.find((x) => x.id === a[0]); if (!f) return;
     let s = os.seen(st, f.id);
+    if (f.note) { const n = s.windows.find((w) => w.kind === 'notepad'); return set(n ? os.focus(s, n.id) : os.openWindow(s, 'notepad', f.name, { text: f.text })); }
     if (/\.html$/.test(f.name)) { // ballast.html on the shared drive: the same real app, opened from a file:// address
-      const url = 'file://///CN-TRAINING/Training/Ballast/ballast.html'; const b = s.windows.find((w) => w.kind === 'browser');
+      const url = 'file://///WNR-TRAINING/Training/Ballast/ballast.html'; const b = s.windows.find((w) => w.kind === 'browser');
       s = b ? os.focus(os.setUrl(s, b.id, url, 'Ballast — ballast.html'), b.id) : os.openWindow(s, 'browser', 'Ballast — ballast.html', { src: APP + '?embedded=1', url });
       return set(os.toast(s, 'Opened ballast.html from the shared drive. (In this tutorial the file:// copy and cror.ca are the same page; in real life each keeps its own keys — pick one and stay with it.)'));
     }
@@ -91,7 +93,7 @@ const coach = () => {
 const next = async () => {
   const n = st.step + 1; if (n >= steps.length) return;
   set({ ...st, step: n, stepDone: false });
-  const s = steps[n]; if (s.explorer) set(os.cd(os.openWindow(st, 'explorer', 'CN-TRAINING — Training'), s.explorer));
+  const s = steps[n]; if (s.explorer) set(os.cd(os.openWindow(st, 'explorer', 'WNR-TRAINING — Training'), s.explorer));
   await arrive(s.arrive); coach();
 };
 const renderCoach = () => {
