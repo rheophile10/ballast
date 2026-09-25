@@ -15,7 +15,7 @@ export const openWindow = (s, kind, title, extra = {}) => {
   const existing = s.windows.find((w) => w.kind === kind);
   if (existing) return focus(s, existing.id);
   const n = s.windows.length;
-  const w = { id: id(), kind, title, x: 60 + n * 30, y: 40 + n * 24, w: kind === 'browser' ? 980 : kind === 'notepad' ? 640 : kind === 'chat' ? 520 : 720, h: kind === 'browser' ? 700 : kind === 'notepad' ? 560 : 460, z: s.z + 1, min: false, ...extra };
+  const w = { id: id(), kind, title, x: 440 + n * 30, y: 40 + n * 24, w: kind === 'browser' ? 980 : kind === 'notepad' ? 640 : kind === 'chat' ? 520 : 720, h: kind === 'browser' ? 700 : kind === 'notepad' ? 560 : 460, z: s.z + 1, min: false, ...extra };
   return { ...s, windows: [...s.windows, w], z: s.z + 1 };
 };
 export const setUrl = (s, wid, url, title) => ({ ...s, windows: s.windows.map((w) => (w.id === wid ? { ...w, url, title } : w)) });
