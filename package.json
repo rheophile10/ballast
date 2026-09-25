@@ -1,9 +1,10 @@
 {
   "name": "ballast",
-  "private": true,
-  "version": "0.1.0",
+    "version": "0.1.0",
   "type": "module",
-  "description": "A serverless test system for rules-qualified employees: one index.html, WebCrypto only, RTC issues a TGBO, trains release.",
+  "description": "A serverless test system: one index.html, WebCrypto only, armored text files. The RTC issues a test, crew release, marks come back signed.",
+  "license": "MIT",
+  "repository": "github:rheophile10/ballast",
   "scripts": {
     "test": "node --test 'test/[!e]*.test.mjs'",
     "e2e": "node --test test/e2e.test.mjs",

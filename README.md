@@ -40,10 +40,10 @@ audit copy sealed to the approving superintendent; the crew member keeps the rel
 the cancellation is signed by the RTC and names that hash; the superintendent can drop any
 release on the book to re-score it and compare with what the RTC reported.
 
-**Tutorial:** `tutorial/index.html` — a pretend desktop (shared drive, browser) around the real
-Ballast, run by a fictional cast (`samples/cast.json`). You play superintendent, then RTC,
-then crew, including an appeal. Built with `node tutorial/build.mjs`; tested by
-`test/tutorial.test.mjs`.
+**Tutorial:** [rheophile10/ballast-tutorial](https://github.com/rheophile10/ballast-tutorial) — a pretend
+desktop (shared drive, mail, browser) around the real Ballast, run by a fictional cast
+(`samples/cast.json`). You play superintendent, then RTC, then crew, including an appeal.
+Live at [cror.ca/tutorial](https://cror.ca/tutorial/); Ballast itself at [cror.ca/ballast](https://cror.ca/ballast/).
 
 **Formats:** `SPEC.md`. **For IT:** `FOR-IT.md`. **Independent re-scoring:** `verify.py`.
 
@@ -58,3 +58,5 @@ node --test test/e2e.test.mjs  # Chromium, file:// (needs playwright)
 ```
 
 Set `ESBUILD` / `PLAYWRIGHT` to module paths if they are not installed here.
+
+MIT licence.
