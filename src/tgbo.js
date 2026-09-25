@@ -11,7 +11,7 @@ const itemsHash = async (items) => hex(await sha256(utf8(items.map((i) => i.id +
  * RTC side. `rtc` = {priv, pub}; `trains` = [{pin, pub}]; `assets` = {name: {mime, b64}}.
  * Returns the armored TGBO and what the sheet must remember (id, salt, key, hash).
  */
-export const issueTGBO = async (test, rtc, trains, assets = {}) => {
+export const issueTGBO = async (test, rtc, trains, assets = {}, rtcName = '') => {
   const id = b64url(random(16)), saltBytes = random(16), salt = b64url(saltBytes);
   const K = random(32), Kkey = await rawKey(K);
   const items = [];
@@ -30,8 +30,8 @@ export const issueTGBO = async (test, rtc, trains, assets = {}) => {
     wraps.push({ sid: await sidOf(saltBytes, t.pin), box: await sealJSON(wk, { K: b64url(K) }) });
   }
   const hash = await itemsHash(items);
-  const body = { v: 1, kind: 'tgbo', id, salt, title: test.title, settings: test.settings, areas: test.areas, rtc: rtc.pub, wraps, items, hash };
-  const text = await armor('TGBO', body, { title: test.title, items: items.length, trains: trains.length, complete: hash.slice(0, 4).toUpperCase() });
+  const body = { v: 1, kind: 'tgbo', id, salt, title: test.title, settings: test.settings, areas: test.areas, rtc: rtc.pub, rtcName, wraps, items, hash };
+  const text = await armor('TGBO', body, { title: test.title, rtc: rtcName, items: items.length, trains: trains.length, complete: hash.slice(0, 4).toUpperCase() });
   return { text, record: { id, salt, hash, key: b64url(K), title: test.title } };
 };
 
@@ -49,7 +49,7 @@ export const copyTGBO = async (text, train, pin) => {
   const order = body.settings.shuffleItems ? shuffled(body.items.map((i) => i.id), sid) : body.items.map((i) => i.id);
   const byId = Object.fromEntries(body.items.map((i) => [i.id, i]));
   return {
-    id: body.id, salt: body.salt, hash: body.hash, title: body.title, settings: body.settings, areas: body.areas, rtc: body.rtc, sid, order,
+    id: body.id, salt: body.salt, hash: body.hash, title: body.title, settings: body.settings, areas: body.areas, rtc: body.rtc, rtcName: body.rtcName || '', sid, order,
     complete: body.hash.slice(0, 4).toUpperCase(),
     /** Decrypt exactly one item, with its options in this train's order. */
     item: async (itemId) => {

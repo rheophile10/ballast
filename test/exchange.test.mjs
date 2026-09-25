@@ -65,9 +65,9 @@ test('TGBO → copy → release → score → cancel', async () => {
 
   // Cancel: Alice reads her marks and read-list; nothing else.
   const can = await cancelTGBO(record, sheet.rtc, alice.pub, alice.pin, r);
-  const seen = await readCancel(can, alice, a.salt);
+  const seen = await readCancel(can, alice);
   assert.equal(seen.grade, r.grade); assert.equal(seen.perItem, undefined); assert.equal(seen.read[0].ref, 'CROR 14(l)');
-  await assert.rejects(readCancel(can, bob, a.salt), /cannot open/);
+  await assert.rejects(readCancel(can, bob), /cannot open/);
 
   // The sheet round-trips under a passphrase and can still open items and releases.
   const saved = await saveSheet(sheet, 'correct horse');

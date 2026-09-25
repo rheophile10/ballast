@@ -112,4 +112,4 @@ if __name__ == '__main__':
     for k, v in r['areas'].items(): print(f"  {k:14s} {v['correct']:g}/{v['total']:g}")
     if r['read']: print('  read:', ', '.join(f'{ref} ({n})' for ref, n in r['read']))
     breaks = attempt.get('breaks', [])
-    if breaks: print(f"  {len(breaks)} break(s):", '; '.join(f"{b.get('why')} {b.get('ms',0)/1000:.0f}s at +{b.get('at',0)/1000:.0f}s" for b in breaks))
+    if breaks: print(f"  {len(breaks)} break(s):", "; ".join(f"{b.get('why')} {b.get('ms',0)/1000:.0f}s at +{(b.get('at',0)-(attempt.get('started') or 0))/1000:.0f}s" for b in breaks))

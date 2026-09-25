@@ -7,14 +7,14 @@ import { INFO, hkdfKey, openJSON, sealJSON, shared } from './crypto.js';
 export const cancelTGBO = async (record, rtc, trainPub, pin, result) => {
   const key = await hkdfKey(await shared(rtc.priv, trainPub), unb64url(record.salt), INFO.plate);
   const { perItem, ...rest } = result;
-  const body = { v: 1, kind: 'cancel', tgbo: record.id, pin: String(pin), rtc: rtc.pub,
+  const body = { v: 1, kind: 'cancel', tgbo: record.id, salt: record.salt, pin: String(pin), rtc: rtc.pub,
     box: await sealJSON(key, { title: record.title, pin: String(pin), ...rest }) };
   return armor('CANCEL', body, { title: record.title, train: `CN ${pin}`, grade: `${Math.round(result.grade * 100)}%` });
 };
 
 /** Train side. */
-export const readCancel = async (text, train, tgboSalt) => {
+export const readCancel = async (text, train) => {
   const { body } = await dearmor(text, 'CANCEL');
-  const key = await hkdfKey(await shared(train.priv, body.rtc), unb64url(tgboSalt), INFO.plate);
+  const key = await hkdfKey(await shared(train.priv, body.rtc), unb64url(body.salt), INFO.plate);
   return openJSON(key, body.box);
 };
