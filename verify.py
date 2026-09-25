@@ -107,7 +107,7 @@ if __name__ == '__main__':
     marks = json.load(open(a.marks)) if a.marks else {}
     r = score(test, attempt, marks)
     if a.json: print(json.dumps(r, indent=1)); sys.exit(0)
-    print(f"RELEASE from CN {rel['pin']} for test {rec['title']!r} — {ident}")
+    print(f"RELEASE from Crew {rel['pin']} for test {rec['title']!r} — {ident}")
     print(f"score {r['score']:g}/{r['total']:g} = {r['grade']*100:.1f}%  {'PASS' if r['pass'] else 'FAIL'}  (pass mark {test['settings']['pass']*100:.0f}%, {r['pending']} short answers unmarked)")
     for k, v in r['areas'].items(): print(f"  {k:14s} {v['correct']:g}/{v['total']:g}")
     if r['read']: print('  read:', ', '.join(f'{ref} ({n})' for ref, n in r['read']))

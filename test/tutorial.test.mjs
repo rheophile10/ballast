@@ -23,21 +23,24 @@ test('the whole tutorial: superintendent, RTC, crew — with the appeal and the 
   p.on('pageerror', (e) => errors.push(e.message)); p.on('dialog', (d) => d.accept(d.type() === 'prompt' ? 'Block C' : 'pw'));
   await p.goto(base + '/tutorial/index.html'); await p.waitForSelector('text=Welcome');
   // the recommended way in: ballast.html on the shared drive, opened from a file:// address
-  await p.dblclick('.dicon:has-text("Shared drive")'); await p.click('.file:has-text("ballast.html")'); await p.click('.openwith:has-text("Open")');
+  await p.dblclick('.dicon:has-text("Shared drive")'); await p.click('.file:has-text("ballast.html")'); await p.click('.win.explorer .openwith:has-text("Open")');
   await p.waitForSelector('iframe.app'); assert.match(await p.inputValue('.urlbar input'), /^file:.*ballast\.html$/);
   const app = p.frameLocator('iframe.app');
   const step = (title) => p.waitForSelector(`#coach >> text=${title}`, { timeout: 20000 });
   const next = () => p.click('#coach button.primary');
   await step('Shared drive or cror.ca'); await next();
-  const openFiles = async (re, n) => { await p.waitForSelector(`.file:has-text("${re}")`); for (let i = 0; i < n; i++) { await p.click('.task:has-text("WNR-TRAINING")'); await p.locator(`.file:has-text("${re}")`).nth(i).click(); await p.click('.openwith'); await p.waitForTimeout(400); } }; // opening a file brings the browser forward, so refocus the explorer from the taskbar each time
+  const openFiles = async (re, n) => { await p.waitForSelector(`.file:has-text("${re}")`); for (let i = 0; i < n; i++) { await p.click('.task:has-text("WNR-TRAINING")'); await p.locator(`.file:has-text("${re}")`).nth(i).click(); await p.click('.win.explorer .openwith'); await p.waitForTimeout(400); } }; // opening a file brings the browser forward, so refocus the explorer from the taskbar each time
   // --- the three explanations, then registration
   await step('railroad metaphor'); await next(); await step('Why Ballast'); await p.dblclick('.dicon:has-text("Why Ballast")'); await p.waitForSelector('pre.note >> text=outlast some rails'); await p.click('.task:has-text("Ballast")'); // the note covers the browser
-  await step('armored text file'); await next();
+  await step('armored text file'); await p.dblclick('.dicon:has-text("Armored text")'); await p.waitForSelector('pre.note >> text=IT IS A GBO'); await p.click('.task:has-text("Ballast")');
   await step('Register'); await app.locator('input[placeholder="Name"]').fill('Tutorial Person'); await app.locator('input[placeholder^="PIN"]').fill('555555'); await app.locator('button[type=submit]').click();
   await app.locator('text=waiting for a role').waitFor();
   await step('mints themself'); await app.locator('summary').click(); await app.locator('button:has-text("Start as superintendent")').click();
   await step('Start your book'); await app.locator('button:has-text("Start a book")').click(); await app.locator('text=Superintendent Tutorial').waitFor();
-  await step('Three RTCs'); await openFiles('registration-', 3); await app.locator('text=Registrations to mint').waitFor();
+  // three ways in: a mail attachment, a chat message body, a file in the shared folder
+  await step('Three RTCs'); await p.dblclick('.dicon:has-text("Mail")'); await p.click('.msg'); await p.click('.attach .openwith'); await p.waitForTimeout(400);
+  await p.dblclick('.dicon:has-text("Messages")'); await p.click('.bubble .openwith'); await p.waitForTimeout(400);
+  await openFiles('registration-', 1); await app.locator('text=Registrations to mint').waitFor(); await app.locator('text=Ray Kowalczyk').first().waitFor(); await app.locator('text=Denise Okafor').first().waitFor();
   await step('Mint them'); for (let i = 0; i < 3; i++) { await app.locator('button:has-text("Mint as RTC")').first().click(); await p.waitForTimeout(300); }
   await step('Tests arrive'); await openFiles('test1', 1); await openFiles('test2', 1);
   await app.locator('.tabs >> text=Test inventory').click(); for (let i = 0; i < 2; i++) { await app.locator('button:has-text("Approve")').first().click(); await p.waitForTimeout(300); }
@@ -63,7 +66,7 @@ test('the whole tutorial: superintendent, RTC, crew — with the appeal and the 
   const rows = await app.locator('table').first().textContent(); assert.doesNotMatch(rows, /unsigned|MISMATCH/);
   await step('Mark, rate, appraise'); await next();
   await step('Cancel and file'); await openFiles('profile-superintendent', 1);
-  await app.locator('.tabs >> text=Releases').click(); await app.locator('button:has-text("Cancel all")').click(); await p.waitForTimeout(500);
+  await app.locator('.tabs >> text=Releases').click(); await app.locator('button:has-text("Cancel all")').click(); await p.waitForTimeout(600); await p.click('.task:has-text("WNR-TRAINING")'); await p.click('.treeitem:has-text("Outbox")'); await p.waitForSelector('.file:has-text("cancellations-")'); await p.click('.task:has-text("Ballast")'); await p.waitForTimeout(500);
   await app.locator('button:has-text("Class profile to")').click();
   await step('Step down again'); await openFiles('profile-crew-you', 1);
   // --- crew

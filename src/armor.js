@@ -32,4 +32,7 @@ export const dearmor = async (s, expectKind) => {
   return { kind, headers, body };
 };
 
+/** Every armored block in a text, in order: a bundle is just blocks concatenated (or an email with several attachments pasted in). */
+export const blocks = (s) => (s.match(/-----BEGIN BALLAST ([A-Z]+)-----\r?\n[\s\S]*?-----END BALLAST \1-----/g) || []);
+export const bundle = (texts) => texts.join('\n');
 export const sniff = (s) => (/-----BEGIN BALLAST ([A-Z]+)-----/.exec(s) || [])[1] || null;

@@ -1,6 +1,6 @@
 // The RTC's desk: register, the sheet, trains (with photos), tests (with approvals), releases, reports to the superintendent.
 import { h, mount, download, readFileText, readFileBytes, fmtTime } from './h.js';
-import { sniff, dearmor } from '../armor.js';
+import { sniff, dearmor, blocks, bundle } from '../armor.js';
 import { readProfile, profileText, mintProfile } from '../profile.js';
 import * as store from './store.js';
 import { parseTest } from '../txt.js';
@@ -14,7 +14,7 @@ import { fold } from './attempt.js';
 import { drawItem, imagesFor } from './draw.js';
 import { b64 } from '../bytes.js';
 import { profileCard, avatar } from './profile-ui.js';
-import { announce } from '../embed.js';
+import { announce, embedded } from '../embed.js';
 
 let sheet = null, tab = 'trains', pass = '', notes = [], view = null, root, go, klass = '';
 const note = (m, bad = false) => { notes.unshift({ m, bad }); notes = notes.slice(0, 6); };
@@ -36,7 +36,12 @@ const intake = async (items) => {
     } catch (e) { note(`${it.name}: ${e.message}`, true); }
   }
 };
-const takeFiles = async (files) => { const items = []; for (const f of files) { if (/\.(png|jpe?g|gif|webp)$/i.test(f.name)) items.push({ name: f.name, asset: f }); else { const text = await readFileText(f); items.push(sniff(text) ? { name: f.name, text } : { name: f.name, text, source: true }); } } await intake(items); rerender(); };
+const takeFiles = async (files) => { const items = []; for (const f of files) { if (/\.(png|jpe?g|gif|webp)$/i.test(f.name)) items.push({ name: f.name, asset: f }); else { const text = await readFileText(f); const bs = blocks(text); if (bs.length > 1) bs.forEach((b, i) => items.push({ name: `${f.name} #${i + 1}`, text: b })); else items.push(sniff(text) ? { name: f.name, text } : { name: f.name, text, source: true }); } } await intake(items); rerender(); };
+/** Fan out: many files at once. In Chrome, into a folder you pick; elsewhere (and when embedded), one download each. */
+const exportAll = async (files, bundleName) => {
+  if (typeof window.showDirectoryPicker === 'function' && !embedded()) { try { const dir = await window.showDirectoryPicker({ mode: 'readwrite' }); for (const [name, text] of files) { const fh = await dir.getFileHandle(name, { create: true }); const w = await fh.createWritable(); await w.write(text); await w.close(); } return note(`${files.length} files written to the folder`); } catch (e) { if (e.name === 'AbortError') return; } }
+  for (const [name, text] of files) download(name, text); if (bundleName) download(bundleName, bundle(files.map(([, t]) => t))); note(`${files.length} files downloaded${bundleName ? ' — and one bundle of them all' : ''}`);
+};
 
 // ---------- tabs
 const mint = async (reg) => { const m = await mintProfile(sheet.rtc, reg, 'crew'); sheet.pending = sheet.pending.filter((x) => x !== reg); sheet.trains = sheet.trains.filter((t) => t.pin !== m.pin); sheet.trains.push(m); download(`profile-crew-${m.pin}.txt`, await profileText(m)); note(`minted crew Crew ${m.pin} ${m.name} — send them the profile`); rerender(); };
@@ -45,7 +50,7 @@ const classBar = () => h('div', { class: 'row' }, h('b', {}, 'Class:'), h('selec
   h('button', { onclick: () => { const name = prompt('Class name (e.g. Block C · Sept 2026)'); if (!name) return; const c = { id: 'c' + Date.now().toString(36), name, pins: [] }; sheet.classes.push(c); klass = c.id; note(`class ${name}`); rerender(); } }, 'New class'),
   klass ? h('button', { onclick: () => { const c = sheet.classes.find((x) => x.id === klass); if (c && confirm(`Delete class ${c.name}? Crew stay on the sheet.`)) { sheet.classes = sheet.classes.filter((x) => x !== c); klass = ''; rerender(); } } }, 'Delete class') : null);
 const noteBox = (t) => { const n = (sheet.notes[t.pin] ??= { rating: 0, note: '' }); return h('div', {}, h('select', { onchange: (e) => { n.rating = Number(e.target.value); } }, [0, 1, 2, 3, 4, 5].map((v) => h('option', { value: v, selected: n.rating === v }, v ? '★'.repeat(v) : 'unrated'))), h('textarea', { rows: 2, placeholder: 'Appraisal — goes to the superintendent with the class profile', value: n.note, oninput: (e) => { n.note = e.target.value; } })); };
-const trainsTab = () => h('div', {}, classBar(), sheet.pending.length ? h('div', { class: 'card' }, h('h2', {}, 'Registrations to mint'), h('table', {}, sheet.pending.map((r) => h('tr', {}, h('td', {}, avatar(r, 48)), h('td', {}, r.name), h('td', {}, r.pin), h('td', {}, h('button', { class: 'primary', onclick: () => mint(r) }, 'Mint as crew'), ' ', h('button', { onclick: () => { sheet.pending = sheet.pending.filter((x) => x !== r); rerender(); } }, 'discard')))))) : null,
+const trainsTab = () => h('div', {}, classBar(), sheet.trains.length ? h('button', { onclick: async () => { const files = []; for (const t of sheet.trains) files.push([`profile-crew-${t.pin}.txt`, await profileText(t)]); await exportAll(files); rerender(); } }, 'Export all minted profiles') : null, sheet.pending.length ? h('div', { class: 'card' }, h('h2', {}, 'Registrations to mint'), h('table', {}, sheet.pending.map((r) => h('tr', {}, h('td', {}, avatar(r, 48)), h('td', {}, r.name), h('td', {}, r.pin), h('td', {}, h('button', { class: 'primary', onclick: () => mint(r) }, 'Mint as crew'), ' ', h('button', { onclick: () => { sheet.pending = sheet.pending.filter((x) => x !== r); rerender(); } }, 'discard')))))) : null,
   h('p', { class: 'small' }, 'Drop registrations on the desk and mint them; the minted profile goes back to the crew member. Minted crew profiles from other RTCs are accepted too.'),
   h('table', {}, h('tr', {}, h('th'), h('th', {}, 'Crew'), h('th', {}, 'Class'), h('th', {}, 'Rating & appraisal'), h('th')),
     sheet.trains.filter((t) => !klass || classOf(t.pin)?.id === klass).sort((a, b) => a.pin.localeCompare(b.pin)).map((t) => h('tr', {}, h('td', {}, avatar(t, 48)), h('td', {}, h('b', {}, t.name), h('br'), `Crew ${t.pin}`, h('div', { class: 'small' }, `since ${t.minted?.start || '?'}`)),
@@ -93,7 +98,7 @@ const releaseTable = (rec, test) => {
     h('table', {}, h('tr', {}, h('th'), h('th', {}, 'Train'), h('th', {}, 'Name'), h('th', {}, 'Score'), h('th', {}, 'Grade'), h('th', {}, 'Breaks'), h('th', {}, 'Identity'), h('th', {}, 'Release'), h('th')),
       scored.map(({ r, s }) => h('tr', {}, h('td', {}, photo(r.pin)), h('td', {}, `Crew ${r.pin}`), h('td', {}, r.name), h('td', {}, `${s.score}/${s.total}${s.pending ? ` (+${s.pending} unmarked)` : ''}`), h('td', { class: s.pass ? 'good' : 'bad' }, `${Math.round(s.grade * 100)}%`), h('td', {}, r.attempt.breaks?.length || 0), h('td', { class: r.identity === 'ok' ? 'good' : 'bad' }, r.identity), h('td', { class: 'small complete' }, (r.hash || '').slice(0, 12), r.signed === false ? h('span', { class: 'bad' }, ' unsigned!') : '', r.late ? h('span', { class: 'bad' }, ' late') : ''),
         h('td', {}, h('button', { onclick: () => { view = { rec, test, r }; rerender(); } }, 'review'), ' ', h('button', { onclick: async () => download(`cancel-${r.pin}.txt`, await cancel(rec, r, s)) }, 'cancel (send marks)'))))),
-    h('div', { class: 'row' }, h('button', { onclick: async () => { for (const { r, s } of scored) download(`cancel-${r.pin}.txt`, await cancel(rec, r, s)); } }, 'Cancel all'), h('button', { onclick: () => download(`${rec.title.replace(/\W+/g, '-')}-summary.csv`, csv(test, scored)) }, 'Summary CSV'),
+    h('div', { class: 'row' }, h('button', { onclick: async () => { const files = []; for (const { r, s } of scored) files.push([`cancel-${r.pin}.txt`, await cancel(rec, r, s)]); await exportAll(files, `cancellations-${rec.title.replace(/\W+/g, '-')}.txt`); rerender(); } }, 'Cancel all (export)'), h('button', { onclick: () => download(`${rec.title.replace(/\W+/g, '-')}-summary.csv`, csv(test, scored)) }, 'Summary CSV'),
       sheet.superintendent ? h('button', { onclick: async () => download(`class-profile-${rec.title.replace(/\W+/g, '-')}.txt`, await sendReport(sheet.rtc, sheet.superintendent.pub, reportFor(rec, test, scored, sum))) }, `Class profile to ${sheet.superintendent.name}`) : h('span', { class: 'small' }, 'Drop the superintendent\'s profile on the desk to send reports.')),
     h('h2', {}, 'By area (class mean)'), h('table', {}, sum.byArea.map((a) => h('tr', {}, h('td', {}, a.label), h('td', {}, `${Math.round(a.mean * 100)}%`), h('td', {}, h('div', { class: 'meter' }, h('div', { style: { width: Math.round(a.mean * 100) + '%' } })))))),
     h('h2', {}, 'Hardest items'), h('table', {}, sum.byItem.slice(0, 10).map((i) => h('tr', {}, h('td', {}, i.id), h('td', {}, i.ref.join(', ')), h('td', {}, `${i.correct}/${i.n} fully correct`)))));

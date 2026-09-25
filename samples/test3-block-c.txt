@@ -41,6 +41,6 @@ type: short
 area: ocs
 ref: CROR 302(b)
 img: clearance-134.png
-alt: OCS clearance No. 134 addressed to CN 5411
+alt: OCS clearance No. 134 addressed to WNR 5411
 Q: Refer to Clearance 134. What must be verified before the clearance is acted upon?
 A: Conductor and locomotive engineer each have a copy; designation and engine number verified.

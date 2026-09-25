@@ -4,7 +4,10 @@ import { h, mount } from '../../src/app/h.js';
 
 export const FOLDERS = ['Ballast', 'Inbox', 'Registrations', 'Tests', 'Releases', 'Class profiles', 'Outbox'];
 // The shared drive ships with a saved copy of Ballast: the recommended way to run it.
-export const initial = (why = '') => ({ windows: [], files: [{ id: 'ballast', folder: 'Ballast', name: 'ballast.html', text: '', from: 'IT (saved from cror.ca/ballast)', at: Date.now() - 86400000 * 30, fresh: false }, { id: 'why', folder: 'Ballast', name: 'Why Ballast.txt', text: why, from: 'IT', at: Date.now() - 86400000 * 30, fresh: false, note: true }], cwd: 'Ballast', z: 1, sel: null, toast: null, clock: '' });
+export const initial = (notes = {}) => ({ windows: [], files: [{ id: 'ballast', folder: 'Ballast', name: 'ballast.html', text: '', from: 'IT (saved from cror.ca/ballast)', at: Date.now() - 86400000 * 30, fresh: false },
+  ...Object.entries(notes).map(([name, text], i) => ({ id: 'note' + i, folder: 'Ballast', name, text, from: 'IT', at: Date.now() - 86400000 * 30, fresh: false, note: true }))], mail: [], chat: [], cwd: 'Ballast', z: 1, sel: null, toast: null, clock: '' });
+export const addMail = (s, m) => ({ ...s, mail: [...s.mail, { id: id(), at: Date.now(), ...m }], toast: `Mail from ${m.from}: ${m.subject}` });
+export const addChat = (s, m) => ({ ...s, chat: [...s.chat, { id: id(), at: Date.now(), ...m }], toast: `Message from ${m.from}` });
 const id = () => Math.random().toString(36).slice(2, 8);
 
 // ---------- reducers (pure)
@@ -12,7 +15,7 @@ export const openWindow = (s, kind, title, extra = {}) => {
   const existing = s.windows.find((w) => w.kind === kind);
   if (existing) return focus(s, existing.id);
   const n = s.windows.length;
-  const w = { id: id(), kind, title, x: 60 + n * 30, y: 40 + n * 24, w: kind === 'browser' ? 980 : kind === 'notepad' ? 640 : 720, h: kind === 'browser' ? 700 : kind === 'notepad' ? 560 : 460, z: s.z + 1, min: false, ...extra };
+  const w = { id: id(), kind, title, x: 60 + n * 30, y: 40 + n * 24, w: kind === 'browser' ? 980 : kind === 'notepad' ? 640 : kind === 'chat' ? 520 : 720, h: kind === 'browser' ? 700 : kind === 'notepad' ? 560 : 460, z: s.z + 1, min: false, ...extra };
   return { ...s, windows: [...s.windows, w], z: s.z + 1 };
 };
 export const setUrl = (s, wid, url, title) => ({ ...s, windows: s.windows.map((w) => (w.id === wid ? { ...w, url, title } : w)) });
@@ -27,6 +30,7 @@ export const toast = (s, msg) => ({ ...s, toast: msg });
 
 // ---------- render
 const ICON = { txt: '📄', html: '🌐', folder: '📁' };
+const ICONW = { browser: '🌐 ', notepad: '📝 ', mail: '📧 ', chat: '💬 ', explorer: '🗄️ ' };
 const ext = (n) => (n.split('.').pop() || '').toLowerCase();
 export const render = (root, s, act) => {
   const desktop = h('div', { class: 'desk' },
@@ -34,19 +38,21 @@ export const render = (root, s, act) => {
     h('div', { class: 'icons' },
       h('button', { class: 'dicon', ondblclick: () => act('open-explorer') }, '🗄️', h('span', {}, 'Shared drive')),
       h('button', { class: 'dicon', ondblclick: () => act('open-browser') }, '🌐', h('span', {}, 'Browser')),
-      h('button', { class: 'dicon', ondblclick: () => act('open-file', 'why') }, '📝', h('span', {}, 'Why Ballast.txt'))),
+      h('button', { class: 'dicon', ondblclick: () => act('open-mail') }, '📧', h('span', {}, 'Mail'), s.mail.some((m) => m.fresh) ? h('span', { class: 'badge' }, s.mail.filter((m) => m.fresh).length) : null),
+      h('button', { class: 'dicon', ondblclick: () => act('open-chat') }, '💬', h('span', {}, 'Messages'), s.chat.some((m) => m.fresh) ? h('span', { class: 'badge' }, s.chat.filter((m) => m.fresh).length) : null),
+      s.files.filter((f) => f.note).map((f) => h('button', { class: 'dicon', ondblclick: () => act('open-file', f.id) }, '📝', h('span', {}, f.name)))),
     ...s.windows.filter((w) => !w.min).sort((a, b) => a.z - b.z).map((w) => win(w, s, act)),
     s.toast ? h('div', { class: 'toast' }, s.toast) : null,
     h('div', { class: 'taskbar' }, h('button', { class: 'start', onclick: () => act('open-explorer') }, '⊞'),
-      s.windows.map((w) => h('button', { class: 'task', onclick: () => act('focus', w.id) }, w.kind === 'browser' ? '🌐 ' : w.kind === 'notepad' ? '📝 ' : '🗄️ ', w.title)),
+      s.windows.map((w) => h('button', { class: 'task', onclick: () => act('focus', w.id) }, ICONW[w.kind] || '🗄️ ', w.title)),
       h('span', { class: 'clock' }, s.clock)));
   mount(root, desktop);
 };
 
 const win = (w, s, act) => {
   const bar = h('div', { class: 'titlebar', onpointerdown: (e) => { if (e.target.closest('button')) return; act('focus', w.id); const ox = e.clientX - w.x, oy = e.clientY - w.y; const mv = (ev) => act('move', w.id, Math.max(0, ev.clientX - ox), Math.max(0, ev.clientY - oy)); const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); }; window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up); } },
-    h('span', {}, w.kind === 'browser' ? '🌐 ' : w.kind === 'notepad' ? '📝 ' : '🗄️ ', w.title), h('span', { class: 'winbtns' }, h('button', { onclick: () => act('minimize', w.id) }, '–'), h('button', { onclick: () => act('close', w.id) }, '✕')));
-  const body = w.kind === 'explorer' ? explorer(s, act) : w.kind === 'notepad' ? h('pre', { class: 'note' }, w.text) : browser(w, s, act);
+    h('span', {}, ICONW[w.kind] || '🗄️ ', w.title), h('span', { class: 'winbtns' }, h('button', { onclick: () => act('minimize', w.id) }, '–'), h('button', { onclick: () => act('close', w.id) }, '✕')));
+  const body = w.kind === 'explorer' ? explorer(s, act) : w.kind === 'notepad' ? h('pre', { class: 'note' }, w.text) : w.kind === 'mail' ? mail(s, act) : w.kind === 'chat' ? chat(s, act) : browser(w, s, act);
   return h('div', { class: 'win ' + w.kind, style: { left: w.x + 'px', top: w.y + 'px', width: w.w + 'px', height: w.h + 'px', zIndex: w.z }, onclick: () => act('focus', w.id) }, bar, body);
 };
 
@@ -70,6 +76,11 @@ const layer = () => document.getElementById('frames') || document.body.appendChi
 const frameFor = (w) => { if (!frames.has(w.id)) { const f = h('iframe', { class: 'app', src: w.src, title: 'Ballast', allow: 'camera; fullscreen' }); layer().append(f); frames.set(w.id, f); } return frames.get(w.id); };
 export const dropFrame = (wid) => { frames.get(wid)?.remove(); frames.delete(wid); };
 export const placeFrames = (s) => { for (const [wid, f] of frames) { const w = s.windows.find((x) => x.id === wid); const slot = document.querySelector(`[data-slot="${wid}"]`); if (!w || w.min || !slot) { f.style.display = 'none'; continue; } const r = slot.getBoundingClientRect(); Object.assign(f.style, { display: 'block', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', zIndex: w.z }); } };
+// A pretend mail client: one message per sender, attachment opened with Ballast.
+const mail = (s, act) => h('div', { class: 'mail' }, h('div', { class: 'maillist' }, s.mail.length ? s.mail.map((m) => h('div', { class: 'msg' + (m.fresh ? ' fresh' : ''), onclick: () => act('read-mail', m.id) }, h('b', {}, m.from), h('div', {}, m.subject), h('div', { class: 'small' }, new Date(m.at).toLocaleTimeString()))) : h('div', { class: 'empty' }, 'No mail.')),
+  h('div', { class: 'mailbody' }, (() => { const m = s.mail.find((x) => x.id === s.readMail) || s.mail.at(-1); if (!m) return null; return [h('h3', {}, m.subject), h('div', { class: 'small' }, `From: ${m.from}`), h('p', {}, m.body), m.attachment ? h('div', { class: 'attach' }, '📎 ', m.attachment.name, ' ', h('button', { class: 'openwith', onclick: () => act('open-text', m.attachment.text, m.attachment.name) }, 'Open with Ballast')) : null]; })()));
+// A pretend messaging app: the armored block pasted straight into the message body.
+const chat = (s, act) => h('div', { class: 'chat' }, s.chat.length ? s.chat.map((m) => h('div', { class: 'bubble' + (m.fresh ? ' fresh' : '') }, h('b', {}, m.from), h('pre', {}, m.text), h('button', { class: 'openwith', onclick: () => act('open-text', m.text, `message from ${m.from}`) }, 'Open this message with Ballast'))) : h('div', { class: 'empty' }, 'No messages.'));
 const browser = (w, s, act) => h('div', { class: 'browser' },
   h('div', { class: 'tabs' }, h('span', { class: 'tab on' }, '🪨 Ballast'), h('button', { class: 'newtab', title: 'New tab', onclick: () => act('new-tab') }, '+')),
   h('div', { class: 'urlbar' }, h('span', {}, '🔒'), h('input', { readonly: true, value: w.url || 'https://cror.ca/ballast/' })),

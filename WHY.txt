@@ -42,6 +42,25 @@ expire, nothing to renew, no company whose closing takes the software
 with it. Text files stay readable by anything that reads text. The whole
 system is a file you can hash once, keep, and open in 2056.
 
+THE MARK IS FOR YOUR ANSWERS
+When you release, your answers are sealed to the RTC and signed with your
+own key, and Ballast shows you the file's SHA-256 -- your receipt. The
+cancellation that comes back is signed by the RTC, names that hash, and
+repeats your answers as marked, item by item. If the hash is not yours or
+the signature is bad, the marks are not for what you released, and the
+superintendent who approved the test can re-score your release from a copy
+sealed to them, with no help from the RTC. Nobody can quietly change
+either side of the mark.
+
+NO NETWORK, NO LATENCY
+There is no server to reach, so there is nothing to time out. The test is
+a file already on your machine before you start; the clock is your
+machine's; every answer is recorded locally the moment you give it; the
+release is written when you press the button, not when a request
+completes. A submission cannot be lost in transit, fail to post, or be
+counted late because a page hung. If the building loses its network in
+the last minute of a test, nothing happens.
+
 WHAT IT IS NOT
 It is not a proctoring system. Once a question is on a screen it is
 cleartext for the person looking at it, and no software can stop them

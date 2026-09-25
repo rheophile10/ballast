@@ -206,7 +206,7 @@ type: short
 area: ocs
 ref: CROR 302(b)
 img: clearance-134.png
-alt: OCS clearance 134 to CN 5411
+alt: OCS clearance 134 to WNR 5411
 Q: What must be verified before the clearance is acted upon?
 A: conductor and LE each have a copy; designation and engine number verified
 ```

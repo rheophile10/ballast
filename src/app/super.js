@@ -1,6 +1,6 @@
 // The superintendent's book: RTCs, the test inventory with approvals, and reports across classes.
 import { h, mount, download, readFileText } from './h.js';
-import { sniff } from '../armor.js';
+import { sniff, blocks } from '../armor.js';
 import { auditRelease } from '../release.js';
 import { scoreAttempt } from '../score.js';
 import { readProfile, profileText, mintProfile } from '../profile.js';
@@ -38,7 +38,7 @@ const audit = async (name, text) => {
   book.audits ??= []; book.audits = book.audits.filter((x) => x.hash !== a.hash); book.audits.push({ hash: a.hash, pin: a.pin, title: src.title, signed: a.signed, when: Date.now(), score: s.score, total: s.total, pending: s.pending, reported: reported ? { grade: reported.grade, score: reported.score, total: reported.total, rtc: reported.rtc, name: reported.name } : null, agrees, items: s.perItem.map((i) => ({ id: i.id, got: i.got, worth: i.worth, pending: i.pending, reported: reported?.marks?.find(([id]) => id === i.id)?.[1] ?? null })) });
   note(`audit ${a.hash.slice(0, 12)} Crew ${a.pin}: re-scored ${s.score}/${s.total}${s.pending ? ` (+${s.pending} short answers unmarked here)` : ''}${reported ? ` · RTC ${reported.rtc} reported ${reported.score}/${reported.total} — ${agrees ? 'AGREES' : 'DIFFERS'}` : ' · no class profile names this release'}`, agrees === false);
 };
-const takeFiles = async (files) => { const items = []; for (const f of files) items.push({ name: f.name, text: await readFileText(f) }); await intake(items); rerender(); };
+const takeFiles = async (files) => { const items = []; for (const f of files) { const text = await readFileText(f); const bs = blocks(text); if (bs.length > 1) bs.forEach((b, i) => items.push({ name: `${f.name} #${i + 1}`, text: b })); else items.push({ name: f.name, text }); } await intake(items); rerender(); };
 
 const mint = async (reg) => { const m = await mintProfile(book.rtc, reg, 'rtc'); book.pending = book.pending.filter((x) => x !== reg); book.trains = book.trains.filter((t) => t.pin !== m.pin); book.trains.push(m); download(`profile-RTC-${m.pin}.txt`, await profileText(m)); note(`minted RTC ${m.name} — send them the profile`); rerender(); };
 const rtcsTab = () => h('div', {}, book.pending.length ? h('div', { class: 'card' }, h('h2', {}, 'Registrations to mint'), h('table', {}, book.pending.map((r) => h('tr', {}, h('td', {}, avatar(r, 48)), h('td', {}, r.name), h('td', {}, r.pin), h('td', {}, h('button', { class: 'primary', onclick: () => mint(r) }, 'Mint as RTC'), ' ', h('button', { onclick: () => { book.pending = book.pending.filter((x) => x !== r); rerender(); } }, 'discard')))))) : null,

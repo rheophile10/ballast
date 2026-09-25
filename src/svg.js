@@ -29,7 +29,7 @@ const sw = (arg) => {
   return s + '</svg>';
 };
 
-/** form clearance no=134 to="CN 5411" proceed="A → B" work="A – B" protect="Frmn Brown, Mile 33–Borden" call="after leaving Borden" complete="0830" rtc="ABC" */
+/** form clearance no=134 to="WNR 5411" proceed="A → B" work="A – B" protect="Frmn Brown, Mile 33–Borden" call="after leaving Borden" complete="0830" rtc="ABC" */
 const form = (arg) => {
   const f = {}; for (const m of arg.matchAll(/(\w+)=(?:"([^"]*)"|(\S+))/g)) f[m[1]] = m[2] ?? m[3];
   const row = (y, label, val) => `<text x="16" y="${y}" font-size="13" fill="#666" font-family="sans-serif">${esc(label)}</text><text x="130" y="${y}" font-size="15" fill="#111" font-family="monospace">${esc(val || '')}</text><line x1="130" y1="${y + 4}" x2="560" y2="${y + 4}" stroke="#bbb"/>`;

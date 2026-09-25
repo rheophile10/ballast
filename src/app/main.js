@@ -1,6 +1,6 @@
 // One page. You register once; someone mints your role; the page becomes that role's home.
 import { h, mount, readFileText, download } from './h.js';
-import { sniff } from '../armor.js';
+import { blocks, sniff } from '../armor.js';
 import { readProfile, profileText, mintProfile, checkMint } from '../profile.js';
 import * as store from './store.js';
 import * as crew from './crew.js';
@@ -24,8 +24,11 @@ const acceptMint = async (text) => {
 };
 
 const openText = async (text, name = '') => {
-  const kind = sniff(text);
   const p = await me();
+  const bs = blocks(text);
+  if (bs.length > 1 && p?.role === 'crew') { const mine = bs.find((b) => new RegExp(`^train: Crew ${p.pin}$`, 'm').test(b)) || bs.find((b) => /BEGIN BALLAST TEST/.test(b)); if (!mine) return go({ screen: 'home', error: `${bs.length} files in one; none is addressed to Crew ${p.pin}` }); text = mine; } // a bundle: open the block for me
+  else if (bs.length > 1 && p) return go({ screen: p.role === 'superintendent' ? 'super' : 'rtc', incoming: bs.map((b, i) => ({ name: `${name || 'bundle'} #${i + 1}`, text: b })) });
+  const kind = sniff(text);
   try {
     if (kind === 'PROFILE' && p && (p.role === 'none' || !p.minted)) { await acceptMint(text); return go({ screen: 'home' }); } // waiting for a role: the only profile that belongs here is mine, minted
     if (kind === 'PROFILE' && p) { const m = await readProfile(text).catch(() => null); if (m && m.pub === p.pub && m.sig === p.sig) { if (p.minted && !confirm(`Replace your ${p.role} role with ${m.role} (minted by ${m.minted?.by?.name || '?'})?`)) return; await acceptMint(text); return go({ screen: 'home' }); } }

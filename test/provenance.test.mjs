@@ -83,3 +83,17 @@ test('the superintendent re-scores a release from the audit copy and the approve
   const rel2 = await giveRelease(await copyTest(plain.text, alice, alice.pin), alice, alice.pin, attempt);
   await assert.rejects(auditRelease(rel2, sup), /no audit copy/);
 });
+
+test('a bundle is blocks concatenated; each side finds its own', async () => {
+  const { blocks, bundle } = await import('../src/armor.js');
+  const { t, rtc, alice, sheet, approval } = await setup();
+  const bob = await makeProfile('crew', 'Bob', '654321', '', true); sheet.trains.push({ pin: bob.pin, pub: bob.pub, sig: bob.sig, name: 'Bob' });
+  const { text, record } = await issueTest(t, rtc, sheet.trains, assets, 'RTC', approval);
+  const rels = []; for (const c of [alice, bob]) { const copy = await copyTest(text, c, c.pin); rels.push(await giveRelease(copy, c, c.pin, await answerAll(copy))); }
+  const b = bundle(rels); assert.equal(blocks(b).length, 2); assert.equal(blocks('hello\n' + b + '\nbye').length, 2);
+  const taken = []; for (const blk of blocks(b)) taken.push(await takeRelease(blk, rtc, record));
+  assert.deepEqual(taken.map((x) => x.pin).sort(), ['123456', '654321']);
+  const cans = []; for (const tk of taken) cans.push(await cancelTest(record, rtc, tk.train, tk.pin, scoreAttempt(t, tk.attempt, {}), { hash: tk.hash, answers: tk.attempt.answers }));
+  const cb = bundle(cans); const mine = blocks(cb).find((x) => /^train: Crew 654321$/m.test(x)); assert.ok(mine);
+  assert.equal((await readCancel(mine, bob)).pin, '654321'); await assert.rejects(readCancel(mine, alice));
+});
