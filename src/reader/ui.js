@@ -41,7 +41,7 @@ export const renderReader = (root, opts) => {
   const heading = (n) => n.kind === 'subrule' ? `${n.id}` : n.kind === 'section' ? n.title : n.number ? `${n.number}. ${n.title || ''}` : n.title;
   const list = (nodes) => h('ul', { class: 'rlist' }, nodes.map((n) => h('li', {}, h('a', { href: '#' + n.id, onclick: (e) => { e.preventDefault(); goTo(n.id); } }, heading(n)), n.kind === 'subrule' || n.kind === 'definition' ? h('span', { class: 'small' }, ' ', n.text.slice(0, 90), n.text.length > 90 ? '…' : '') : null)));
   const main = () => {
-    if (!at) return h('div', {}, h('h2', {}, opts.doc.title), h('p', { class: 'small' }, `${opts.doc.edition || ''} · ${opts.doc.source || ''}`), list(ix.roots));
+    if (!at) return h('div', {}, h('h2', {}, opts.doc.title), h('p', { class: 'small' }, `${opts.doc.edition || ''} · ${opts.doc.source || ''}`), opts.doc.pdfSha256 ? h('p', { class: 'small' }, 'Extracted from the PDF with SHA-256 ', h('span', { class: 'complete' }, opts.doc.pdfSha256), opts.doc.url ? [' — ', h('a', { href: opts.doc.url, target: '_blank', rel: 'noopener' }, 'the posted file')] : null, '. Hash the download yourself to check it is the same edition.') : null, list(ix.roots));
     const n = ix.get(at); const kids = ix.children(n.id);
     return h('div', {}, crumbs(n.id), h('h2', {}, heading(n)), h('div', { class: 'small complete' }, `hash ${n.hash}`), n.text ? textView(n) : null, kids.length ? [h('h3', {}, n.kind === 'section' ? 'Rules' : 'Parts'), list(kids)] : null,
       n.kind === 'subrule' || n.kind === 'rule' ? h('p', { class: 'small' }, 'Cite as ', h('code', {}, `CROR ${n.id}`), ' · link ', h('code', {}, `${n.id}@${n.hash}`)) : null);

@@ -6,6 +6,8 @@
 "edition": "January 28, 2025",
 "source": "Transport Canada — https://tc.canada.ca/en/rail-transportation/rules/2024-2025/canadian-rail-operating-rules",
 "extracted": "2025_CROR_current_TransportCanada.pdf",
+"pdfSha256": "48dfd05518a6a26c07c86ba0fc9d86707aaab04fdab635f534790faf9b26806c",
+"url": "https://tc.canada.ca/sites/default/files/2025-01/Jan_2025_Canadian_rail_operating_rules_EN.pdf",
 "nodes": [
 {
 "id": "sec:definitions",

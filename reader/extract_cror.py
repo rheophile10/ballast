@@ -100,7 +100,8 @@ def main(pdf, out):
     sections = [n for n in nodes if n["kind"] == "section"]; rest = sorted([n for n in nodes if n["kind"] != "section"], key=key)
     doc = {"v": 1, "kind": "document", "id": "cror-2025", "title": "Canadian Rail Operating Rules", "edition": "January 28, 2025",
            "source": "Transport Canada — https://tc.canada.ca/en/rail-transportation/rules/2024-2025/canadian-rail-operating-rules",
-           "extracted": os.path.basename(pdf), "nodes": sections + rest}
+           "extracted": os.path.basename(pdf), "pdfSha256": hashlib.sha256(open(pdf, "rb").read()).hexdigest(),
+           "url": "https://tc.canada.ca/sites/default/files/2025-01/Jan_2025_Canadian_rail_operating_rules_EN.pdf", "nodes": sections + rest}
     for n in doc["nodes"]:
         for k in [k for k, v in n.items() if v is None]: del n[k]
     json.dump(doc, open(out, "w"), ensure_ascii=False, indent=0)
